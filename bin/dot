@@ -1,0 +1,52 @@
+#!/bin/sh
+#
+# dot
+#
+# `dot` handles installation, updates, things like that. Run it periodically
+# to make sure you're on the latest and greatest.
+
+set -e
+
+displayUsageAndExit() {
+	echo "dot -- dotfiles management"
+	echo ""
+	echo "Usage: dot [options]"
+	echo ""
+	echo "Options:"
+	echo "  -e, --edit    Open dotfiles directory for editing"
+	echo "  -h, --help    Show this help message and exit"
+	exit
+}
+
+while test $# -gt 0; do
+	case "$1" in
+		"-h"|"--help")
+			displayUsageAndExit
+			;;
+		"-e"|"--edit")
+			exec "$EDITOR" "$DOTFILES_ROOT"
+			exit
+			;;
+		*)
+			echo "Invalid option: $1"
+			displayUsageAndExit
+			;;
+	esac
+	shift
+done
+
+# Update dotfiles themselves
+if which git &>/dev/null; then
+    if [ -d "$DOTFILES_ROOT/.git" ]; then
+        echo "Updating dotfiles from git repository..."
+        git -C "$DOTFILES_ROOT" pull && echo "Dotfiles updated successfully." || echo "Failed to update dotfiles from git."
+    else
+        echo "Dotfiles directory is not a git repository. Skipping update."
+    fi
+else
+    echo "Git is not installed. Skipping dotfiles update."
+fi
+
+# Install dependencies and set defaults using bootstrap
+echo "Installing dependencies and setting defaults via bootstrap script..."
+"$DOTFILES_ROOT/bootstrap" --install-deps && echo "Bootstrap completed successfully." || echo "Bootstrap execution failed."

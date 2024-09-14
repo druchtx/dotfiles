@@ -1,0 +1,582 @@
+#!/usr/bin/env bash
+#
+# Bootstrap Script for Dotfiles Setup
+# ===================================
+#
+# This script sets up dotfiles and dependencies for a development environment.
+# It performs the following operations:
+#   - Configures Git with user-specific settings
+#   - Creates symbolic links for dotfiles
+#   - Installs system dependencies and tools
+#
+# Run './bootstrap --help' for usage information.
+#
+# Configuration:
+#   The script uses environment variables for customization:
+#   - DOTFILES_ROOT: Root directory of dotfiles (default: parent of script)
+#   - LOG_LEVEL: Logging verbosity (default: info)
+#   - BACKUP_DIR: Directory for backups (default: ~/.dotfiles-backup)
+#
+
+# Exit immediately on errors
+set -e
+
+# Configuration variables with defaults
+DOTFILES_ROOT="${DOTFILES_ROOT:-$(cd "$(dirname "$0")" && pwd -P)}"
+LOG_LEVEL="${LOG_LEVEL:-info}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/.dotfiles-backup}"
+LOG_FILE="${LOG_FILE:-$DOTFILES_ROOT/.tmp/dotfiles.log}"
+DRY_RUN="${DRY_RUN:-false}"
+VERBOSE="${VERBOSE:-false}"
+
+# ANSI color codes
+GREEN='\033[32m'
+RED='\033[31m'
+YELLOW='\033[33m'
+BLUE='\033[34m'
+RESET='\033[0m'
+
+# Global flags
+SETUP_GIT=false
+INSTALL_DOT=false
+INSTALL_DEPS=false
+QUIET=false
+OVERWRITE_ALL=false
+BACKUP_ALL=false
+SKIP_ALL=false
+
+# Trap for cleanup on exit
+trap 'cleanup_on_exit' EXIT
+
+# Function to handle cleanup on script exit
+cleanup_on_exit() {
+    local exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        log_error "Bootstrap script failed with exit code $exit_code"
+        log_info "Check the log file at $LOG_FILE for details"
+    fi
+}
+
+# Logging functions
+log_info() {
+    [ "$QUIET" = true ] || printf "${GREEN}[INFO]${RESET} %s\n" "$1" >&2
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [INFO] $1" >> "$LOG_FILE"
+}
+
+log_error() {
+    printf "${RED}[ERROR]${RESET} %s\n" "$1" >&2
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [ERROR] $1" >> "$LOG_FILE"
+}
+
+log_warn() {
+    [ "$QUIET" = true ] || printf "${YELLOW}[WARN]${RESET} %s\n" "$1" >&2
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [WARN] $1" >> "$LOG_FILE"
+}
+
+log_debug() {
+    [ "$VERBOSE" = true ] && printf "${BLUE}[DEBUG]${RESET} %s\n" "$1" >&2
+    echo "$(date '+%Y-%m-%d %H:%M:%S') [DEBUG] $1" >> "$LOG_FILE"
+}
+
+show_usage() {
+    cat << EOF >&2
+Usage: ./bootstrap [options]
+
+Options:
+  -i, --install-deps    Install only dependencies
+  --setup-git           Setup Git configuration
+  --install-dot         Install dotfiles
+  --install-deps        Install dependencies
+  -s, --silent          Suppress output (quiet mode)
+  -d, --dry-run         Preview changes without executing
+  -v, --verbose         Enable verbose output
+  -h, --help            Display this help message
+EOF
+}
+
+# Handle help flag early
+if [[ "$*" == *"-h"* ]] || [[ "$*" == *"--help"* ]]; then
+    show_usage
+    exit 0
+fi
+
+# Create log directory if it doesn't exist
+mkdir -p "$(dirname "$LOG_FILE")"
+
+log_info "Starting bootstrap script"
+log_info "Dotfiles root: $DOTFILES_ROOT"
+log_info "Log file: $LOG_FILE"
+
+# Parse command-line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -i|--install-deps)
+            INSTALL_DEPS=true
+            log_info "Install dependencies enabled"
+            shift
+            ;;
+        --setup-git)
+            SETUP_GIT=true
+            log_info "Setup Git enabled"
+            shift
+            ;;
+        --install-dot)
+            INSTALL_DOT=true
+            log_info "Install dotfiles enabled"
+            shift
+            ;;
+        --install-deps)
+            INSTALL_DEPS=true
+            log_info "Install dependencies enabled"
+            shift
+            ;;
+        -s|--silent)
+            QUIET=true
+            log_info "Quiet mode enabled"
+            shift
+            ;;
+        -d|--dry-run)
+            DRY_RUN=true
+            log_info "Dry-run mode enabled"
+            shift
+            ;;
+        -v|--verbose)
+            VERBOSE=true
+            log_info "Verbose mode enabled"
+            shift
+            ;;
+
+        *)
+            log_error "Unknown option: $1"
+            log_error "Use -h or --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# Set defaults if no selective flags provided
+if [ "$SETUP_GIT" = false ] && [ "$INSTALL_DOT" = false ] && [ "$INSTALL_DEPS" = false ]; then
+    SETUP_GIT=true
+    INSTALL_DOT=true
+    INSTALL_DEPS=true
+    log_info "No selective flags provided, running all components"
+fi
+
+# =============================================================================
+# Git Configuration Functions
+# =============================================================================
+
+# validate_git_name()
+# -------------------
+# Validates the Git author name input.
+# Args: $1 - name to validate
+# Returns: 0 if valid, 1 if invalid
+validate_git_name() {
+    local name="$1"
+    if [ -z "$name" ]; then
+        log_error "Git author name cannot be empty"
+        return 1
+    fi
+    if [[ "$name" =~ [^a-zA-Z\ \.\-] ]]; then
+        log_error "Git author name contains invalid characters. Use only letters, spaces, dots, and hyphens."
+        return 1
+    fi
+    return 0
+}
+
+# validate_email()
+# ----------------
+# Validates email address format.
+# Args: $1 - email to validate
+# Returns: 0 if valid, 1 if invalid
+validate_email() {
+    local email="$1"
+    if [ -z "$email" ]; then
+        log_error "Git author email cannot be empty"
+        return 1
+    fi
+    if ! [[ "$email" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+        log_error "Invalid email format"
+        return 1
+    fi
+    return 0
+}
+
+# validate_signing_key()
+# ----------------------
+# Validates the signing key path.
+# Args: $1 - path to validate
+# Returns: 0 if valid or empty, 1 if invalid
+validate_signing_key() {
+    local key_path="$1"
+    if [ -n "$key_path" ] && [ ! -f "$key_path" ]; then
+        log_warn "Signing key file does not exist: $key_path"
+        # Don't fail, as it might be created later
+    fi
+    return 0
+}
+
+# setup_gitconfig()
+# -----------------
+# Sets up local Git configuration for the user.
+# This includes generating SSH keys, prompting for user details,
+# and creating the gitconfig.local.symlink file.
+#
+# Skips if gitconfig.local.symlink already exists.
+# Prompts for:
+#   - Git author name
+#   - Git author email
+#   - Git signing key path (optional)
+#
+# Uses OS-specific credential helpers.
+setup_gitconfig() {
+    log_info "Checking for existing gitconfig..."
+    if [ -f "tools/git/gitconfig.local.symlink" ]; then
+        log_info "Gitconfig already exists, skipping setup"
+        return 0
+    fi
+
+    # Check if running in devcontainer
+    if [[ -n "$REMOTE_CONTAINERS" ]] || [[ -n "$REMOTE_CONTAINERS_IPC" ]] || [[ -n "$DEVCONTAINER" ]] || [[ -d "/.devcontainer" ]]; then
+        log_info "Git configuration is being skipped due to devcontainer"
+        return 0
+    fi
+
+    log_info "Setting up Git configuration"
+
+    if [ "$DRY_RUN" = true ]; then
+        log_info "[DRY RUN] Would prompt for Git configuration details"
+        return 0
+    fi
+
+    # Determine OS-specific Git credential helper
+    local git_credential='cache'
+    case "$(uname -s)" in
+        Darwin)
+            git_credential='osxkeychain'
+            ;;
+        Linux)
+            git_credential='store'
+            ;;
+        *)
+            log_warn "Unknown OS for Git credential helper, using default"
+            ;;
+    esac
+
+    # Generate SSH key if it doesn't exist
+    if [ ! -f ~/.ssh/id_ed25519 ]; then
+        log_info "Generating SSH key..."
+        if [ "$DRY_RUN" = false ]; then
+            ssh-keygen -t ed25519 -C "git@$(hostname)" -f ~/.ssh/id_ed25519 -N "" >/dev/null 2>&1
+            log_info "Generated SSH key at ~/.ssh/id_ed25519 (no passphrase)"
+            log_info "Add a passphrase if needed: ssh-keygen -f ~/.ssh/id_ed25519 -p"
+        else
+            log_info "[DRY RUN] Would generate SSH key at ~/.ssh/id_ed25519"
+        fi
+    else
+        log_debug "SSH key already exists"
+    fi
+
+    # Prompt for Git configuration
+    local git_authorname
+    local git_authoremail
+    local git_signingkey
+
+    printf "What is your Git author name? " >&2
+    read -e git_authorname
+    validate_git_name "$git_authorname" || return 1
+
+    printf "What is your Git author email? " >&2
+    read -e git_authoremail
+    validate_email "$git_authoremail" || return 1
+
+    printf "What is your Git signing key path (press Enter to skip)? " >&2
+    read -e git_signingkey
+    if [ -z "$git_signingkey" ]; then
+        git_signingkey=~/.ssh/id_ed25519
+    fi
+    validate_signing_key "$git_signingkey" || return 1
+
+    # Escape special characters for sed
+    local escaped_git_signingkey
+    escaped_git_signingkey=$(sed 's/[\/&]/\\&/g' <<<"$git_signingkey")
+
+    # Generate gitconfig.local.symlink
+    log_info "Creating gitconfig.local.symlink..."
+    if [ "$DRY_RUN" = false ]; then
+        sed -e "s/AUTHORNAME/$git_authorname/g" \
+            -e "s/AUTHOREMAIL/$git_authoremail/g" \
+            -e "s/SIGNING_KEY/$escaped_git_signingkey/g" \
+            -e "s/GIT_CREDENTIAL_HELPER/$git_credential/g" \
+            -e "s/GPG_SIGN/true/g" \
+            tools/git/gitconfig.local.symlink.example > tools/git/gitconfig.local.symlink
+        log_info "Gitconfig setup completed successfully"
+    else
+        log_info "[DRY RUN] Would create gitconfig.local.symlink"
+    fi
+}
+
+# =============================================================================
+# Dotfiles Installation Functions
+# =============================================================================
+
+# install_dotfiles()
+# ------------------
+# Installs dotfiles by creating symbolic links.
+#
+# Searches for files with .symlink extension in the DOTFILES_ROOT directory.
+# For each symlink file:
+#   - Determines the target destination (default: ~/.filename)
+#   - Supports custom paths via DOTFILE_CONFIG_PATH comment in the file
+#   - Handles conflicts by prompting user or using backup strategy
+#
+# Naming convention: topic.symlink -> ~/.topic
+# Custom path: Add "# DOTFILE_CONFIG_PATH: ~/.config/topic/config" to the symlink file
+install_dotfiles() {
+    log_info "Installing dotfiles"
+
+    # Reset global flags for each run
+    OVERWRITE_ALL=false
+    BACKUP_ALL=false
+    SKIP_ALL=false
+
+    # In silent mode, default to backup all
+    if [ "$QUIET" = true ]; then
+        BACKUP_ALL=true
+    fi
+
+    # Find all .symlink files, excluding .git directory
+    local symlink_files
+    symlink_files=$(find -H "$DOTFILES_ROOT" -maxdepth 3 -name '*.symlink' -not -path '*.git*' 2>/dev/null)
+
+    if [ -z "$symlink_files" ]; then
+        log_warn "No .symlink files found"
+        return 0
+    fi
+
+    for src in $symlink_files; do
+        # Determine destination path
+        local dst="$HOME/.$(basename "${src%.*}")"
+
+        # Check for custom config path in file comments
+        local extracted_config_path
+        extracted_config_path=$(grep -m 1 'DOTFILE_CONFIG_PATH' "$src" 2>/dev/null | awk -F': ' '{print $2}' | xargs)
+        if [ -n "$extracted_config_path" ]; then
+            # Expand ~ to home directory
+            extracted_config_path="${extracted_config_path/\~/$HOME}"
+            dst="$extracted_config_path"
+            if [ "$DRY_RUN" = false ]; then
+                mkdir -p "$(dirname "$dst")" || {
+                    log_error "Failed to create directory for $dst"
+                    continue
+                }
+            else
+                log_debug "[DRY RUN] Would create directory $(dirname "$dst")"
+            fi
+        fi
+
+        link_file "$src" "$dst"
+    done
+
+    log_info "Dotfiles installation completed"
+}
+
+# link_file()
+# ----------
+# Creates a symbolic link from src to dst, handling conflicts.
+#
+# Modifies global variables: OVERWRITE_ALL, BACKUP_ALL, SKIP_ALL
+#
+# Args:
+#   $1 - source file path
+#   $2 - destination file path
+link_file() {
+    local src="$1"
+    local dst="$2"
+
+    log_debug "Linking $src -> $dst"
+
+    local overwrite=false
+    local backup=false
+    local skip=false
+    local action
+
+    if [ -f "$dst" ] || [ -d "$dst" ] || [ -L "$dst" ]; then
+        local current_src
+        current_src="$(readlink -f "$dst" 2>/dev/null)"
+
+        if [ "$current_src" = "$src" ]; then
+            log_debug "Link already exists and is correct"
+            return 0
+        fi
+
+        if [ "$QUIET" = true ]; then
+            backup=true
+        elif [ "$OVERWRITE_ALL" = false ] && [ "$BACKUP_ALL" = false ] && [ "$SKIP_ALL" = false ]; then
+            if [ "$DRY_RUN" = true ]; then
+                log_info "[DRY RUN] Would prompt for action on existing file: $dst"
+                return 0
+            fi
+
+            printf "File already exists: %s (%s), what do you want to do?\n" "$dst" "$(basename "$src")" >&2
+            printf "[s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all? " >&2
+            read -n 1 action >&2
+            echo >&2
+
+            case "$action" in
+                o) overwrite=true ;;
+                O) OVERWRITE_ALL=true ;;
+                b) backup=true ;;
+                B) BACKUP_ALL=true ;;
+                s) skip=true ;;
+                S) SKIP_ALL=true ;;
+                *) log_warn "Invalid option, skipping" ; skip=true ;;
+            esac
+        fi
+
+        # Apply defaults
+        overwrite="${overwrite:-$OVERWRITE_ALL}"
+        backup="${backup:-$BACKUP_ALL}"
+        skip="${skip:-$SKIP_ALL}"
+
+        if [ "$overwrite" = true ]; then
+            if [ "$DRY_RUN" = false ]; then
+                rm -rf "$dst" || {
+                    log_error "Failed to remove $dst"
+                    return 1
+                }
+            fi
+            log_info "Removed existing $dst"
+        fi
+
+        if [ "$backup" = true ]; then
+            local backup_path="${dst}.backup.$(date +%Y%m%d_%H%M%S)"
+            if [ "$DRY_RUN" = false ]; then
+                mv "$dst" "$backup_path" || {
+                    log_error "Failed to backup $dst"
+                    return 1
+                }
+            fi
+            log_info "Backed up $dst to $backup_path"
+        fi
+
+        if [ "$skip" = true ]; then
+            log_info "Skipped $src"
+            return 0
+        fi
+    fi
+
+    # Create the symbolic link
+    if [ "$DRY_RUN" = false ]; then
+        ln -sf "$src" "$dst" || {
+            log_error "Failed to create symlink $src -> $dst"
+            return 1
+        }
+    fi
+    log_info "Created symlink $src -> $dst"
+}
+
+# =============================================================================
+# Dependency Installation Functions
+# =============================================================================
+
+# install_dependencies()
+# ---------------------
+# Installs system dependencies and tools by running install.sh scripts.
+#
+# Searches for install.sh scripts in:
+#   - Root directory of dotfiles
+#   - OS-specific directories (os/mac, os/linux)
+#
+# For Linux, requires apt package manager (Debian-based distributions).
+# Logs output from install scripts and handles failures gracefully.
+install_dependencies() {
+    log_info "Installing dependencies"
+
+    local os
+    os="$(uname -s)"
+
+    # Function to run an installer script
+    run_installer() {
+        local installer="$1"
+        log_info "Running installer: $installer"
+
+        if [ "$DRY_RUN" = true ]; then
+            log_info "[DRY RUN] Would run $installer"
+            return 0
+        fi
+
+        # Run the installer and capture output
+        if (cd "$(dirname "$installer")" && sh -c "./$(basename "$installer")") 2>&1; then
+            log_info "Successfully ran $installer"
+            return 0
+        else
+            local exit_code=$?
+            log_error "Failed to run $installer (exit code: $exit_code)"
+            return $exit_code
+        fi
+    }
+
+    # Find and run general installers
+    local installers
+    installers=$(find "$DOTFILES_ROOT/tools" -name install.sh 2>/dev/null)
+    for installer in $installers; do
+        run_installer "$installer" || log_warn "Continuing despite failure of $installer"
+    done
+
+    # Run OS-specific installers
+    case "$os" in
+        Darwin)
+            log_debug "Detected macOS"
+            installers=$(find "$DOTFILES_ROOT/os/mac" -name install.sh 2>/dev/null)
+            for installer in $installers; do
+                run_installer "$installer" || log_warn "Continuing despite failure of $installer"
+            done
+            ;;
+        Linux)
+            log_debug "Detected Linux"
+            # Check for apt (Debian-based)
+            if ! command -v apt >/dev/null 2>&1; then
+                log_error "apt not found. This script supports Debian-based Linux distributions."
+                return 1
+            fi
+            installers=$(find "$DOTFILES_ROOT/os/linux" -name install.sh 2>/dev/null)
+            for installer in $installers; do
+                run_installer "$installer" || log_warn "Continuing despite failure of $installer"
+            done
+            ;;
+        *)
+            log_error "Unsupported operating system: $os"
+            return 1
+            ;;
+    esac
+
+    log_info "Dependency installation completed"
+}
+
+# Legacy helper functions removed - replaced by unified logging functions
+
+# =============================================================================
+# Main Execution Logic
+# =============================================================================
+
+log_info "Starting main execution"
+
+if [ "$SETUP_GIT" = true ] && [ "$QUIET" = false ]; then
+    setup_gitconfig || exit 1
+fi
+
+if [ "$INSTALL_DOT" = true ]; then
+    install_dotfiles || exit 1
+fi
+
+if [ "$INSTALL_DEPS" = true ]; then
+    install_dependencies || exit 1
+fi
+
+if [ "$QUIET" = false ]; then
+    echo ""
+    log_info "  All installed!"
+fi
+
+log_info "Bootstrap script completed successfully"

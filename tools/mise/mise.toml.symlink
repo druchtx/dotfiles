@@ -1,0 +1,15 @@
+# mise config
+# DOTFILE_CONFIG_PATH: ~/.mise/config.toml 
+
+[tools]
+go  = "1.25.5"
+java = "corretto-21"
+node = "lts"
+# erlang = "latest"
+# elixir = "1.19.4-otp-28"
+python = "3.14"
+groovy = "5.0.3"
+rust = "latest"
+# zig = "latest"
+gcloud = "latest"
+terraform = "latest"

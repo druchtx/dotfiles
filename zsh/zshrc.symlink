@@ -1,0 +1,54 @@
+# shortcut to this dotfiles path is $ZSH
+SCRIPT_DIR="${${(%):-%N}:P:h}"
+export DOTFILES_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+export ZSH="$DOTFILES_ROOT"
+
+# Load global environment variables (PATH, EDITOR, etc.)
+source "$SCRIPT_DIR/../system/env.zsh"
+
+# Load user-specific environment variables from ~/.localrc
+# This file is not tracked in git, so you can put personal settings here
+# such as API keys, custom paths, or machine-specific configurations
+if [[ -a ~/.localrc ]]
+then
+  source ~/.localrc
+fi
+
+setopt extendedglob nullglob
+typeset -U config_files
+pattern="$ZSH/**/*.zsh~$ZSH/system/env.zsh$([[ $(uname -s) == Darwin ]] && echo "~$ZSH/os/linux/**/*.zsh" || [[ $(uname -s) == Linux ]] && echo "~$ZSH/os/mac/**/*.zsh")"
+config_files=( ${~pattern} )
+unsetopt extendedglob nullglob
+
+# Load path files from all config files (common + OS)
+for file in ${(M)config_files:#*/path.zsh}
+do
+  source $file
+done
+
+# Load other files (excluding path and completion)
+for file in ${${config_files:#*/path.zsh}:#*/completion*.zsh}
+do
+  source $file
+done
+
+# initialize autocomplete here, otherwise functions won't be loaded
+autoload bashcompinit && bashcompinit
+autoload -Uz compinit && compinit
+
+# Load completion files
+for file in ${(M)config_files:#*/completion*.zsh}
+do
+    source "$file"
+done
+
+unset config_files
+
+# Better history
+# Credits to https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search # Up
+bindkey "^[[B" down-line-or-beginning-search # Down

@@ -1,0 +1,6 @@
+build-essential
+libncurses-dev
+autoconf
+libssl-dev
+m4
+bc

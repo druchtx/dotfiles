@@ -1,0 +1,9 @@
+{
+  "folders": [],
+  "settings": {
+    "extensions.ignoreRecommendations": true,
+    "workbench.colorCustomizations": {
+      // "statusBarItem.remoteBackground":"#5c7298",
+    }
+  }
+}

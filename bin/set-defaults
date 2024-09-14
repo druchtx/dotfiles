@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Sets macOS defaults by running $ZSH/macos/set-defaults.sh.
+
+os=$(uname -s)
+if [ "$os" = "Darwin" ]; then
+    exec $ZSH/macos/set-defaults.sh
+fi

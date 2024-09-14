@@ -1,0 +1,232 @@
+"""""""""""""""" 基础设置 """"""""""""""""""""
+" ---------- 主要模式 ---------- 
+" 关闭兼容模式
+set nocompatible          
+" 显示当前所处的模式 
+set showmode              
+" 显示输入的命令
+set showcmd               
+" 键码超时设置 
+set ttimeoutlen=10        
+" 按键映射超时设置
+set timeoutlen=300
+" 启用所有模式下的鼠标
+set mouse=a               
+" 关闭文件交换
+set noswapfile
+" vimrc文件修改之后自动加载linux/mac
+augroup MyVimrc
+    autocmd!
+    autocmd BufWritePost $MYVIMRC source $MYVIMRC
+augroup END
+
+
+" ---------- 外观与显示设置 ---------- 
+" 显示绝对行号
+set number                
+" 显示相对行号 
+set relativenumber        
+" 高亮显示当前行
+set cursorline            
+" 开启 24 位颜色 
+set termguicolors         
+" 设置行宽警戒线
+set colorcolumn=100       
+" 设置命令行高度为 2 行 
+set cmdheight=2           
+" 增强模式中的命令行自动完成操作 
+set wildmenu              
+set wildmode=list:longest
+" 开启文件类型检测
+filetype on               
+" 开启语法高亮
+syntax on                 
+" 设置终端标题
+set title
+" 设置上下移动时光标上下方最低行数
+set scrolloff=8
+" 取消换行
+set nowrap
+" 自动补全菜单行为（改为兼容补全插件）
+set completeopt=menuone,noinsert,noselect
+
+" ---------- 搜索行为设置 --------- 
+" 搜索结果高亮
+set hlsearch              
+" 搜索时实时显示匹配结果
+set incsearch             
+" 搜索时忽略大小写
+set ignorecase            
+" 智能大小写
+set smartcase             
+" 搜索时文件末尾自动绕回到文件开头继续搜索
+set wrapscan              
+
+" 
+" ---------- 缩进与格式设置 --------- 
+" 自动缩进 
+set autoindent            
+" 智能缩进 
+set smartindent           
+" 复制缩进 
+set copyindent            
+" 将 Tab 键输入转换为空格
+set expandtab             
+" Tab 实际显示宽度为 4
+set tabstop=4             
+" Tab 键按下时所插入的空格数或移动的步长
+set softtabstop=4         
+" 自动缩进和 <<, >> 命令移动的步长
+set shiftwidth=4          
+
+" 
+" ---------- 文件/会话管理设置 --------- 
+" 设置文件编码
+set encoding=utf-8
+" 自动判断编码时，依次尝试以下编码：
+set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,euc-jp,euc-kr,latin1
+" 将unix设置为默认文件格式
+set fileformats=unix,dos
+" 如遇Unicode值大于255的文本，不必等到空格再折行
+set formatoptions+=m
+" 合并两行中文时，不在中间加空格
+set formatoptions+=B
+" 允许在有未保存的修改时切换缓冲区/窗口
+set hidden                  
+" 自动保存
+set autowriteall            
+" 增大命令行和搜索历史记录条数
+set history=2000
+" 开启持久化撤销功能
+set undofile
+" 确保 undodir 存在
+if !isdirectory(expand('~/.vim/undo'))
+  call mkdir(expand('~/.vim/undo'), 'p')
+endif
+" 指定撤销文件保存路径
+set undodir=~/.vim/undo
+" 减少光标空闲检查时间，用于加快交换文件更新和插件响应
+set updatetime=300
+
+" 保存时删除尾随空格，避免 IDE 自动补空格导致的映射失效
+augroup TrimTrailing
+    autocmd!
+    autocmd BufWritePre * %s/\s\+$//e
+    autocmd ColorScheme * match ErrorMsg /\s\+$/
+augroup END
+" 立即启用高亮
+match ErrorMsg /\s\+$/
+
+"""""""""""""""" 按键映射 """"""""""""""""""""
+" 设置前导键
+let mapleader = " "
+
+" ---------- 模式切换 --------- 
+" 退出插入模式
+inoremap <C-g> <Esc>
+" 退出可视模式
+vnoremap <C-g> <Esc>
+" 取消搜索高亮
+nnoremap <ESC><ESC> :nohl<CR>
+
+" ---------- 移动操作 --------- 
+" 禁用方向键
+noremap <Left> <Nop>
+noremap <Down> <Nop>
+noremap <Up> <Nop>
+noremap <Right> <Nop>
+
+" ---------- 文件操作 --------- 
+" 保存
+nnoremap <Leader>s :w<CR>
+" 不保存退出
+nnoremap <Leader>q :q!<CR>
+" 保存后退出
+nnoremap <Leader>x :wq<CR>         
+" 不保存退出所有
+nnoremap <Leader>Q :qa!<CR>
+" 保存后退出所有
+nnoremap <Leader>X :wqa<CR>
+
+" ----------- 文本编辑 --------- 
+" 重做
+nnoremap U <C-r>
+" 让 Y 行为和其他大写行为一致，复制到行尾
+nnoremap Y y$
+" 折行
+nnoremap K i<CR><Esc>
+" 屏蔽 gi 命令
+nnoremap gi <Nop>
+
+" 复制选中区到系统剪切板中
+vnoremap <Leader>y "+y
+" 从系统剪切板中粘贴
+nnoremap <Leader>p "+p
+
+" 在当前行下方插入空行
+nnoremap <Leader>j mmo<Esc>`m
+
+" 在当前行上方插入空行
+nnoremap <Leader>k mmO<Esc>`m
+
+" 在光标前插入空格
+nnoremap <Leader>h i<Space><Esc>
+
+" 在光标后插入空格
+nnoremap <Leader>l a<Space><Esc>     
+
+" 移动当前行到下方
+nnoremap sj :m .+1<CR><ESC>
+" 移动当前行到上方
+nnoremap sk :m .-2<CR><ESC>
+
+" 全选
+nnoremap <Leader>V ggVG
+" 选择段落
+nnoremap <Leader>v vap
+
+" ----------- 窗口与分割操作 --------- 
+" 窗口切换 
+" 切换到左边的窗口
+nnoremap <C-h> <C-w>h
+vnoremap <C-h> <C-w>h
+" 切换到下边的窗口
+nnoremap <C-j> <C-w>j
+vnoremap <C-j> <C-w>j
+" 切换到上边的窗口
+nnoremap <C-k> <C-w>k
+vnoremap <C-k> <C-w>k
+" 切换到右边的窗口
+nnoremap <C-l> <C-w>l          
+vnoremap <C-l> <C-w>l          
+
+" 窗口管理
+" 平衡所有窗口大小
+noremap <C-=> <C-w>=          
+
+" ---------- 缓冲区、标签页与文件操作--------- 
+" 标签页切换与管理
+" 切换到下一个标签页
+noremap ]t :tabnext<CR>       
+" 切换到上一个标签页
+noremap [t :tabprevious<CR>   
+" 新建标签页
+noremap <Leader>n :tabnew<CR>   
+
+" 缓冲区切换与管理
+" 切换到下一个缓冲区
+noremap ]b :bnext<CR>         
+" 切换到上一个缓冲区
+noremap [b :bprevious<CR>     
+
+" 切换到确切的tab
+noremap <Leader>1 1gt
+noremap <Leader>2 2gt
+noremap <Leader>3 3gt
+noremap <Leader>4 4gt
+noremap <Leader>5 5gt
+noremap <Leader>6 6gt
+noremap <Leader>7 7gt
+noremap <Leader>8 8gt
+noremap <Leader>9 9gt
+noremap <Leader>0 :tablast<CR>

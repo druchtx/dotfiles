@@ -1,0 +1,39 @@
+{
+  "name": "",
+  "image": "mcr.microsoft.com/devcontainers/base:2.1.3-debian12",
+  // "build": {
+  //   "dockerfile": "${localEnv:DOTFILES_ROOT}/tools/devcontainer/Dockerfile",
+  //   "context": "${localEnv:DOTFILES_ROOT}",
+  //   "options": [
+  //     "--no-cache"
+  //   ] 
+  // },
+  
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/Workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/home/vscode/Workspace",
+  "runArgs": [
+    "--name",
+    "devcontainer"
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": false,
+      "installOhMyZshConfig": false
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1":{}
+  },
+  //config dotfiles
+  "postCreateCommand": "rm -rf ~/.dotfiles && git clone https://github.com/druchtx/dotfiles ~/.dotfiles &&  rm  ~/.dotfiles/tools/git/git* && ~/.dotfiles/bootstrap  --install-dot --install-deps -s",
+  "remoteUser": "vscode",
+  "customizations": { 
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/zsh"
+      }
+    }
+  },
+  "mounts": [
+    "source=vol-vsc-dc,target=/home/vscode,type=volume"
+  ]
+}

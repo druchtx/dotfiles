@@ -1,0 +1,11 @@
+[user]
+        name = AUTHORNAME
+        email = AUTHOREMAIL
+        signingkey = SIGNING_KEY
+[credential]
+        helper = GIT_CREDENTIAL_HELPER
+
+[commit]
+	gpgSign = GPG_SIGN
+[gpg]
+	format = ssh
