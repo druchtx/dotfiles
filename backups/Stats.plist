@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Battery_state</key>
+	<false/>
+	<key>Disk_state</key>
+	<false/>
+	<key>NSNavPanelExpandedSizeForSaveMode</key>
+	<string>{894, 448}</string>
+	<key>NSNavPanelExpandedStateForSaveMode</key>
+	<true/>
+	<key>NSOSPLastRootDirectory</key>
+	<data>
+	Ym9vaxQDAAAAAAQQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA7AEA
+	AAQAAAADAwAAAAQAAAUAAAABAQAAVXNlcnMAAAAHAAAAAQEAAGRydWNodHgACQAAAAEB
+	AABEb2N1bWVudHMAAAAGAAAAAQEAAE90aGVycwAAEAAAAAEGAAAQAAAAIAAAADAAAABE
+	AAAACAAAAAQDAACeOAAAAAAAAAgAAAAEAwAAuw0wAwAAAAAIAAAABAMAAJ8kMQMAAAAA
+	CAAAAAQDAAB2KTEDAAAAABAAAAABBgAAbAAAAHwAAACMAAAAnAAAAAgAAAAABAAAQcV6
+	PsSAAAAYAAAAAQIAAAIAAAAAAAAAHwIAAAAAAAAfAgAAAAAAAAAAAAABBQAACAAAAAQD
+	AAACAAAAAAAAAAQAAAADAwAA9QEAAAgAAAABCQAAZmlsZTovLy8MAAAAAQEAAE1hY2lu
+	dG9zaCBIRAgAAAAEAwAAAFDBGXMAAAAIAAAAAAQAAEHG+LWVAAAAJAAAAAEBAAA5OTBD
+	NEYxOS0zREM4LTQyNzgtQTI0QS03MUI1N0Y4Mjk5NkEYAAAAAQIAAIEAAAABAAAA7xMA
+	AAEAAADvEwAAAQAAAAEAAAABAQAALwAAADAAAAABAgAAZG5pYgAAAAABAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAcmRsZgIAAAAAAAAA8AAAAP7///8BAAAAAAAAABMAAAAE
+	EAAAVAAAAAAAAAAFEAAArAAAAAAAAAAQEAAA1AAAAAAAAABAEAAAxAAAAAAAAAACIAAA
+	qAEAAAAAAAAFIAAAGAEAAAAAAAAQIAAAKAEAAAAAAAARIAAAXAEAAAAAAAASIAAAPAEA
+	AAAAAAATIAAATAEAAAAAAAAgIAAAiAEAAAAAAAAwIAAA9AAAAAAAAAABwAAA/AAAAAAA
+	AAARwAAAIAAAAAAAAAASwAAADAEAAAAAAAAB0AAA9AAAAAAAAAAQ0AAABAAAAAAAAAAX
+	8AAARAAAAAAAAAAi8AAAtAEAAAAAAAA=
+	</data>
+	<key>NSStatusItem Preferred Position CPU_mini</key>
+	<real>375</real>
+	<key>NSStatusItem Preferred Position Network_speed</key>
+	<real>422</real>
+	<key>NSStatusItem Preferred Position RAM_mini</key>
+	<real>328</real>
+	<key>NSStatusItem Restore Position Battery_battery</key>
+	<integer>351</integer>
+	<key>NSToolbar Configuration eu.exelban.Stats.Settings.Toolbar</key>
+	<dict>
+		<key>TB Display Mode</key>
+		<integer>1</integer>
+		<key>TB Icon Size Mode</key>
+		<integer>1</integer>
+		<key>TB Is Shown</key>
+		<true/>
+		<key>TB Size Mode</key>
+		<integer>1</integer>
+	</dict>
+	<key>NSWindow Frame NSNavPanelAutosaveName</key>
+	<string>309 375 894 448 0 0 1512 948 </string>
+	<key>Network_label_position</key>
+	<integer>1</integer>
+	<key>Network_networkChart_position</key>
+	<integer>2</integer>
+	<key>Network_speed_icon</key>
+	<string>dots</string>
+	<key>Network_speed_iconAlignment</key>
+	<string>left</string>
+	<key>Network_speed_iconColor</key>
+	<string>default</string>
+	<key>Network_speed_mode</key>
+	<string>twoRows</string>
+	<key>Network_speed_position</key>
+	<integer>0</integer>
+	<key>Network_speed_valueAlignment</key>
+	<string>center</string>
+	<key>Network_state_position</key>
+	<integer>3</integer>
+	<key>Network_text_position</key>
+	<integer>4</integer>
+	<key>Network_widget</key>
+	<string>speed</string>
+	<key>setupProcess</key>
+	<true/>
+	<key>telemetry</key>
+	<false/>
+	<key>updater_check_ts</key>
+	<integer>1750508995</integer>
+	<key>version</key>
+	<string>2.11.45</string>
+</dict>
+</plist>
