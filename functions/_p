@@ -1,0 +1,4 @@
+#compdef p
+
+_files -W $PLAYGROUNDS -/
+
