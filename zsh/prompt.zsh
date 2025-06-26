@@ -75,8 +75,19 @@ current_user() {
     echo "%{$fg[magenta]%}%n%{$reset_color%}"  
 }
 
+aws_vault_name() {
+  if [ -n "$AWS_VAULT" ]; then
+    local UTC_EPOCH=$(TZ='UTC' gdate -d "$AWS_CREDENTIAL_EXPIRATION" +%s)
+    local CURRENT_JST_EPOCH=$(TZ='Asia/Tokyo' gdate +%s)
+    local DIFF_SECONDS=$((UTC_EPOCH - CURRENT_JST_EPOCH )) 
+    local DIFF_HOUR=$((DIFF_SECONDS / 3600 ))
+    DIFF_HOUR=$(printf "<%02d" $DIFF_HOUR+1)
 
-export PROMPT=$'\$(current_user) in $(directory_name) $(git_dirty)$(need_push)\n› '
+     echo "%{$fg_bold[yellow]%}(AWS: ${AWS_VAULT} ${DIFF_HOUR}h)%{$reset_color%}"
+  fi
+}
+
+export PROMPT=$'\$(current_user) in $(directory_name) $(git_dirty)$(need_push) $(aws_vault_name)\n› '
 set_prompt () {
   export RPROMPT="%{$fg[cyan]%}%{$reset_color%}"
 }
