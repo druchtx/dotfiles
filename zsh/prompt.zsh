@@ -76,14 +76,26 @@ current_user() {
 }
 
 aws_vault_name() {
-  if [ -n "$AWS_VAULT" ]; then
-    local UTC_EPOCH=$(TZ='UTC' gdate -d "$AWS_CREDENTIAL_EXPIRATION" +%s)
-    local CURRENT_JST_EPOCH=$(TZ='Asia/Tokyo' gdate +%s)
-    local DIFF_SECONDS=$((UTC_EPOCH - CURRENT_JST_EPOCH )) 
-    local DIFF_HOUR=$((DIFF_SECONDS / 3600 ))
-    DIFF_HOUR=$(printf "<%02d" $DIFF_HOUR+1)
+  [[ -z "$AWS_VAULT" || -z "$AWS_CREDENTIAL_EXPIRATION" ]] && return
 
-     echo "%{$fg_bold[yellow]%}(AWS: ${AWS_VAULT} ${DIFF_HOUR}h)%{$reset_color%}"
+  local utc_epoch current_epoch diff_seconds diff_hour
+  local date_cmd="date"
+  command -v gdate &>/dev/null && date_cmd="gdate"
+
+  if [[ "$date_cmd" == "gdate" ]]; then
+    utc_epoch=$(TZ='UTC' gdate -d "$AWS_CREDENTIAL_EXPIRATION" +%s 2>/dev/null)
+    current_epoch=$(gdate +%s 2>/dev/null)
+  else
+    utc_epoch=$(TZ='UTC' date -j -f "%Y-%m-%dT%H:%M:%SZ" "$AWS_CREDENTIAL_EXPIRATION" +%s 2>/dev/null)
+    current_epoch=$(date +%s 2>/dev/null)
+  fi
+
+  if [[ -n "$utc_epoch" && -n "$current_epoch" ]]; then
+    diff_seconds=$((utc_epoch - current_epoch))
+    diff_hour=$([[ $diff_seconds -lt 0 ]] && echo "expired" || echo "<$(( (diff_seconds + 3599) / 3600 ))h")
+    echo "%{$fg_bold[yellow]%}(AWS: ${AWS_VAULT} ${diff_hour})%{$reset_color%}"
+  else
+    echo "%{$fg_bold[yellow]%}(AWS: ${AWS_VAULT})%{$reset_color%}"
   fi
 }
 
