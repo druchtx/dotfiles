@@ -99,7 +99,7 @@ aws_vault_name() {
   fi
 }
 
-export PROMPT=$'\$(current_user) in $(directory_name) $(git_dirty)$(need_push) $(aws_vault_name)\n⧉ '
+export PROMPT=$'\$(current_user)@$(hostname | cut -d"." -f1) in $(directory_name) $(git_dirty)$(need_push) $(aws_vault_name)\n⧉ '
 set_prompt () {
   export RPROMPT="%{$fg[cyan]%}%{$reset_color%}"
 }

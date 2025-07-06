@@ -1,3 +1,3 @@
 #!/bin/sh 
-
-/opt/homebrew/bin/mise install  -y
+hb_prefix=$(brew --prefix)
+eval "${hb_prefix}/bin/mise install  -y"

@@ -42,21 +42,10 @@ cask "firefox"
 cask "font-fira-code"
 cask "google-chrome" 
 cask "iterm2"
-cask "microsoft-excel"
-# cask "microsoft-powerpoint"
-cask "microsoft-word"
-# cask "windows-app"
 cask "raycast"
 cask "stats"
 cask "orbstack"
 cask "postman"
 cask "tableplus"
 cask "visual-studio-code"
-cask "rustdesk" 
-cask "spotify"
-cask "slack"
-cask "wechat"
 
-mas "Dictionaries", id: 1380563956
-mas "LINE", id: 539883307
-mas "Xcode", id: 497799835

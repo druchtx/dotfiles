@@ -1,2 +1,4 @@
 #!/bin/zsh
-eval "$(/opt/homebrew/bin/mise activate)"
+
+hb_prefix=$(brew --prefix)
+eval "$(${hb_prefix}/bin/mise activate)"
