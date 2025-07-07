@@ -11,28 +11,28 @@ setup_gitconfig() {
       git_credential='osxkeychain'
     fi
 
+    # generate ssh key if not exist
+    if [[ ! -f ~/.ssh/id_ed25519 ]]; then
+      ssh-keygen -t ed25519 -C "git@$(hostname)" -f ~/.ssh/id_ed25519 -N "" -y >/dev/null 2>&1
+      info 'generated ssh key at ~/.ssh/id_ed25519 with no passphrase'
+      info 'add an passphrase if needed with "ssh-keygen -f ~/.ssh/id_ed25519 -p"'
+    fi
     user ' - What is your git author name?'
     read -e git_authorname
     user ' - What is your git author email?'
     read -e git_authoremail
-    user " - What is your git signing key path (press Enter to skip)? e.g., /Users/$(whoami)/.ssh/keys/share.pub"
+    user " - What is your git signing key path (press Enter to skip)? e.g., /Users/$(whoami)/.ssh/id_ed25519"
     read -e git_signingkey
-
-    if [ -z "$git_signingkey" ] || [[ ! "$git_signingkey" =~ ^/Users/$(whoami)/.ssh/.* ]]; then
-      info ' The signing key path is null or invalid. Skipping signing key setup. Please set it manually if needed.'
-      sed -e "s/AUTHORNAME/$git_authorname/g" \
-        -e "s/AUTHOREMAIL/$git_authoremail/g" \
-        -e "s/GIT_CREDENTIAL_HELPER/$git_credential/g" \
-        git/gitconfig.local.symlink.example >git/gitconfig.local.symlink
-    else
-      escaped_git_signingkey=$(sed 's/[\/&]/\\&/g' <<<"$git_signingkey")
-      sed -e "s/AUTHORNAME/$git_authorname/g" \
-        -e "s/AUTHOREMAIL/$git_authoremail/g" \
-        -e "s/SIGNING_KEY/$escaped_git_signingkey/g" \
-        -e "s/GIT_CREDENTIAL_HELPER/$git_credential/g" \
-        -e "s/GPG_SIGN/true/g" \
-        git/gitconfig.local.symlink.example >git/gitconfig.local.symlink
+    if [ -z "$git_signingkey" ]; then
+      git_signingkey=~/.ssh/id_ed25519
     fi
+    escaped_git_signingkey=$(sed 's/[\/&]/\\&/g' <<<"$git_signingkey")
+    sed -e "s/AUTHORNAME/$git_authorname/g" \
+      -e "s/AUTHOREMAIL/$git_authoremail/g" \
+      -e "s/SIGNING_KEY/$escaped_git_signingkey/g" \
+      -e "s/GIT_CREDENTIAL_HELPER/$git_credential/g" \
+      -e "s/GPG_SIGN/true/g" \
+      git/gitconfig.local.symlink.example >git/gitconfig.local.symlink
 
     success 'gitconfig'
   fi
