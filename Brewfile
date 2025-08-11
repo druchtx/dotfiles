@@ -43,7 +43,6 @@ cask "firefox"
 cask "font-fira-code"
 cask "google-chrome" 
 cask "iterm2"
-cask "hazeover"
 # cask "microsoft-excel"
 # cask "microsoft-powerpoint"
 # cask "microsoft-word"
@@ -58,6 +57,7 @@ cask "rustdesk"
 cask "spotify"
 cask "slack"
 cask "wechat"
+cask "ghostty"
 
 mas "Dictionaries", id: 1380563956
 mas "LINE", id: 539883307

@@ -1,3 +1,8 @@
+# mise config
+#
+# CONFIG_PATH: ~/.config/mise/mise.toml 
+#
+
 [tools]
 erlang = "27"
 elixir = "1.17.3-otp-27"
@@ -7,8 +12,3 @@ node = "lts"
 rust = "1.83.0"
 gcloud = "502.0.0"
 terraform = "1.10.1"
-
-
-[settings]
-global_config_file = "$HOME/.mise.toml"
-trusted_config_paths = ["$HOME/.mise.toml", "$HOME/mise.local.toml"]

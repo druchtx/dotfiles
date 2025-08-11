@@ -38,17 +38,27 @@ setup_gitconfig() {
   fi
 }
 
+# Install dotfiles
+#
+# To create your configuration file, use the naming convention 'topic.symlink'.
+# Add a comment at the top of the file 'topic.symlink' like the following:
+#   # CONFIG_PATH: ~/.config/topic/config
+# If the CONFIG_PATH is not specified, the default config path ~/.topic will be used.
 install_dotfiles() {
   info 'installing dotfiles'
 
   local overwrite_all=false backup_all=false skip_all=false
 
   for src in $(find -H "$DOTFILES_ROOT" -maxdepth 3 -name '*.symlink' -not -path '*.git*'); do
-    dst="$HOME/.$(basename "${src%.*}")"
+    # default config dst 
+    local dst="$HOME/.$(basename "${src%.*}")"
 
-    # special handling for mise
-    if [ "$src" == *"mise"* ]; then
-      dst="$HOME/.config/mise/.config.yaml"
+    # parse CONFIG_PATH
+    local extracted_config_path=$(grep -m 1 'CONFIG_PATH:' "$src" | awk -F': ' '{print $2}' | xargs)
+    if [[ -n "$extracted_config_path" ]]; then
+      extracted_config_path="${extracted_config_path/\~/$HOME}"
+      dst="$extracted_config_path" 
+      mkdir -p "$(dirname "$dst")"
     fi
 
     _link_file "$src" "$dst"
