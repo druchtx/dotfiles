@@ -357,7 +357,6 @@ defmodule GitWtf do
   defp show_relations(b, all_branches, options) do
     integration_branches = options[:config]["integration-branches"]
 
-    # 使用 Enum.split_with 替换 Enum.partition
     {ibs, fbs} =
       Enum.split_with(all_branches, fn {_name, br} ->
         Enum.member?(integration_branches, br[:local_branch]) or Enum.member?(integration_branches, br[:remote_branch])

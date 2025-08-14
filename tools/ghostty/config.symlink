@@ -6,15 +6,14 @@
 # theme
 theme = github-dark-dimmed
 window-theme = dark
-font-family = 'Fira Code'
+font-family = Fira Code Light
 font-size = 13
 
 # window
 window-padding-balance = true
-window-padding-x = 0
+window-padding-x = 6
 window-padding-y = 0
-window-theme = "ghostty"
+window-theme = ghostty
 background-blur-radius = 15
 background-opacity = 0.96
-
 mouse-hide-while-typing
