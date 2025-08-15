@@ -10,6 +10,7 @@ font-family = Fira Code Light
 font-size = 13
 
 # window
+## normal
 window-padding-balance = true
 window-padding-x = 6
 window-padding-y = 0
@@ -17,3 +18,15 @@ window-theme = ghostty
 background-blur-radius = 15
 background-opacity = 0.96
 mouse-hide-while-typing
+## quick window
+quick-terminal-position = right
+quick-terminal-screen = mouse
+quick-terminal-animation-duration = 0.15
+quick-terminal-autohide = true
+
+# key binding
+## global 
+keybind = global:ctrl+alt+/=toggle_quick_terminal
+keybind = cmd+\=new_split:right
+keybind = shift+cmd+\=new_split:down
+
