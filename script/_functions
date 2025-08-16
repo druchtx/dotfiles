@@ -54,7 +54,7 @@ install_dotfiles() {
     local dst="$HOME/.$(basename "${src%.*}")"
 
     # parse CONFIG_PATH
-    local extracted_config_path=$(grep -m 1 'CONFIG_PATH:' "$src" | awk -F': ' '{print $2}' | xargs)
+    local extracted_config_path=$(grep -m 1 'DOTFILE_CONFIG_PATH' "$src" | awk -F': ' '{print $2}' | xargs)
     if [[ -n "$extracted_config_path" ]]; then
       extracted_config_path="${extracted_config_path/\~/$HOME}"
       dst="$extracted_config_path" 

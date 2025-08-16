@@ -1,0 +1,9 @@
+#!/bin/zsh
+
+# install package manager vim-plug
+# docs: https://junegunn.github.io
+ [ ! -f ~/.vim/autoload/plug.vim ]; then
+    mkdir -p ~/.vim/autoload
+    curl -fLo ~/.vim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+fiif

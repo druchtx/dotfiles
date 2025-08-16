@@ -1,6 +1,6 @@
 # ghostty config
 #
-# CONFIG_PATH: ~/.config/ghostty/config
+# DOTFILE_CONFIG_PATH: ~/.config/ghostty/config
 #
 
 # theme

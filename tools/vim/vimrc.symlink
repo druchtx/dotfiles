@@ -1,0 +1,14 @@
+set hidden
+set number
+set fileencodings=utf-8
+set cursorline
+set wildmenu
+
+
+
+call plug#begin()
+
+" List your plugins here
+Plug 'junegunn/fzf' 
+
+call plug#end()
