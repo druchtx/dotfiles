@@ -9,67 +9,86 @@ g() {
 
 
 # spanner
-spanner() {
-  spanner-cli "$@"
-}
+spn(){
+  usage() {
+  echo ""
+  echo "spanner - Run queries or SQL files against a Google Spanner database."
+  echo ""
+  echo "Usage:"
+  echo "  spanner <database_name> [*.sql | query | blank | --create | --drop]"
+  echo "Arguments:"
+  echo "  <database_name>   Name of the Spanner database to connect to."
+  echo "  *.sql             Path to a SQL file; executes the SQL statements in the file."
+  echo "  query             A SQL query string; executes the query directly."
+  echo "  blank             If no additional argument is provided, enters the spanner-cli REPL for interactive queries."
+  echo "  --create          Creates the database if it doesn't exist."
+  echo "  --drop            Drops the database if it exists."
+  echo ""
+  echo "Hint: This function uses your gcloud configuration for project and instance."
+  echo "      Ensure both 'gcloud' and 'spanner-cli' are installed and configured." 
+  }
 
-spanner-tables(){
-    if [[ "$1" =~ "-h" ]] ; then
-      echo "Usage: $0 [database_name]"
-      echo "Options: -h ,--help"
-    return 1
-  fi
-  gcloud spanner databases list --format=json --filter="name~${1:-''}" | jq -r .
-}
-
-
-spanner-instances(){
-    if [[ "$1" =~ "-h" ]] ; then
-      echo "Usage: $0 [instance_name]"
-      echo "Options: -h ,--help"
-    return 1
-  fi
-    gcloud spanner instances list --format=json --filter="name~${1:-''}" | jq -r .
-}
-
-spanner-file(){
-  if [[ "$1" =~ "-h" ]] || [ "$#" -lt 2 ] || [[ ! "$2" =~ ".sql" ]] || [[ ! -f "$2" ]]; then
-    echo "Usage: spanner-file <database_name> <file_path>"
-    echo "Options: -h ,--help"
-    return 1
-  fi
-  local project_name instance_name file_path database_name
-  project_name=$(gcloud config get core/project 2>/dev/null)
-  instance_name=$(gcloud config get spanner/instance 2>/dev/null)
-  file_path="$2"
-  database_name="$1"
-
-  if [ -z "$instance_name" ] || [ -z "$project_name" ] || [ -z "$file_path" ] || [ -z "$database_name" ] || [ ! -f "$file_path" ]; then
-    echo "Please set the project name and spanner instance name"
-    return 1
+  # Display help if no arguments or help flag is present
+  if [ "$#" -eq 0 ] || [[ "$1" =~ "^-(h|(-help))$|^help$" ]]; then
+      usage
+      return 1
   fi
 
-  spanner-cli sql --project "$project_name" --instance "$instance_name" --database "$database_name" --file "$file_path"
-}
+  # Process the first argument - the database name
+  local DATABASE_NAME=$1
+  # shift # Consume the database name argument
 
-spanner-exec(){
-
-  if [[ "$1" =~ "-h" ]] || [ "$#" -lt 2 ]; then
-    echo "Usage: spanner-exec database_name> <query>"
-    echo "Options: -h ,--help"
-    return 1
-  fi
-  local project_name instance_name file_path database_name
-  project_name=$(gcloud config get core/project 2>/dev/null)
-  instance_name=$(gcloud config get spanner/instance 2>/dev/null)
-  sql="$2"
-  database_name="$1"
-
-  if [ -z "$instance_name" ] || [ -z "$project_name" ] || [ -z "$sql" ] || [ -z "$database_name" ]; then
-    echo "Please set the project name and spanner instance name"
-    return 1
+  # Fetch project and instance from gcloud config
+  local PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+  local INSTANCE_ID=$(gcloud config get-value spanner/instance 2>/dev/null)
+  if [ -z "$PROJECT_ID" ] || [ -z "$INSTANCE_ID" ]; then 
+      usage
+      return 1 
   fi
 
-  spanner-cli sql --project "$project_name" --instance "$instance_name" --database "$database_name" --execute $sql 
+  local info="[project=$PROJECT_ID, instance=$INSTANCE_ID, database=$DATABASE_NAME]\n"
 
+  # Process the second argument - the SQL file or query
+  local SECOND_AEG=$2
+  # if it's a file
+  if [[ "$SECOND_AEG" == *.sql ]]; then
+      echo "${info}Executing SQL file... " >&2
+      spanner-cli sql --project "$PROJECT_ID" --instance "$INSTANCE_ID" --database "$DATABASE_NAME" --source "$SECOND_AEG"
+      return 
+  fi
+
+  if [[ "$SECOND_AEG" == "--create" ]]; then
+      echo "${info}Creating database... " >&2
+
+      if gcloud spanner databases list --instance "$INSTANCE_ID" --project "$PROJECT_ID" 2>/dev/null | grep -q "$DATABASE_NAME"; then
+        echo "Database $DATABASE_NAME already exists."
+      return 
+      fi  
+
+      gcloud spanner databases create "$DATABASE_NAME" --instance "$INSTANCE_ID" --project "$PROJECT_ID"
+      return 
+  fi
+
+  if [[ "$SECOND_AEG" == "--drop" ]] || [[ "$SECOND_AEG" == "--delete" ]]; then
+      echo "${info}Dropping database... " >&2
+
+      if ! gcloud spanner databases list --instance "$INSTANCE_ID" --project "$PROJECT_ID" 2>/dev/null | grep -q "$DATABASE_NAME"; then
+        echo "Database $DATABASE_NAME does not exists."
+      return 
+      fi  
+      
+      gcloud spanner databases delete "$DATABASE_NAME" --instance "$INSTANCE_ID" --project "$PROJECT_ID"
+      return 
+  fi
+
+  # not file or options, assume it's a query
+  if [ -n "$SECOND_AEG" ]; then
+      echo "${info}Executing query... " >&2
+      spanner-cli sql --project "$PROJECT_ID" --instance "$INSTANCE_ID" --database "$DATABASE_NAME" --execute "$SECOND_AEG"
+      return 
+  fi
+    
+  # Execute the final command, passing any remaining arguments
+  echo "${info}Connecting to Google Cloud Spanner REPL..." >&2
+  spanner-cli sql --project "$PROJECT_ID" --instance "$INSTANCE_ID" --database "$DATABASE_NAME"
 }

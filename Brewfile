@@ -34,6 +34,7 @@ brew "wxwidgets"
 brew "yq"
 brew "cobra-cli"
 brew "protobuf"
+brew "fzf"
 
 cask "appcleaner"
 cask "aws-vault"
