@@ -58,8 +58,6 @@ spn(){
   fi
 
   if [[ "$SECOND_AEG" == "--create" ]]; then
-      echo "${info}Creating database... " >&2
-
       if gcloud spanner databases list --instance "$INSTANCE_ID" --project "$PROJECT_ID" 2>/dev/null | grep -q "$DATABASE_NAME"; then
         echo "Database $DATABASE_NAME already exists."
       return 
@@ -70,8 +68,6 @@ spn(){
   fi
 
   if [[ "$SECOND_AEG" == "--drop" ]] || [[ "$SECOND_AEG" == "--delete" ]]; then
-      echo "${info}Dropping database... " >&2
-
       if ! gcloud spanner databases list --instance "$INSTANCE_ID" --project "$PROJECT_ID" 2>/dev/null | grep -q "$DATABASE_NAME"; then
         echo "Database $DATABASE_NAME does not exists."
       return 
@@ -91,4 +87,19 @@ spn(){
   # Execute the final command, passing any remaining arguments
   echo "${info}Connecting to Google Cloud Spanner REPL..." >&2
   spanner-cli sql --project "$PROJECT_ID" --instance "$INSTANCE_ID" --database "$DATABASE_NAME"
+}
+
+gcenv(){
+  usage(){
+    echo ""
+    echo "gcenv - Easily switch between Google Cloud projects."
+    echo ""
+  }
+
+  if [[ -z "$1" ]]; then
+    cat "$HOME/.config/gcloud/active_config" && echo 
+    return 0
+  fi
+
+
 }

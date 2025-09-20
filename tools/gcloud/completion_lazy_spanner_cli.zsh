@@ -19,12 +19,13 @@ _spanner_completions() {
       return 0
     fi
 
-    local info="[project=$PROJECT_ID, instance=$INSTANCE_ID, database=$DATABASE_NAME]"
+    local info="[INFO] project=$PROJECT_ID, instance=$INSTANCE_ID"
 
     local -a DB_NAMES
+    _message "$info"
+    _message "[INFO] Fetching database list..."
     DB_NAMES=(${(f)"$(gcloud spanner databases list --instance="$INSTANCE_ID" --project="$PROJECT_ID" --format="value(name)" 2>/dev/null)"})
     if (( ${#DB_NAMES[@]} == 0 )); then
-      _message "$info"
       _message "[ERROR] No databases found ! Please create one first."
       return 0
     fi

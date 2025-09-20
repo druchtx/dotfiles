@@ -4,7 +4,7 @@
 #
 
 # theme
-theme = github-dark-dimmed
+theme = Github Dark Dimmed
 window-theme = dark
 font-family = Fira Code Light
 font-size = 13

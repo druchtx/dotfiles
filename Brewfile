@@ -37,7 +37,7 @@ brew "protobuf"
 brew "fzf"
 
 cask "appcleaner"
-cask "aws-vault"
+cask "aws-vault-binary"
 cask "font-fira-code"
 cask "google-chrome" 
 # cask "microsoft-excel"
