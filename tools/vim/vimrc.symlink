@@ -1,14 +1,34 @@
-set hidden
-set number
-set fileencodings=utf-8
-set cursorline
-set wildmenu
+set showmode		  " 命令行显示输入的命令
+set hidden		      " 允许在有未保存的修改时切换缓冲区
+set wildmenu		  " 增强模式中的命令行自动完成操作
+set number		      " 显示行号
+set hlsearch		  " 收缩结果高亮set number " 显示行号
+set incsearch         " 设置检索实时显示
+set relativenumber	  " 显示相对行号（这个非常重要，慢慢体会）
+set hlsearch          " 搜索结果高亮
+set autoindent        " 自动缩进
+set smartindent 	  " 智能缩进
+set tabstop=4 		  " 设置 tab 制表符所占宽度为 4
+set softtabstop=4 	  " 设置按 tab 时缩进的宽度为 4
+set shiftwidth=4      " 设置自动缩进宽度为 4
+set ttimeoutlen=10    " 键码超时设置
+set expandtab         " 缩进时将 tab 制表符转换为空格
+set nocompatible      " 关闭兼容模式
+set showcmd           " 显示输入的命令
+set autowrite         " 自动保存
+filetype on           " 开启文件类型检测
+syntax on             " 开启语法高亮
+syntax on             " 开启语法高亮
+filetype on	  	      " 开启文件类型检测
 
+"设置前导键
+let mapleader = "\\"
+""" 按键映射
+" 上下左右移动光标禁用
+noremap <Left> <Nop>
+noremap <Down> <Nop>
+noremap <Up> <Nop>
+noremap <Right> <Nop>
 
-
-call plug#begin()
-
-" List your plugins here
-Plug 'junegunn/fzf' 
-
-call plug#end()
+"退出插入模式
+inoremap <C-g> <Esc> 
