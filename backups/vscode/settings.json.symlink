@@ -1,7 +1,6 @@
 /* 
 DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
 */
-
 {
     /* 
     Appearance -- font
@@ -52,11 +51,16 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
     // .vimrc
     "vim.vimrc.enable": true,
     "vim.vimrc.path": "~/.vimrc",
+    "vim.leader": "space", // .vimrc not working
     // vscode vim settings
     "vim.easymotion": true,
     "editor.lineNumbers": "relative",
     "vim.useSystemClipboard": true,
     "vim.useCtrlKeys": true,
+    "vim.handleKeys": {
+        "<C-a>": false,
+        "<C-f>": false
+    },
     // "vim.insertModeKeyBindings": [
     //     {
     //         "before": [
@@ -71,18 +75,20 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
     "vim.normalModeKeyBindingsNonRecursive": [
         {
             "before": [
-                "<C-n>"
-            ],
-            "commands": [
-                ":nohl"
-            ]
-        },
-        {
-            "before": [
                 "K"
             ],
             "commands": [
                 "lineBreakInsert"
+            ],
+            "silent": true
+        },
+        {
+            "before": [
+                "leader",
+                "R"
+            ],
+            "commands": [
+                "editor.action.rename"
             ],
             "silent": true
         },
@@ -180,17 +186,6 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
         {
             "before": [
                 "g",
-                "h"
-            ],
-            "commands": [
-                "workbench.action.terminal.focusHover"
-            ],
-            "silent": true
-        },
-        // Open the code actions menu
-        {
-            "before": [
-                "g",
                 "."
             ],
             "commands": [
@@ -257,11 +252,6 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
             "silent": true
         },
     ],
-    "vim.leader": "\\",
-    "vim.handleKeys": {
-        "<C-a>": false,
-        "<C-f>": false
-    },
     "extensions.experimental.affinity": {
         "vscodevim.vim": 1
     },

@@ -4,8 +4,12 @@ set wildmenu		  " 增强模式中的命令行自动完成操作
 set number		      " 显示行号
 set hlsearch		  " 收缩结果高亮set number " 显示行号
 set incsearch         " 设置检索实时显示
-set relativenumber	  " 显示相对行号（这个非常重要，慢慢体会）
+set relativenumber	  " 显示相对行号
 set hlsearch          " 搜索结果高亮
+set ignorecase        " 搜索时忽略大小写
+set smartcase         " 搜索时有大写时区分大小写
+set wrapscan          " 搜索时文件末尾自动换行
+set cursorline        " 高亮显示当前行
 
 set autoindent        " 自动缩进
 set smartindent 	  " 智能缩进
@@ -23,7 +27,7 @@ syntax on             " 开启语法高亮
 filetype on	  	      " 开启文件类型检测
 
 """ 按键映射设置
-let mapleader = " "   " 设置前导键
+let mapleader = " "   " 设置前导键 <space>
 " 上下左右移动光标禁用
 noremap <Left> <Nop>
 noremap <Down> <Nop>
@@ -32,3 +36,39 @@ noremap <Right> <Nop>
 
 inoremap <C-g> <Esc>                " 退出插入模式
 nnoremap <ESC><ESC> :nohl<CR>       " 取消搜索高亮
+
+" 窗口操作
+noremap <C-h> <C-w>h           " 切换到左边的窗口
+noremap <C-j> <C-w>j           " 切换到下边的窗口
+noremap <C-k> <C-w>k           " 切换到上边的窗口
+noremap <C-l> <C-w>l           " 切换到右边的窗口
+noremap  \ : split<CR>         " 水平分割窗口
+noremap  | : vsplit<CR>        " 垂直分割窗口
+noremap ]t : tabnext<CR>       " 切换到下一个标签页
+noremap [t : tabprevious<CR>   " 切换到上一个标签页
+noremap <Leader>tc : tabo<CR>  " 关闭除当前标签以外的所有标签
+noremap ]b : bnext<CR>         " 切换到下一个缓冲区
+noremap [b : bprevious<CR>     " 切换到上一个缓冲区
+noremap <Leader>bc : only<CR> " 关闭除当前缓冲区以外的所有缓冲区
+
+" 文件操作
+noremap <C-s> :w<CR>                     " 保存
+noremap <C-q> :q<CR>                     " 退出
+noremap <Leader>n :tabnew<CR>             " 新建标签页
+noremap <Leader>c :tabclose<CR>           " 关闭标签页
+" 重命名
+nnoremap <Leader>R :call RenameFile()<CR>
+
+""" 自定义函数
+" RenameFile 重命名文件
+function! RenameFile()
+  let current_file = expand('%')
+  let new_file = input("Rename to: ", current_file)
+  if new_file != '' && new_file != current_file
+    " 1. 执行系统 mv 命令重命名文件
+    execute '!mv ' . shellescape(current_file) . ' ' . shellescape(new_file)
+    " 2. 将当前缓冲区的文件名更新为新文件名
+    execute 'file ' . new_file
+  endif
+endfunction
+

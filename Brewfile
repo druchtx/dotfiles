@@ -35,6 +35,7 @@ brew "yq"
 brew "cobra-cli"
 brew "protobuf"
 brew "fzf"
+brew "nvim"
 
 cask "appcleaner"
 cask "aws-vault-binary"
