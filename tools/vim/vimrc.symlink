@@ -6,6 +6,7 @@ set hlsearch		  " 收缩结果高亮set number " 显示行号
 set incsearch         " 设置检索实时显示
 set relativenumber	  " 显示相对行号（这个非常重要，慢慢体会）
 set hlsearch          " 搜索结果高亮
+
 set autoindent        " 自动缩进
 set smartindent 	  " 智能缩进
 set tabstop=4 		  " 设置 tab 制表符所占宽度为 4
@@ -21,14 +22,13 @@ syntax on             " 开启语法高亮
 syntax on             " 开启语法高亮
 filetype on	  	      " 开启文件类型检测
 
-"设置前导键
-let mapleader = "\\"
-""" 按键映射
+""" 按键映射设置
+let mapleader = " "   " 设置前导键
 " 上下左右移动光标禁用
 noremap <Left> <Nop>
 noremap <Down> <Nop>
 noremap <Up> <Nop>
 noremap <Right> <Nop>
 
-"退出插入模式
-inoremap <C-g> <Esc> 
+inoremap <C-g> <Esc>                " 退出插入模式
+nnoremap <ESC><ESC> :nohl<CR>       " 取消搜索高亮
