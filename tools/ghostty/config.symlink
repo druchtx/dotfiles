@@ -14,7 +14,7 @@ font-size = 13
 window-padding-balance = true
 window-padding-x = 6
 window-padding-y = 0
-window-theme = ghostty
+window-theme = auto
 background-blur-radius = 15
 background-opacity = 0.9
 background-blur = true
@@ -24,10 +24,11 @@ quick-terminal-position = right
 quick-terminal-screen = mouse
 quick-terminal-animation-duration = 0.15
 quick-terminal-autohide = true
+quick-terminal-size = 45%
 
 # key binding
 ## global 
-keybind = global:ctrl+alt+/=toggle_quick_terminal
+keybind = global:ctrl+shift+/=toggle_quick_terminal
 keybind = cmd+\=new_split:right
 keybind = shift+cmd+\=new_split:down
 

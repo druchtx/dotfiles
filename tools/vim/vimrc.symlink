@@ -1,125 +1,117 @@
-""""""""""""""""""""
-""" 基础设置
-""""""""""""""""""""
+"""""""""""""""" 基础设置 """"""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""
+" 核心模式/兼容性设置 
+"""""""""""""""""""""""""""""""""""""""""""""
+set nocompatible          " 关闭兼容模式
+set showmode              " 显示当前所处的模式 
+set showcmd               " 显示输入的命令
+set ttimeoutlen=10        " 键码超时设置 
+set mouse=a               " 启用所有模式下的鼠标
+set clipboard=unnamed     " 启用系统剪贴板
 
-" 命令行显示输入的命令
-set showmode		  
-" 允许在有未保存的修改时切换缓冲区
-set hidden		      
-" 增强模式中的命令行自动完成操作
-set wildmenu		  
-" 显示行号
-set number		      
-" 收缩结果高亮
-set hlsearch		  
-" 设置检索实时显示
-set incsearch         
-" 显示相对行号
-set relativenumber	  
-" 搜索结果高亮
-set hlsearch          
-" 搜索时忽略大小写
-set ignorecase        
-" 搜索时有大写时区分大小写
-set smartcase         
-" 搜索时文件末尾自动换行
-set wrapscan          
-" 高亮显示当前行
-set cursorline        
+"""""""""""""""""""""""""""""""""""""""""""""
+" 外观与显示设置 
+"""""""""""""""""""""""""""""""""""""""""""""
+set number                " 显示绝对行号
+set relativenumber        " 显示相对行号 
+set cursorline            " 高亮显示当前行
+set termguicolors         " 开启 24 位颜色 
+set colorcolumn=100       " 设置行宽警戒线
+set cmdheight=2           " 设置命令行高度为 2 行 
+set wildmenu              " 增强模式中的命令行自动完成操作 
+filetype on               " 开启文件类型检测
+syntax on                 " 开启语法高亮
 
-" 自动缩进
-set autoindent        
-" 智能缩进
-set smartindent 	  
-" 设置 tab 制表符所占宽度为 4
-set tabstop=4 		  
-" 设置按 tab 时缩进的宽度为 4
-set softtabstop=4 	  
-" 设置自动缩进宽度为 4
-set shiftwidth=4      
-" 键码超时设置
-set ttimeoutlen=10    
-" 缩进时将 tab 制表符转换为空格
-set expandtab         
-" 关闭兼容模式
-set nocompatible      
-" 显示输入的命令
-set showcmd           
-" 自动保存
-set autowrite         
-" 开启文件类型检测
-filetype on           
-" 开启语法高亮
-syntax on             
-" 开启语法高亮
-syntax on             
-" 开启文件类型检测
-filetype on	  	      
+"""""""""""""""""""""""""""""""""""""""""""""
+" 搜索行为设置 
+"""""""""""""""""""""""""""""""""""""""""""""
+set hlsearch              " 搜索结果高亮
+set incsearch             " 搜索时实时显示匹配结果
+set ignorecase            " 搜索时忽略大小写
+set smartcase             " 智能大小写
+set wrapscan              " 搜索时文件末尾自动绕回到文件开头继续搜索
 
-""""""""""""""""""""
-""" 按键映射设置
-""""""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""
+" 缩进与格式设置 
+"""""""""""""""""""""""""""""""""""""""""""""
+set autoindent            " 自动缩进 
+set smartindent           " 智能缩进 
+set copyindent            " 复制缩进 
+set expandtab             " 将 Tab 键输入转换为空格
+set tabstop=4             " Tab 实际显示宽度为 4
+set softtabstop=4         " Tab 键按下时所插入的空格数或移动的步长
+set shiftwidth=4          " 自动缩进和 <<, >> 命令移动的步长
 
-" 设置前导键 <space>
-let mapleader = " "   
-" 上下左右移动光标禁用
+"""""""""""""""""""""""""""""""""""""""""""""
+" 文件/会话管理设置
+"""""""""""""""""""""""""""""""""""""""""""""
+set hidden                  " 允许在有未保存的修改时切换缓冲区/窗口
+set autowriteall            " 自动保存
+set history=1000            " 增大命令行和搜索历史记录条数
+set undofile                " 开启持久化撤销功能
+set undodir=~/.vim/undodir  " 指定撤销文件保存路径
+set updatetime=300          " 减少光标空闲检查时间，用于加快交换文件更新和插件响应
+
+
+
+"""""""""""""""" 按键映射设置 """"""""""""""""""""
+"""""""""""""""""""""""""""""""""""""""""""""
+" 设置前导键
+let mapleader = " "
+
+"""""""""""""""""""""""""""""""""""""""""""""
+" 模式切换
+"""""""""""""""""""""""""""""""""""""""""""""
+inoremap <C-g> <Esc>          " 退出插入模式 (替代 Esc)
+nnoremap <ESC><ESC> :nohl<CR> " 取消搜索高亮
+
+"""""""""""""""""""""""""""""""""""""""""""""
+" 移动与编辑操作
+"""""""""""""""""""""""""""""""""""""""""""""
+" 禁用方向键 (强制使用 hjkl)
 noremap <Left> <Nop>
 noremap <Down> <Nop>
 noremap <Up> <Nop>
 noremap <Right> <Nop>
 
-" 退出插入模式
-inoremap <C-g> <Esc>                
-" 取消搜索高亮
-nnoremap <ESC><ESC> :nohl<CR>       
+" 快速插入新行 (基于最终稳定修正)
+" sj: 在下方插入一行，o<Esc> 后光标向下跳，k 向上回到新行
+nnoremap sj o<Esc>k              
+" sk: 在上方插入一行，O<Esc> 后光标通常停在新行，这里 j 只是确保停留在新行
+nnoremap sk O<Esc>j              
 
-""" 窗口操作
-" 切换到左边的窗口
-noremap <C-h> <C-w>h           
-" 切换到下边的窗口
-noremap <C-j> <C-w>j           
-" 切换到上边的窗口
-noremap <C-k> <C-w>k           
-" 切换到右边的窗口
-noremap <C-l> <C-w>l           
-" 水平分割窗口
-noremap  \ : split<CR>         
-" 垂直分割窗口
-noremap  | : vsplit<CR>        
-" 切换到下一个标签页
-noremap ]t : tabnext<CR>       
-" 切换到上一个标签页
-noremap [t : tabprevious<CR>   
-" 关闭除当前标签以外的所有标签
-noremap <Leader>tc : tabo<CR>  
-" 切换到下一个缓冲区
-noremap ]b : bnext<CR>         
-" 切换到上一个缓冲区
-noremap [b : bprevious<CR>     
-" 关闭除当前缓冲区以外的所有缓冲区
-noremap <Leader>bc : only<CR> 
+"""""""""""""""""""""""""""""""""""""""""""""
+" 窗口与分割操作
+"""""""""""""""""""""""""""""""""""""""""""""
+" 窗口切换 (Ctrl + 键的统一风格)
+noremap <C-h> <C-w>h          " 切换到左边的窗口
+noremap <C-j> <C-w>j          " 切换到下边的窗口
+noremap <C-k> <C-w>k          " 切换到上边的窗口
+noremap <C-l> <C-w>l          " 切换到右边的窗口
 
-" 文件操作
-noremap <C-s> :w<CR>                     " 保存
-noremap <C-q> :q<CR>                     " 退出
-noremap <Leader>n :tabnew<CR>             " 新建标签页
-noremap <Leader>c :tabclose<CR>           " 关闭标签页
-" 重命名
-nnoremap <Leader>R :call RenameFile()<CR>
+" 窗口管理
+noremap <C-=> <C-w>=          " 平衡所有窗口大小
 
-""""""""""""""""""""
-""" 自定义函数
-""""""""""""""""""""
+" 分割操作 (使用非 Leader 键)
+noremap <Bslash> :split<CR>   " 水平分割窗口 (\)
+noremap <Bar> :vsplit<CR>     " 垂直分割窗口 (|)
 
-" RenameFile 重命名文件
-function! RenameFile()
-  let current_file = expand('%')
-  let new_file = input("Rename to: ", current_file)
-  if new_file != '' && new_file != current_file
-    " 1. 执行系统 mv 命令重命名文件
-    execute '!mv ' . shellescape(current_file) . ' ' . shellescape(new_file)
-    " 2. 将当前缓冲区的文件名更新为新文件名
-    execute 'file ' . new_file
-  endif
-endfunction
+"""""""""""""""""""""""""""""""""""""""""""""
+" 缓冲区、标签页与文件操作
+"""""""""""""""""""""""""""""""""""""""""""""
+" 标签页切换与管理
+noremap ]t :tabnext<CR>       " 切换到下一个标签页
+noremap [t :tabprevious<CR>   " 切换到上一个标签页
+noremap <Leader>n :tabnew<CR>   " 新建标签页
+noremap <Leader>c :tabclose<CR> " 关闭标签页
+noremap <Leader>tc :tabo<CR>  " 关闭除当前标签以外的所有标签
 
+" 缓冲区切换与管理
+noremap ]b :bnext<CR>         " 切换到下一个缓冲区
+noremap [b :bprevious<CR>     " 切换到上一个缓冲区
+noremap <Leader>bc :only<CR>  " 关闭除当前缓冲区以外的所有窗口 (注意: 并非关闭缓冲区)
+
+" 文件操作 (使用 Ctrl + 键)
+noremap <C-s> :w<CR>            " 保存
+noremap <C-q> :q<CR>            " 退出
+noremap <Leader>Z :wq<CR>       " 保存并退出

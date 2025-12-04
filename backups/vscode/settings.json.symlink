@@ -92,6 +92,26 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
             ],
             "silent": true
         },
+        {
+            "before": [
+                "]",
+                "c"
+            ],
+            "commands": [
+                "editor.action.rename"
+            ],
+            "silent": true
+        },
+        {
+            "before": [
+                "[",
+                "c"
+            ],
+            "commands": [
+                "editor.action.rename"
+            ],
+            "silent": true
+        },
         // Keybindings -- language server
         {
             "before": [
@@ -458,4 +478,5 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
     // -- end -- 2025-12--01
     "docker.extension.dockerEngineAvailabilityPrompt": false,
     "explorer.confirmPasteNative": false,
+    "zig.zls.enabled": "on"
 }
