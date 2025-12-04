@@ -7,7 +7,6 @@ set showmode              " 显示当前所处的模式
 set showcmd               " 显示输入的命令
 set ttimeoutlen=10        " 键码超时设置 
 set mouse=a               " 启用所有模式下的鼠标
-set clipboard=unnamed     " 启用系统剪贴板
 
 """""""""""""""""""""""""""""""""""""""""""""
 " 外观与显示设置 
@@ -62,25 +61,37 @@ let mapleader = " "
 """""""""""""""""""""""""""""""""""""""""""""
 " 模式切换
 """""""""""""""""""""""""""""""""""""""""""""
-inoremap <C-g> <Esc>          " 退出插入模式 (替代 Esc)
+inoremap <C-g> <Esc>          " 退出插入模式
+vnoremap <C-g> <Esc>          " 退出可视模式
 nnoremap <ESC><ESC> :nohl<CR> " 取消搜索高亮
 
 """""""""""""""""""""""""""""""""""""""""""""
 " 移动与编辑操作
 """""""""""""""""""""""""""""""""""""""""""""
-" 禁用方向键 (强制使用 hjkl)
+" 禁用方向键
 noremap <Left> <Nop>
 noremap <Down> <Nop>
 noremap <Up> <Nop>
 noremap <Right> <Nop>
 
-nnoremap sj o<Esc>k           " 下方插入空行
-nnoremap sk O<Esc>j           " 上方插入空行 
+" 插入空行或空格
+nnoremap sj mmo<Esc>`m        " 下方插入空行
+nnoremap sk mmO<Esc>`m        " 上方插入空行 
+nnoremap sh i<Space><Esc>     " 在光标前插入空格 
+nnoremap sl a<Space><Esc>     " 在光标后插入空格 
+
+" 文本编辑
+noremap U <C-r>               " 重做
+
+" 寄存器
+vnoremap <Leader>y "*y         " 复制到剪贴板
+nnoremap <Leader>p "*p         " 从剪贴板粘贴
+nnoremap <Leader>Y :let @+=@"<CR>
 
 """""""""""""""""""""""""""""""""""""""""""""
 " 窗口与分割操作
 """""""""""""""""""""""""""""""""""""""""""""
-" 窗口切换 (Ctrl + 键的统一风格)
+" 窗口切换 
 noremap <C-h> <C-w>h          " 切换到左边的窗口
 noremap <C-j> <C-w>j          " 切换到下边的窗口
 noremap <C-k> <C-w>k          " 切换到上边的窗口
@@ -89,9 +100,9 @@ noremap <C-l> <C-w>l          " 切换到右边的窗口
 " 窗口管理
 noremap <C-=> <C-w>=          " 平衡所有窗口大小
 
-" 分割操作 (使用非 Leader 键)
-noremap <Bslash> :split<CR>   " 水平分割窗口 (\)
-noremap <Bar> :vsplit<CR>     " 垂直分割窗口 (|)
+" 分割操作
+noremap <Bslash> :split<CR>   " 水平分割窗口
+noremap <Bar> :vsplit<CR>     " 垂直分割窗口 
 
 """""""""""""""""""""""""""""""""""""""""""""
 " 缓冲区、标签页与文件操作
@@ -103,12 +114,12 @@ noremap <Leader>n :tabnew<CR>   " 新建标签页
 noremap <Leader>c :tabclose<CR> " 关闭标签页
 noremap <Leader>tc :tabo<CR>  " 关闭除当前标签以外的所有标签
 
+
 " 缓冲区切换与管理
 noremap ]b :bnext<CR>         " 切换到下一个缓冲区
 noremap [b :bprevious<CR>     " 切换到上一个缓冲区
 noremap <Leader>bc :only<CR>  " 关闭除当前缓冲区以外的所有窗口
 
-" 文件操作 (使用 Ctrl + 键)
-noremap <C-s> :w<CR>            " 保存
-noremap <C-q> :q<CR>            " 退出
-noremap <Leader>Z :wq<CR>       " 保存并退出
+" 文件操作
+noremap <Leader>s :w<CR>        " 保存
+noremap <Leader>x :wq<CR>       " 保存后退出

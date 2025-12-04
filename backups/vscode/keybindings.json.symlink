@@ -178,5 +178,15 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
     {
         "key": "alt+cmd+p",
         "command": "projectManager.listProjectsNewWindow"
+    },
+    {
+        "key": "ctrl+f",
+        "command": "-extension.vim_ctrl+f",
+        "when": "editorTextFocus && vim.active && vim.use<C-f> && !inDebugRepl && vim.mode != 'Insert'"
+    },
+    {
+        "key": "ctrl+f",
+        "command": "-cursorRight",
+        "when": "textInputFocus"
     }
 ]
