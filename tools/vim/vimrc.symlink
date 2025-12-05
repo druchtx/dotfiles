@@ -61,8 +61,8 @@ let mapleader = " "
 """""""""""""""""""""""""""""""""""""""""""""
 " 模式切换
 """""""""""""""""""""""""""""""""""""""""""""
-inoremap <C-g> <Esc>          " 退出插入模式
-vnoremap <C-g> <Esc>          " 退出可视模式
+inoremap jk <Esc>             " 退出插入模式
+inoremap jk <Esc>             " 退出可视模式
 nnoremap <ESC><ESC> :nohl<CR> " 取消搜索高亮
 
 """""""""""""""""""""""""""""""""""""""""""""
@@ -75,7 +75,7 @@ noremap <Up> <Nop>
 noremap <Right> <Nop>
 
 " 插入空行或空格
-nnoremap sj mmo<Esc>`m        " 下方插入空行
+nnoremap sj mmo<Esc>`m        
 nnoremap sk mmO<Esc>`m        " 上方插入空行 
 nnoremap sh i<Space><Esc>     " 在光标前插入空格 
 nnoremap sl a<Space><Esc>     " 在光标后插入空格 
@@ -121,5 +121,6 @@ noremap [b :bprevious<CR>     " 切换到上一个缓冲区
 noremap <Leader>bc :only<CR>  " 关闭除当前缓冲区以外的所有窗口
 
 " 文件操作
-noremap <Leader>s :w<CR>        " 保存
-noremap <Leader>x :wq<CR>       " 保存后退出
+noremap <Leader>s :w<CR>          " 保存
+noremap <Leader>q :q!<CR>         " 不保存退出
+noremap <Leader>x :wq<CR>         " 保存后退出
