@@ -1,7 +1,7 @@
 cask_args appdir: '/Applications'
 
 tap "hashicorp/tap"
-
+tap "daipeihust/tap"
 brew "ack"
 brew "perl"
 brew "autoconf"
@@ -36,6 +36,7 @@ brew "cobra-cli"
 brew "protobuf"
 brew "fzf"
 brew "nvim"
+brew "im-select"
 
 cask "appcleaner"
 cask "aws-vault-binary"

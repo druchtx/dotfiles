@@ -4,79 +4,6 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
 
 [
     {
-        "key": "shift+cmd+/",
-        "command": "codeium.openChatView",
-        "when": "true"
-    },
-    {
-        "key": "shift+cmd+a",
-        "command": "-codeium.openChatView",
-        "when": "true"
-    },
-    {
-        "key": "shift+cmd+i",
-        "command": "-codeium.openCodeiumCommand",
-        "when": "codeium.commandEnabled && editorTextFocus && !inlineSuggestionsVisible"
-    },
-    {
-        "key": "cmd+k cmd+d",
-        "command": "dockerContainers.focus"
-    },
-    {
-        "key": "cmd+k",
-        "command": "-workbench.debug.panel.action.clearReplAction",
-        "when": "focusedView == 'workbench.panel.repl.view'"
-    },
-    {
-        "key": "cmd+k",
-        "command": "workbench.debug.panel.action.clearReplAction",
-        "when": "focusedView == 'workbench.panel.repl.view'"
-    },
-    {
-        "key": "shift+cmd+t",
-        "command": "-workbench.action.reopenClosedEditor"
-    },
-    {
-        "key": "shift+cmd+t",
-        "command": "workbench.action.tasks.test"
-    },
-    {
-        "key": "ctrl+7",
-        "command": "-workbench.action.openEditorAtIndex7"
-    },
-    {
-        "key": "ctrl+8",
-        "command": "-workbench.action.openEditorAtIndex8"
-    },
-    {
-        "key": "ctrl+9",
-        "command": "-workbench.action.openEditorAtIndex9"
-    },
-    {
-        "key": "cmd+7",
-        "command": "-workbench.action.focusSeventhEditorGroup"
-    },
-    {
-        "key": "cmd+3",
-        "command": "-workbench.action.focusThirdEditorGroup"
-    },
-    {
-        "key": "cmd+6",
-        "command": "-workbench.action.focusSixthEditorGroup"
-    },
-    {
-        "key": "cmd+4",
-        "command": "-workbench.action.focusFourthEditorGroup"
-    },
-    {
-        "key": "cmd+5",
-        "command": "-workbench.action.focusFifthEditorGroup"
-    },
-    {
-        "key": "cmd+8",
-        "command": "-workbench.action.focusEighthEditorGroup"
-    },
-    {
         "key": "shift+cmd+i",
         "command": "-workbench.panel.chatEditing",
         "when": "workbench.panel.chat.view.edits.active"
@@ -85,22 +12,6 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
         "key": "shift+cmd+i",
         "command": "-workbench.action.chat.openEditSession",
         "when": "chatEditingParticipantRegistered && !chatSetupHidden && view != 'workbench.panel.chat.view.edits'"
-    },
-    {
-        "key": "shift+enter",
-        "command": "workbench.action.terminal.sendSequence",
-        "args": {
-            "text": "\\\r\n"
-        },
-        "when": "terminalFocus"
-    },
-    {
-        "key": "shift+cmd+1",
-        "command": "workbench.action.focusPreviousGroup"
-    },
-    {
-        "key": "cmd+3",
-        "command": "workbench.action.focusThirdEditorGroup"
     },
     {
         "key": "shift+escape",
@@ -188,5 +99,66 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
         "key": "ctrl+f",
         "command": "-cursorRight",
         "when": "textInputFocus"
+    },
+    {
+        "key": "ctrl+a",
+        "command": "-cursorLineStart",
+        "when": "textInputFocus"
+    },
+    {
+        "key": "ctrl+a",
+        "command": "-extension.vim_ctrl+a",
+        "when": "editorTextFocus && vim.active && vim.use<C-a> && !inDebugRepl"
+    },
+    
+    /* 
+    仅在编辑器获得焦点时，禁用 VSCode 对 Ctrl+K 的默认行为
+    这样 Vim 的 <C-k> 窗口切换映射才能正常工作
+    */
+    {
+        "key": "ctrl+k",
+        "command": "-workbench.action.openGlobalCommandPalette",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+k",
+        "command": "-editor.action.openLink",
+        "when": "editorTextFocus && !inDebugRepl"
+    },
+    {
+        "key": "ctrl+k",
+        "command": "-workbench.action.files.newUntitledFile",
+        "when": "editorTextFocus"
+    },
+
+    /*
+    将 Ctrl+L 映射为切换到右侧编辑组（仅在编辑器获得焦点且 Vim 激活时）
+    这确保按一次 Ctrl+L 就能切换窗口，而不依赖扩展内部的拦截逻辑。
+    */
+    {
+        "key": "ctrl+l",
+        "command": "workbench.action.focusRightGroup",
+        "when": "editorTextFocus && vim.active"
+    },
+    {
+        "key": "ctrl+cmd+left",
+        "command": "workbench.action.moveEditorToPreviousGroup",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+cmd+left",
+        "command": "-workbench.action.moveEditorToPreviousGroup"
+    },
+    {
+        "key": "ctrl+l c",
+        "command": "-extension.copyGitHubLinkToClipboard"
+    },
+    {
+        "key": "ctrl+l g",
+        "command": "-extension.openInGitHub"
+    },
+    {
+        "key": "ctrl+l p",
+        "command": "-extension.openPrGitProvider"
     }
 ]

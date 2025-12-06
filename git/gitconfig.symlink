@@ -11,7 +11,7 @@
         count   = !git shortlog -sn
 [color]
    
-     diff = auto
+        diff = auto
         status = auto
         branch = auto
         ui = true

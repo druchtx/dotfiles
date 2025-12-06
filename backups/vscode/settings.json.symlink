@@ -55,82 +55,68 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
     // vscode vim settings
     "vim.easymotion": true,
     "editor.lineNumbers": "relative",
-    "vim.useSystemClipboard": true,
+    "vim.useSystemClipboard": false,
     "vim.useCtrlKeys": true,
     "vim.handleKeys": {
-        "<C-a>": false,
-        "<C-f>": false
+        // delegate to vscode 
+        "<C-l>": false
     },
-    // "vim.insertModeKeyBindings": [
-    //     {
-    //         "before": [
-    //             "C-g"
-    //         ],
-    //         "after": [
-    //             "<Esc>"
-    //         ]
-    //     }
-    // ],
+    // IME settings
+    "vim.autoSwitchInputMethod.enable": true,
+    "vim.autoSwitchInputMethod.defaultIM": "com.apple.keylayout.ABC",
+    "vim.autoSwitchInputMethod.obtainIMCmd": "/opt/homebrew/bin/im-select",
+    "vim.autoSwitchInputMethod.switchIMCmd": "/opt/homebrew/bin/im-select {im}",
+    "vim.camelCaseMotion.enable": true,
     // Keybindings
+    "vim.insertModeKeyBindingsNonRecursive": [
+        {
+            "before": [ 
+                "<C-g>"
+            ],
+            "after": [
+                "<Esc>"
+            ],
+            "silent": true
+        }
+    ],
     "vim.normalModeKeyBindingsNonRecursive": [
+        // Keybindings -- vim fallback
         {
-            "before": [
-                "K"
-            ],
-            "commands": [
-                "lineBreakInsert"
-            ],
+            // delegate to vscode
+            "before": [ "<C-g>" ],
+            "after": [ "<Esc>" ],
             "silent": true
         },
         {
-            "before": [
-                "leader",
-                "R"
-            ],
-            "commands": [
-                "editor.action.rename"
-            ],
+            //　将tab移动到上一个分组
+            "before": [ "<leader>", "|" ],
+            "commands": [ "workbench.action.moveEditorToPreviousGroup" ],
+            "when": "editorFocus",
             "silent": true
         },
         {
-            "before": [
-                "]",
-                "c"
-            ],
-            "commands": [
-                "editor.action.rename"
-            ],
+            //　将tab移动到下一个分组
+            "before": [ "<leader>", "\\" ],
+            "commands": [ "workbench.action.moveEditorToNextGroup" ], "when": "editorFocus",
+            "silent": true
+        },
+        // Keybindings -- LSP  
+        {
+            "before": [ "g", "d" ],
+            "commands": [ "editor.action.revealDefinition" ],
+            "when": "editorFocus",
             "silent": true
         },
         {
-            "before": [
-                "[",
-                "c"
-            ],
-            "commands": [
-                "editor.action.rename"
-            ],
-            "silent": true
-        },
-        // Keybindings -- language server
-        {
-            "before": [
-                "g",
-                "d"
-            ],
-            "commands": [
-                "editor.action.showReferences"
-            ],
+            "before": [ "g", "D" ],
+            "commands": [ "editor.action.revealDefinitionAside" ],
+            "when": "editorFocus",
             "silent": true
         },
         {
-            "before": [
-                "g",
-                "D"
-            ],
-            "commands": [
-                "editor.action.showReferences"
-            ],
+            "before": [ "g", "i" ],
+            "commands": [ "editor.action.goToImplementation" ],
+            "when": "editorFocus",
             "silent": true
         },
         {
@@ -139,138 +125,171 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
                 "I"
             ],
             "commands": [
-                "editor.action.goToImplementation"
+                "editor.action.revealDefinitionAside"
             ],
+            "when": "editorFocus",
             "silent": true
         },
         {
-            "before": [
-                "c",
-                "d"
-            ],
-            "commands": [
-                "editor.action.rename"
-            ],
+            "before": [ "c", "d" ],
+            "commands": [ "editor.action.rename" ],
+            "when": "editorFocus",
             "silent": true
         },
         {
-            "before": [
-                "g",
-                "A"
-            ],
-            "commands": [
-                "goToNextReference"
-            ],
+            "before": [ "g", "r" ],
+            "commands": [ "editor.action.goToReferences" ],
+            "when": "editorFocus",
             "silent": true
         },
         {
-            "before": [
-                "g",
-                "s"
-            ],
-            "commands": [
-                "workbench.action.gotoSymbol"
-            ],
+            // 文件查找符号
+            "before": [ "g", "s" ],
+            "commands": [ "workbench.action.gotoSymbol" ],
+            "when": "editorFocus",
             "silent": true
         },
         {
-            "before": [
-                "g",
-                "S"
-            ],
-            "commands": [
-                "workbench.action.showAllSymbols"
-            ],
+            // 项目查找符号
+            "before": [ "g", "S" ],
+            "commands": [ "workbench.action.showAllSymbols" ],
+            "when": "editorFocus",
             "silent": true
         },
         {
-            "before": [
-                "g",
-                "h"
-            ],
-            "commands": [
-                "editor.debug.action.showDebugHover"
-            ],
+            // 打开悬浮提示
+            "before": [ "g", "h" ],
+            "commands": [ "editor.debug.action.showdebughover" ],
+            "when": "editorfocus",
             "silent": true
         },
         {
-            "before": [
-                "g",
-                "h"
-            ],
-            "commands": [
-                "editor.action.showHover"
-            ],
+            "before": [ "g", "h" ],
+            "commands": [ "editor.action.showhover" ],
+            "when": "editorfocus",
             "silent": true
         },
         {
-            "before": [
-                "g",
-                "."
-            ],
-            "commands": [
-                "editor.action.quickFix"
-            ],
+            // 打开修复建议
+            "before": [ "g", "." ],
+            "commands": [ "editor.action.quickfix" ],
+            "when": "editorfocus",
             "silent": true
         },
         {
-            "before": [
-                "]",
-                "m"
-            ],
-            "commands": [
-                "editor.action.quickFix"
-            ],
+            // 导航到上一个错误提示
+            "before": [ "g", "[" ],
+            "commands": [ "editor.action.marker.prevInFiles" ],
+            "when": "editorfocus",
             "silent": true
         },
         {
-            "before": [
-                "]",
-                "m"
-            ],
-            "commands": [
-                "editor.action.quickFix"
-            ],
+            // 导航到下一个错误提示
+            "before": [ "g", "]" ],
+            "commands": [ "editor.action.marker.nextInFiles" ],
+            "when": "editorfocus",
             "silent": true
         },
         {
-            "before": [
-                "g",
-                "/"
-            ],
-            "commands": [
-                "workbench.action.findInFiles"
-            ],
-            // "silent": true
-        },
-    ],
-    "vim.visualModeKeyBindings": [
-        {
-            "before": [
-                ">"
-            ],
-            "commands": [
-                "editor.action.indentLines"
-            ]
+            // 格式化
+            "before": [ "g", "F" ],
+            "commands": [ "editor.action.formatDocument" ],
+            "when": "editorfocus",
+            "silent": true
         },
         {
-            "before": [
-                "<"
-            ],
-            "commands": [
-                "editor.action.outdentLines"
-            ]
+            // 打开文件与上个版本的差分view 
+            "before": [ "<leader>", "c" ],
+            "commands": [ "git.openChange" ],
+            "when": "editorfocus",
+            "silent": true
         },
         {
-            "before": [
-                "g",
-                "\/"
-            ],
+            "before": [ "<leader>", "\/" ],
             "commands": [
                 "workbench.view.search"
             ],
             "silent": true
         },
+        {
+            "before": [ "<leader>", "e" ],
+            "commands": [ "workbench.view.explorer" ],
+            "silent": true
+        },
+        {
+            "before": [ "<leader>", "[" ],
+            "commands": [ "workbench.action.toggleSidebarVisibility" ],
+            "silent": true
+        },
+        {
+            "before": [ "<leader>", "]" ],
+            "commands": [ "workbench.action.toggleAuxiliaryBar" ],
+            "silent": true
+        },
+        {
+            "before": [ "<leader>", "t" ],
+            "commands": [ "workbench.action.terminal.toggleTerminal" ],
+            "silent": true
+        },
+        /* pannel */
+        {
+            "before": [ "<leader>", "g" ],
+            "commands": [ "workbench.scm.focus" ],
+            "silent": true
+        },
+        /* git */
+        {
+            "before": [ "<leader>", "c" ],
+            "commands": [ "git.openChange" ],
+            "silent": true
+        },
+        {
+            "before": [ "[", "c" ],
+            "commands": [ "workbench.action.compareEditor.previousChange" ],
+            "when": "textCompareEditorVisible",
+            "silent": true
+        },
+        {
+            "before": [ "]", "c" ],
+            "commands": [ "workbench.action.compareEditor.nextChange" ],
+            "when": "textCompareEditorVisible",
+            "silent": true
+        },
+        {
+            "before": [ "[", "s" ],
+            "commands": [ "diffEditor.revert" ],
+            "when": "inDiffEditor",
+            "silent": true
+        },
+        {
+            "before": [ "]", "s" ],
+            "commands": [ "git.diff.stageHunk" ],
+            "when": "editorTextFocus && !operationInProgress && resourceScheme == 'file'",
+            "silent": true
+        }
+    ],
+    "vim.visualModeKeyBindings": [
+        // Keybindings  
+        {
+            // delegate to vscode
+            "before": ["<C-g>"],
+            "after":["<Esc>"],
+            "silent":true
+        },
+        {
+            "before": [ ">" ],
+            "commands": [ "editor.action.indentLines" ]
+        },
+        {
+            "before": [ "<" ],
+            "commands": [ "editor.action.outdentLines" ]
+        },
+        {
+            "before": [ "g", "F" ],
+            "commands": [ "editor.action.formatSelection" ],
+            "when": "editorfocus",
+            "silent": true
+        }
     ],
     "extensions.experimental.affinity": {
         "vscodevim.vim": 1
@@ -450,7 +469,7 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
         "scminput": false
     },
     "go.lintFlags": [
-        "--path-mode=abs",
+        "--path-mode=abs"
     ],
     "go.formatTool": "custom",
     "go.alternateTools": {
