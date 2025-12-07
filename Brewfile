@@ -37,6 +37,7 @@ brew "protobuf"
 brew "fzf"
 brew "nvim"
 brew "im-select"
+brew "codex"
 
 cask "appcleaner"
 cask "aws-vault-binary"
