@@ -497,5 +497,8 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
     // -- end -- 2025-12--01
     "docker.extension.dockerEngineAvailabilityPrompt": false,
     "explorer.confirmPasteNative": false,
-    "zig.zls.enabled": "on"
+    "zig.zls.enabled": "on",
+    "redhat.telemetry.enabled": true,
+    "projectManager.checkInvalidPathsBeforeListing": false,
+    "window.newWindowProfile": "Default"
 }
