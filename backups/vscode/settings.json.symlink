@@ -45,6 +45,12 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
     "files.encoding": "utf8",
     "files.autoSave": "afterDelay",
     "files.autoSaveDelay": 3000,
+
+    /* 
+    Functionalities
+    */
+    "terminal.integrated.shellIntegration.enabled": false,
+
     /* 
     Extensions -- vim
     */

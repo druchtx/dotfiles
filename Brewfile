@@ -37,12 +37,12 @@ brew "protobuf"
 brew "fzf"
 brew "nvim"
 brew "im-select"
-brew "codex"
+
 
 cask "appcleaner"
 cask "aws-vault-binary"
 cask "font-fira-code"
-cask "google-chrome" 
+cask "google-chrome"
 # cask "microsoft-excel"
 # cask "microsoft-powerpoint"
 # cask "microsoft-word"
@@ -52,11 +52,13 @@ cask "stats"
 cask "orbstack"
 cask "tableplus"
 cask "visual-studio-code"
-cask "rustdesk" 
+cask "rustdesk"
 cask "spotify"
 cask "slack"
 cask "wechat"
 cask "ghostty"
+cask "claude"
+
 
 mas "Dictionaries", id: 1380563956
 mas "LINE", id: 539883307
