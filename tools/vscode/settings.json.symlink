@@ -1,5 +1,5 @@
-/* 
-DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
+/*
+DOTFILE_CONFIG_PATH: ~/.config/Code/User/settings.json
 */
 {
     /* 
@@ -70,8 +70,6 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
     // IME settings
     "vim.autoSwitchInputMethod.enable": true,
     "vim.autoSwitchInputMethod.defaultIM": "com.apple.keylayout.ABC",
-    "vim.autoSwitchInputMethod.obtainIMCmd": "/opt/homebrew/bin/im-select",
-    "vim.autoSwitchInputMethod.switchIMCmd": "/opt/homebrew/bin/im-select {im}",
     "vim.camelCaseMotion.enable": true,
     // Keybindings
     "vim.insertModeKeyBindingsNonRecursive": [
@@ -430,7 +428,6 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
         "crystal": "crystal",
         "ocaml": "ocaml",
         "r": "Rscript",
-        "applescript": "osascript",
         "clojure": "lein exec",
         "haxe": "haxe --cwd $dirWithoutTrailingSlash --run $fileNameWithoutExt",
         "rust": "cd $dir && rustc $fileName && $dir$fileNameWithoutExt",

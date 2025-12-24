@@ -1,6 +1,31 @@
 #!/bin/sh
-#
-# I literally always forget how to flush my DNS settings on macOS (in large part
-# because it changes every damn update).
+set -e
 
-sudo killall -HUP mDNSResponder
+if command -v systemd-resolve >/dev/null 2>&1; then
+  systemd-resolve --flush-caches
+  echo "Flushed systemd-resolved cache"
+  exit 0
+fi
+
+if command -v resolvectl >/dev/null 2>&1; then
+  resolvectl flush-caches
+  echo "Flushed systemd-resolved cache"
+  exit 0
+fi
+
+if command -v service >/dev/null 2>&1 && service nscd status >/dev/null 2>&1; then
+  service nscd restart
+  echo "Restarted nscd"
+  exit 0
+fi
+
+if command -v systemctl >/dev/null 2>&1; then
+  if systemctl is-active --quiet systemd-resolved; then
+    systemctl restart systemd-resolved
+    echo "Restarted systemd-resolved"
+    exit 0
+  fi
+fi
+
+echo "No supported DNS cache service found"
+exit 1

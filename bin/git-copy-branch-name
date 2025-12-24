@@ -1,7 +1,11 @@
 #!/bin/sh
-#
-# Copy the current branch name to the clipboard.
+set -e
 
-branch=$(git rev-parse --abbrev-ref HEAD)
-echo $branch
-echo $branch | tr -d '\n' | tr -d ' ' | pbcopy
+branch="$(git symbolic-ref --short HEAD 2>/dev/null || true)"
+if [ -z "$branch" ]; then
+  echo "Not on a branch"
+  exit 1
+fi
+
+printf "%s" "$branch" | xclip -selection clipboard
+echo "$branch"

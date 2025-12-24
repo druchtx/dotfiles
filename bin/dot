@@ -40,12 +40,6 @@ done
 
 export ZSH=$HOME/.dotfiles
 
-# Set macOS defaults
-$ZSH/macos/set-defaults.sh
-
-# Install homebrew
-$ZSH/homebrew/install 2>&1
-
 # Update dotfiles themselves
 if which git &>/dev/null; then
     if [ -d "$ZSH/.git" ]; then
@@ -57,13 +51,6 @@ if which git &>/dev/null; then
 else
     echo "› git command not found, skip updating dotfiles"
 fi
-
-# Upgrade homebrew
-echo "› brew update"
-brew update
-
-echo "› brew upgrade"
-brew upgrade
 
 # Install software
 echo "› script/install"

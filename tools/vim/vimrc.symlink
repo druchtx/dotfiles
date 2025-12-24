@@ -14,7 +14,7 @@ set timeoutlen=300
 set mouse=a               
 " 关闭文件交换
 set noswapfile
-" vimrc文件修改之后自动加载linux/mac
+" vimrc文件修改之后自动加载linux
 augroup MyVimrc
     autocmd!
     autocmd BufWritePost $MYVIMRC source $MYVIMRC
