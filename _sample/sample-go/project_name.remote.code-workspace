@@ -1,0 +1,12 @@
+{
+  "folders": [
+    {
+      "path": "app-tf"
+    },{
+     "path": "tmp" 
+    }
+  ],
+  "settings": {
+    "extensions.ignoreRecommendations": true
+  }
+}

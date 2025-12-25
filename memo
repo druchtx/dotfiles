@@ -1,0 +1,5 @@
+⧉ dev --host-path /Users/druchtx/Workspace -w /Users/druchtx/Workspace/devtools/project_name.remote.code-workspace -c /Users/druchtx/dotfiles/_sample/sample-go/.devcontainer/devcontainer.json
+zsh: correct 'dev' to 'rev' [nyae]? %                                                                                    
+druchtx in sample-go/ on devcontainer ✘ 
+⧉ devcontainer-vsc --host-path /Users/druchtx/Workspace -w /Users/druchtx/Workspace/devtools/project_name.remote.code-workspace -c /Users/druchtx/dotfiles/_sample/sample-go/.devcontainer/devcontainer.json
+Opening workspace in devcontainer: /workspaces/devtools/project_name.remote.code-workspace

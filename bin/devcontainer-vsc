@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""
+Open VS Code in a devcontainer by computing the dev-container URI.
+Falls back to opening the folder/workspace when no devcontainer is present.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+def read_workspace_folder(devcontainer_path: Path) -> str | None:
+    """Best-effort parse of workspaceFolder from devcontainer.json (JSONC)."""
+    try:
+        text = devcontainer_path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return None
+
+    match = re.search(r'"workspaceFolder"\s*:\s*"([^"]+)"', text)
+    if match:
+        return match.group(1)
+    return None
+
+
+def find_workspace_file(target_dir: Path, explicit: str | None) -> Path | None:
+    """Pick a workspace file from args/env or first *.code-workspace in dir."""
+    if explicit:
+        path = (target_dir / explicit) if not os.path.isabs(explicit) else Path(explicit)
+        return path
+
+    env_ws = os.environ.get("CODE_WORKSPACE_FILE")
+    if env_ws:
+        return (target_dir / env_ws) if not os.path.isabs(env_ws) else Path(env_ws)
+
+    candidates = sorted(target_dir.glob("*.code-workspace"))
+    return candidates[0] if candidates else None
+
+
+def resolve_devcontainer_path(target_dir: Path, explicit: str | None) -> Path:
+    """Resolve devcontainer.json path from args or default location."""
+    if explicit:
+        return Path(explicit) if os.path.isabs(explicit) else (target_dir / explicit)
+    return target_dir / ".devcontainer" / "devcontainer.json"
+
+
+def compute_host_path(devcontainer_path: Path) -> Path:
+    """Host path is repo root when devcontainer is in .devcontainer/; otherwise parent."""
+    devcontainer_dir = devcontainer_path.parent
+    if devcontainer_dir.name == ".devcontainer":
+        return devcontainer_dir.parent
+    return devcontainer_dir
+
+
+def open_local(target_dir: Path, workspace_file: Path | None) -> None:
+    """Open VS Code locally (no container)."""
+    if workspace_file and workspace_file.is_file():
+        print(f"Opening VS Code workspace: {workspace_file}")
+        subprocess.run(["code", str(workspace_file)], check=False)
+    else:
+        print(f"Opening VS Code in: {target_dir}")
+        subprocess.run(["code", str(target_dir)], check=False)
+
+
+def open_devcontainer(
+    target_dir: Path,
+    devcontainer_path: Path,
+    workspace_file: Path | None,
+    workspace_folder_override: str | None,
+    host_path_override: Path | None,
+) -> None:
+    """Open VS Code using a dev-container URI."""
+    host_path = host_path_override or compute_host_path(devcontainer_path)
+    host_path = host_path.resolve()
+
+    workspace_folder = workspace_folder_override or os.environ.get("DEVCONTAINER_WORKSPACE_FOLDER")
+    if not workspace_folder:
+        workspace_folder = read_workspace_folder(devcontainer_path)
+    if not workspace_folder:
+        workspace_folder = f"/workspaces/{host_path.name}"
+    workspace_folder = workspace_folder.rstrip("/")
+
+    if workspace_file:
+        workspace_file = workspace_file.expanduser().resolve()
+        if not workspace_file.is_file():
+            print(f"Workspace file not found: {workspace_file}", file=sys.stderr)
+            workspace_file = None
+
+    rel_workspace_path = None
+    if workspace_file:
+        try:
+            rel_workspace_path = workspace_file.relative_to(host_path)
+        except ValueError:
+            print(
+                f"Workspace file is outside host path: {workspace_file} (host: {host_path})",
+                file=sys.stderr,
+            )
+            workspace_file = None
+
+    if workspace_file and rel_workspace_path:
+        uri_type = "--file-uri"
+        uri_suffix = f"{workspace_folder}/{rel_workspace_path.as_posix()}"
+        print(f"Opening workspace in devcontainer: {uri_suffix}")
+    else:
+        uri_type = "--folder-uri"
+        uri_suffix = f"{workspace_folder}"
+        print(f"Opening folder in devcontainer: {uri_suffix}")
+
+    uri_json = {
+        "hostPath": str(host_path),
+        "configFile": {"$mid": 1, "path": str(devcontainer_path), "scheme": "vscode-fileHost"},
+    }
+    uri_hex = json.dumps(uri_json, separators=(",", ":")).encode("utf-8").hex()
+    uri = f"vscode-remote://dev-container%2B{uri_hex}{uri_suffix}"
+
+    subprocess.run(["code", f"{uri_type}={uri}"], check=False)
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="devcontainer-vsc",
+        description="Open VS Code in a devcontainer by computing the dev-container URI.",
+    )
+    parser.add_argument("path", nargs="?", default=os.getcwd(), help="Target directory.")
+    parser.add_argument("-f", "--folder", dest="folder", help="Explicit folder to open.")
+    parser.add_argument("-w", "--workspace", dest="workspace", help="Workspace file to open.")
+    parser.add_argument(
+        "-c",
+        "--devcontainer",
+        dest="devcontainer",
+        help="Path to devcontainer.json.",
+    )
+    parser.add_argument(
+        "--workspace-folder",
+        dest="workspace_folder",
+        help="Override container workspace folder path.",
+    )
+    parser.add_argument(
+        "--host-path",
+        dest="host_path",
+        help="Host path used to build the dev-container URI (defaults to the devcontainer's folder).",
+    )
+    args = parser.parse_args(argv)
+
+    if args.folder and args.path and args.path != os.getcwd():
+        parser.error("Use either --folder or positional path, not both.")
+    if args.folder:
+        args.path = args.folder
+    return args
+
+
+def main(argv: list[str]) -> int:
+    args = parse_args(argv)
+
+    target_dir = Path(args.path).expanduser().resolve()
+    if not target_dir.is_dir():
+        print(f"Directory not found: {target_dir}", file=sys.stderr)
+        return 1
+
+    devcontainer_path = resolve_devcontainer_path(target_dir, args.devcontainer)
+    workspace_file = find_workspace_file(target_dir, args.workspace)
+    host_path_override = None
+    if args.host_path:
+        host_path_override = Path(args.host_path).expanduser()
+    elif os.environ.get("DEVCONTAINER_HOST_PATH"):
+        host_path_override = Path(os.environ["DEVCONTAINER_HOST_PATH"]).expanduser()
+
+    if not devcontainer_path.is_file():
+        if args.devcontainer:
+            print(f"devcontainer.json not found: {devcontainer_path}", file=sys.stderr)
+            return 1
+        open_local(target_dir, workspace_file)
+        return 0
+
+    open_devcontainer(
+        target_dir,
+        devcontainer_path,
+        workspace_file,
+        args.workspace_folder,
+        host_path_override,
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

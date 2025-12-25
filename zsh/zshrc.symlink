@@ -41,6 +41,13 @@ done
 
 unset config_files
 
+# Ensure core binaries are discoverable even if PATH was clobbered.
+if ! command -v ls >/dev/null 2>&1; then
+  if [[ -f "$ZSH/system/_path.zsh" ]]; then
+    source "$ZSH/system/_path.zsh"
+  fi
+fi
+
 # Better history
 # Credits to https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys
 autoload -U up-line-or-beginning-search
