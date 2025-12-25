@@ -180,5 +180,9 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
         "key": "ctrl+h",
         "command": "workbench.action.terminal.focusPreviousPane",
         "when": "terminalFocus && terminalHasBeenCreated && terminalSplitPaneActive || terminalFocus && terminalProcessSupported && terminalSplitPaneActive"
+    },
+    {
+        "key": "shift+cmd+w",
+        "command": "-workbench.action.closeAllEditors"
     }
 ]
