@@ -6,8 +6,8 @@
   "features": {
     // "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/common-utils:2": {
-      "installZsh": true,
-      "configureZshAsDefaultShell": true
+      "installZsh": false,
+      "configureZshAsDefaultShell": false
     }
   },
   "dotfiles": {

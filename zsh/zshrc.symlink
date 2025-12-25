@@ -43,6 +43,7 @@ unset config_files
 
 # Ensure core binaries are discoverable even if PATH was clobbered.
 if ! command -v ls >/dev/null 2>&1; then
+  export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
   if [[ -f "$ZSH/system/_path.zsh" ]]; then
     source "$ZSH/system/_path.zsh"
   fi
