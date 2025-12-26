@@ -1,7 +1,6 @@
 /* 
 DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
-*/ 
-
+*/
 [
     {
         "key": "shift+cmd+i",
@@ -110,7 +109,6 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
         "command": "-extension.vim_ctrl+a",
         "when": "editorTextFocus && vim.active && vim.use<C-a> && !inDebugRepl"
     },
-    
     /* 
     仅在编辑器获得焦点时，禁用 VSCode 对 Ctrl+K 的默认行为
     这样 Vim 的 <C-k> 窗口切换映射才能正常工作
@@ -130,7 +128,6 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
         "command": "-workbench.action.files.newUntitledFile",
         "when": "editorTextFocus"
     },
-
     /*
     将 Ctrl+L 映射为切换到右侧编辑组（仅在编辑器获得焦点且 Vim 激活时）
     这确保按一次 Ctrl+L 就能切换窗口，而不依赖扩展内部的拦截逻辑。
@@ -184,5 +181,49 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
     {
         "key": "shift+cmd+w",
         "command": "-workbench.action.closeAllEditors"
+    },
+    {
+        "key": "shift+cmd+i",
+        "command": "-workbench.action.chat.openagent",
+        "when": "config.chat.agent.enabled && !chatSetupDisabled && !chatSetupHidden"
+    },
+    {
+        "key": "shift+cmd+i",
+        "command": "roo-cline.focusInput"
+    },
+    {
+        "key": "ctrl+shift+[",
+        "command": "workbench.action.toggleSidebarVisibility"
+    },
+    {
+        "key": "cmd+b",
+        "command": "-workbench.action.toggleSidebarVisibility"
+    },
+    {
+        "key": "ctrl+shift+]",
+        "command": "workbench.action.toggleAuxiliaryBar"
+    },
+    {
+        "key": "alt+cmd+b",
+        "command": "-workbench.action.toggleAuxiliaryBar"
+    },
+    
+    {
+        "key": "cmd+n",
+        "command": "-workbench.action.files.newUntitledFile"
+    },
+    {
+        "key": "ctrl+n",
+        "command": "explorer.newFile",
+        "when": "explorerViewletFocus"
+    },
+    {
+        "key": "ctrl+shift+n",
+        "command": "explorer.newFolder",
+        "when": "explorerViewletFocus"
+    },
+    {
+        "key": "cmd+y",
+        "command": "roo-cline.acceptInput"
     }
 ]

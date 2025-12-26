@@ -507,5 +507,11 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
     "zig.zls.enabled": "on",
     "redhat.telemetry.enabled": true,
     "projectManager.checkInvalidPathsBeforeListing": false,
-    "window.newWindowProfile": "Default"
+    "window.newWindowProfile": "Default",
+    "roo-cline.allowedCommands": [
+        "git log",
+        "git diff",
+        "git show"
+    ],
+    "roo-cline.deniedCommands": []
 }

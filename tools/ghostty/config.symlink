@@ -20,7 +20,7 @@ background-opacity = 0.9
 background-blur = true
 mouse-hide-while-typing
 ## quick window
-quick-terminal-position = right
+quick-terminal-position = left
 quick-terminal-screen = mouse
 quick-terminal-animation-duration = 0.15
 quick-terminal-autohide = true
@@ -32,3 +32,7 @@ keybind = global:ctrl+shift+/=toggle_quick_terminal
 keybind = cmd+\=new_split:right
 keybind = shift+cmd+\=new_split:down
 
+keybind = ctrl+j=goto_split:down
+keybind = ctrl+k=goto_split:up
+keybind = ctrl+h=goto_split:left
+keybind = ctrl+l=goto_split:right
