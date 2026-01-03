@@ -1,91 +1,103 @@
-# Dotfiles
+# Personal Dotfiles
 
-Dotfiles are how you personalize your system. These are mine.
+These are my personal dotfiles for setting up a consistent development environment on macOS and Linux systems. They include shell configurations, tool setups, Git configurations, and various scripts.
 
-I personally install everything that does not need version management using [`Homebrew`](https://brew.sh), and the others using [`mise`](https://github.com/jdx/mise) for easily switching toolchain versions.
+## Repository Structure
 
-The repository is cloned from [**holman/dotfiles**](https://github.com/holman/dotfiles), **please read the README file in the original repository**.
+- `bin/`: Executable scripts added to `$PATH`
+- `functions/`: Zsh functions
+- `langs/`: Language-specific configurations (Go, Node.js, Python, Rust, Swift)
+- `os/`: OS-specific configurations
+  - `mac/`: macOS-specific scripts and configs (Homebrew, Xcode, etc.)
+  - `linux/`: Linux-specific scripts (apt packages, Debian)
+- `system/`: General system configurations (aliases, env, keys)
+- `tools/`: Tool-specific configurations (AWS, Docker, Git, VS Code, etc.)
+- `zsh/`: Zsh shell configurations (aliases, completion, prompt, etc.)
+- `bootstrap`: Main setup script
+- `functions/`: Additional Zsh functions
 
-Below are only the parts I extracted for reference when adding content.
+## Installation
 
-
-## Components
-
-There's a few special files in the hierarchy.
-
-- `bin/`: Anything in `bin/` will get added to your `$PATH` and be made available everywhere.
-
-- `topic/*.zsh`: Any files ending in `.zsh` get loaded into your environment.
-
-- `topic/path.zsh`: Any file named `path.zsh` is loaded first and is expected to setup `$PATH` or similar.
-
-- `topic/completion.zsh`: Any file named `completion.zsh` is loaded last and is expected to setup autocomplete.
-
-- `topic/install.sh`: Any file named `install.sh` contains functions `install_self`, `update_self`, `install_tool`. Always runs all three functions to handle install and upgrade.
-
-- `topic/*.symlink`: Any file ending in `*.symlink` gets symlinked into your` $HOME`. This is so you can keep all of those versioned in your dotfiles but still keep those autoloaded files in your home directory. These get symlinked in when you run `script/bootstrap`.
-
-
-## Install
-
-⚠️ **WARNING**: Be aware of what will happen before running the command, or you may mess up your system.
-
-These dotfiles support multiple operating systems including macOS and Linux. Follow the instructions for your platform.
+⚠️ **Caution**: These scripts modify system configurations. Review them before running.
 
 ### Prerequisites
 
 #### macOS
-- [Homebrew](https://brew.sh) installed
+- None (Homebrew will be installed if missing)
 
-#### Linux/Debian
-- Debian-based system (e.g., Ubuntu, Debian)
+#### Linux (Debian-based)
+- `sudo` access
 - `apt` package manager
-- `sudo` access for package installation
 
-### macOS Installation
+### Quick Setup
 
-Install Homebrew if not already installed.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/druchtx/dotfiles.git ~/.dotfiles
+   cd ~/.dotfiles
+   ```
 
-Then run:
+2. Run the bootstrap script:
+   ```bash
+   ./bootstrap
+   ```
 
-```shell
-./script/bootstrap
-```
+This will:
+- Set up Git configuration (name, email, SSH key)
+- Create symbolic links for dotfiles (`.symlink` files to `~/.*`)
+- Install system dependencies (Homebrew on macOS, apt packages on Linux)
+- Install tool dependencies via `install.sh` scripts
 
-### Linux/Debian Installation
+### Selective Installation
 
-Run the Linux-specific install script to install required packages:
+You can run specific parts:
+- `./bootstrap --setup-git`: Only Git setup
+- `./bootstrap --install-dot`: Only dotfile symlinks
+- `./bootstrap --install-deps`: Only dependencies
 
-```shell
-./os/linux/install.sh
-```
+### Devcontainers
 
-Then, bootstrap the dotfiles:
+For development containers, use `tools/devcontainer/devcontainer.json`. The container will auto-clone and run bootstrap.
 
-```shell
-./script/bootstrap
-```
+## Usage
 
-### Devcontainers (Linux/Debian)
+After installation, configurations load automatically in your shell.
 
-For Debian-based devcontainers, use the provided `tools/devcontainer/devcontainer.json`. The devcontainer configuration will automatically clone the repository and run the bootstrap process during container creation, including the Linux installation scripts.
+### Available Scripts
 
-To use:
-1. Open the project folder in VS Code with the Dev Containers extension installed.
-2. When prompted, select "Reopen in Container" to build and enter the devcontainer.
+- `./bootstrap`: Full setup
+- `./bin/dot`: Update dotfiles and dependencies
+- `./bin/dot -e`: Open dotfiles directory in editor
+- Various scripts in `bin/` for specific tasks
+
+## Customization
+
+### Adding Configurations
+
+Organize by topic:
+- `.zsh` files: Shell configs
+- `.symlink` files: Symlinked to home directory
+- `install.sh`: Tool installation scripts
+- Custom paths: Add `# DOTFILE_CONFIG_PATH: ~/.config/app/config` in symlink files
+
+### Tool-Specific Setup
+
+Many tools have their own directories in `tools/` with:
+- Environment variables
+- Aliases
+- Completion scripts
+- Installation scripts
 
 ## Maintenance
 
-To keep your dotfiles and tools up-to-date, run the maintenance script periodically:
+Run `./bin/dot` periodically to:
+- Update the dotfiles repository
+- Update system packages
+- Upgrade tools
 
-```shell
-./bin/dot
-```
+## Notes
 
-This updates dotfiles, system packages, tools managed by mise, and runs bootstrap --install-deps to upgrade tools installed via install.sh scripts.
-
-Consider adding this to a cron job or alias for automated updates.
-
-### Cross-platform Compatibility
-
-The dotfiles are designed to work across macOS and Linux environments. Scripts and configurations include conditional logic to handle OS-specific differences. Package management uses Homebrew on macOS and apt on Linux/Debian. Toolchain management with `mise` provides cross-platform support for development tools.
+- Based on [holman/dotfiles](https://github.com/holman/dotfiles)
+- Supports macOS and Debian-based Linux
+- Git setup is skipped in devcontainers
+- Logs available in `.tmp/dotfiles.log`
