@@ -120,13 +120,13 @@ Examples:
   # Use a specific devcontainer.json and override the in-container workspace folder
   ./bin/remote-vsc /path/to/project -c /path/to/shared/devcontainer.json -w /app/src
 
-  # Launch using a .code-workspace template (template paths must be absolute in-container)
+  # Launch using a .code-workspace template (template paths can be relative or absolute starting with /)
   ./bin/remote-vsc . -t ./template.code-workspace -o ./my-project
 
   # Launch with multiple paths using a template
   ./bin/remote-vsc . -t ./template.code-workspace -o ./project1 -o ./project2
 
-  # Launch with path expansion (requires -t)
+  # Launch with path expansion
   ./bin/remote-vsc . -t ./template.code-workspace -o ./project-dir
   # If ./project-dir does not exist, expands to matching paths under the project
 
@@ -163,7 +163,7 @@ Examples:
         "--open-path",
         nargs='*',
         default=[],
-        help="The host paths (files or folders) to open inside the container. If a path does not exist, it will be expanded using glob pattern (path + \"*\") when --template is specified. Expansion requires --template. When multiple paths are provided (including from expansion), --template must be specified. Overrides devcontainer.json settings.",
+        help="The host paths (files or folders) to open inside the container. If a path does not exist, it will be expanded using glob pattern (path + \"*\"). When multiple paths are provided (including from expansion), a default workspace template will be automatically generated if --template is not specified. Overrides devcontainer.json settings.",
     )
     parser.add_argument(
         "-t",
@@ -171,7 +171,7 @@ Examples:
         type=str,
         default=None,
         help="Path to a .code-workspace JSON file on the host to use as a template. "
-             "Note: The paths inside the template must be absolute paths within the container.",
+             "Note: The paths inside the template can be relative (default) or absolute (when starting with /) paths within the container.",
     )
     parser.add_argument(
         "--dry-run",
@@ -328,10 +328,8 @@ def convert_host_to_container_path(host_path: str, abs_host_project: Path, mount
     return container_path
 
 
-def validate_arguments(args: ParsedArgs) -> None:
-    """Validate command-line arguments."""
-    if len(args.open_path) > 1 and not args.template:
-        raise ValidationError("When specifying multiple paths with -o, the -t flag must be provided.")
+# def validate_arguments(args: ParsedArgs) -> None:
+#     """Validate command-line arguments."""
 
 
 def find_and_load_config(args: ParsedArgs) -> tuple[Path, DevContainerConfig, str]:
@@ -364,8 +362,6 @@ def process_open_paths(args: ParsedArgs, abs_host_path: Path, mount_point: str) 
             container_path = convert_host_to_container_path(host_path, abs_host_path, mount_point)
             container_open_paths.append(container_path)
         else:
-            if not args.template:
-                raise ValidationError(f"Path '{host_path}' does not exist and -t not specified for expansion.")
             expanded_paths = list(path_obj.parent.glob(path_obj.name + "*"))
             expanded_paths = [p for p in expanded_paths if p.is_relative_to(abs_host_path)]
             if not expanded_paths:
@@ -373,9 +369,6 @@ def process_open_paths(args: ParsedArgs, abs_host_path: Path, mount_point: str) 
             for ep in expanded_paths:
                 container_path = convert_host_to_container_path(str(ep), abs_host_path, mount_point)
                 container_open_paths.append(container_path)
-
-    if len(container_open_paths) > 1 and not args.template:
-        raise ValidationError("Multiple open paths (from expansion or multiple -o) require -t flag.")
 
     if container_open_paths:
         logging.info(f"Converted open paths: {container_open_paths}")
@@ -420,11 +413,20 @@ def handle_template(args: ParsedArgs, container_open_paths: List[str], abs_host_
     if "folders" not in template_data:
         template_data["folders"] = []
 
-    template_data["folders"] = [f for f in template_data["folders"] if f.get("path")]
+    existing_folders = [f for f in template_data["folders"] if f.get("path")]
 
+    # Convert relative paths in existing folders to absolute by prepending mount_point
+    for folder in existing_folders:
+        path = folder["path"]
+        if not path.startswith("/"):
+            folder["path"] = f"{mount_point}/{path}"
+
+    new_folders = []
     for path in container_open_paths:
-        if not any(f.get("path") == path for f in template_data["folders"]):
-            template_data["folders"].append({"path": path})
+        if not any(f.get("path") == path for f in existing_folders):
+            new_folders.append({"path": path})
+
+    template_data["folders"] = new_folders + existing_folders
 
     workspace_dir_host = abs_host_path / REMOTE_VSC_DIR
     if not workspace_dir_host.exists():
@@ -459,6 +461,38 @@ def handle_template(args: ParsedArgs, container_open_paths: List[str], abs_host_
     return container_workspace_file_path
 
 
+def generate_default_workspace(container_open_paths: List[str], abs_host_path: Path, mount_point: str, dry_run: bool) -> str:
+    """Generate a default .code-workspace file with the provided open paths as folders."""
+    template_data: CodeWorkspaceConfig = {
+        "folders": [{"path": path} for path in container_open_paths]
+    }
+
+    workspace_dir_host = abs_host_path / REMOTE_VSC_DIR
+    if not workspace_dir_host.exists():
+        if dry_run:
+            logging.info(f"[Dry-run] Would create directory: {workspace_dir_host}")
+        else:
+            workspace_dir_host.mkdir(parents=True, exist_ok=True)
+
+    base_name = "workspace"
+    workspace_filename = f"{base_name}.code-workspace"
+    workspace_host_path = workspace_dir_host / workspace_filename
+
+    container_workspace_file_path = f"{mount_point}/{REMOTE_VSC_DIR}/{workspace_filename}"
+
+    if dry_run:
+        logging.info(f"\n[Dry-run] Would create default workspace file at: {workspace_host_path}")
+        logging.info(f"[Dry-run] Container path: {container_workspace_file_path}")
+        logging.info("[Dry-run] Content:")
+        logging.info(json.dumps(template_data, indent=4))
+    else:
+        with workspace_host_path.open("w", encoding="utf-8") as f:
+            json.dump(template_data, f, indent=4)
+        logging.info(f"Created default workspace file at: {workspace_host_path}")
+
+    return container_workspace_file_path
+
+
 def main() -> None:
     """Main entry point for the script."""
     args = parse_arguments()
@@ -467,19 +501,22 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO if not args.silent else logging.WARNING, format="%(message)s")
 
     try:
-        validate_arguments(args)
+        # validate_arguments(args)
         config_path, config, mount_point = find_and_load_config(args)
         abs_host_path, abs_config_path = resolve_paths(args.host_path, str(config_path))
         container_open_paths = process_open_paths(args, abs_host_path, mount_point)
-        path_to_open = determine_path_to_open(args, config, container_open_paths)
         uri_json = generate_uri_json(abs_host_path, abs_config_path)
         encoded_json = encode_uri_json(uri_json)
 
-        if args.template:
-            path_to_open = handle_template(args, container_open_paths, abs_host_path, mount_point, args.dry_run)
+        if len(container_open_paths) > 1 and not args.template:
+            path_to_open = generate_default_workspace(container_open_paths, abs_host_path, mount_point, args.dry_run)
+        else:
+            path_to_open = determine_path_to_open(args, config, container_open_paths)
+            if args.template:
+                path_to_open = handle_template(args, container_open_paths, abs_host_path, mount_point, args.dry_run)
 
         remote_uri = construct_remote_uri(encoded_json, path_to_open)
-        launch_vscode(remote_uri, path_to_open, dry_run=args.dry_run, silent=args.silent, use_template=bool(args.template))
+        launch_vscode(remote_uri, path_to_open, dry_run=args.dry_run, silent=args.silent, use_template=bool(args.template or (len(container_open_paths) > 1 and not args.template)))
 
     except (ValidationError, ConfigError, PathConversionError) as e:
         logging.error(f"Error: {e}")

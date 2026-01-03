@@ -1,5 +1,12 @@
 {
-  "folders": [],
+  "folders": [
+    // {
+    //   "path": "docs"
+    // },
+    // {
+    //   "path": "tmp"
+    // }
+  ],
   "settings": {
     "extensions.ignoreRecommendations": true,
     "workbench.colorCustomizations": {

@@ -4,7 +4,8 @@
 dev() {
     local host_path="$WORK"
     local config_path="$ZSH/tools/devcontainer/devcontainer.json"
-    local template_path="$ZSH/tools/devcontainer/remote.code-workspace"
+    # remote-vsc will generate default simple code-workspace
+    # local template_path="$ZSH/tools/devcontainer/remote.code-workspace"
     local open_paths=()
 
     if [[ $# -gt 0 ]]; then
@@ -12,7 +13,11 @@ dev() {
             if [[ $arg == /* ]]; then
                 open_paths+=("$arg")
             else
-                open_paths+=("$WORK/$arg")
+                if [[ -e "$WORK/$arg" ]]; then
+                    open_paths+=("$WORK/$arg")
+                else
+                    open_paths+=("$PROJECTS/$arg")
+                fi
             fi
         done
     else
@@ -21,7 +26,6 @@ dev() {
 
     "$ZSH/bin/remote-vsc" "$host_path" \
         --config "$config_path" \
-        --template "$template_path" \
         --s \
         -o "${open_paths[@]}"
 }

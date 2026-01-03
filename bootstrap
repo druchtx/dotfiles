@@ -345,9 +345,9 @@ install_dotfiles() {
         BACKUP_ALL=true
     fi
 
-    # Find all .symlink files, excluding .git directory
+    # Find all .symlink and .dirsymlink files, excluding .git directory
     local symlink_files
-    symlink_files=$(find -H "$DOTFILES_ROOT" -maxdepth 3 -name '*.symlink' -not -path '*.git*' 2>/dev/null)
+    symlink_files=$(find -H "$DOTFILES_ROOT" -maxdepth 3 \( -name '*.symlink' -o -name '*.dirsymlink' \) -not -path '*.git*' 2>/dev/null)
 
     if [ -z "$symlink_files" ]; then
         log_warn "No .symlink files found"
@@ -355,8 +355,21 @@ install_dotfiles() {
     fi
 
     for src in $symlink_files; do
+        local actual_src="$src"
+        local is_dirsymlink=false
+        if [[ "$src" == *.dirsymlink ]]; then
+            is_dirsymlink=true
+            actual_src=$(grep -v '^#' "$src" | head -1 | xargs)
+            if [[ "$actual_src" != /* ]]; then
+                actual_src="$DOTFILES_ROOT/$actual_src"
+            fi
+        fi
+
         # Determine destination path
-        local dst="$HOME/.$(basename "${src%.*}")"
+        local dst=""
+        if [ "$is_dirsymlink" = false ]; then
+            dst="$HOME/.$(basename "${src%.*}")"
+        fi
 
         # Check for custom config path in file comments
         local extracted_config_path
@@ -375,7 +388,12 @@ install_dotfiles() {
             fi
         fi
 
-        link_file "$src" "$dst"
+        if [ -z "$dst" ]; then
+            log_error "No destination path determined for $src"
+            continue
+        fi
+
+        link_file "$actual_src" "$dst"
     done
 
     log_info "Dotfiles installation completed"
@@ -519,16 +537,12 @@ install_dependencies() {
 
     # Find and run general installers
     local installers
-    installers=$(find "$DOTFILES_ROOT/tools" -name install.sh 2>/dev/null)
-    for installer in $installers; do
-        run_installer "$installer" || log_warn "Continuing despite failure of $installer"
-    done
 
     # Run OS-specific installers
     case "$os" in
         Darwin)
             log_debug "Detected macOS"
-            installers=$(find "$DOTFILES_ROOT/os/mac" -name install.sh 2>/dev/null)
+            installers=$(find "$DOTFILES_ROOT/os/mac" -name "install*.sh" 2>/dev/null)
             for installer in $installers; do
                 run_installer "$installer" || log_warn "Continuing despite failure of $installer"
             done
@@ -540,7 +554,7 @@ install_dependencies() {
                 log_error "apt not found. This script supports Debian-based Linux distributions."
                 return 1
             fi
-            installers=$(find "$DOTFILES_ROOT/os/linux" -name install.sh 2>/dev/null)
+            installers=$(find "$DOTFILES_ROOT/os/linux" -name "install*.sh" 2>/dev/null)
             for installer in $installers; do
                 run_installer "$installer" || log_warn "Continuing despite failure of $installer"
             done
@@ -551,6 +565,10 @@ install_dependencies() {
             ;;
     esac
 
+    installers=$(find "$DOTFILES_ROOT/tools" -name "install*.sh" 2>/dev/null)
+    for installer in $installers; do
+        run_installer "$installer" || log_warn "Continuing despite failure of $installer"
+    done
     log_info "Dependency installation completed"
 }
 

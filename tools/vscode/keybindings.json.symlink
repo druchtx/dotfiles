@@ -225,5 +225,10 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
     {
         "key": "cmd+y",
         "command": "roo-cline.acceptInput"
+    },
+    {
+        "key": "ctrl+shift+[BracketRight]",
+        "command": "-extension.vim_ctrl+]",
+        "when": "editorTextFocus && vim.active && vim.use<C-]> && !inDebugRepl"
     }
 ]

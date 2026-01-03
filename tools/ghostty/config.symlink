@@ -24,7 +24,7 @@ quick-terminal-position = left
 quick-terminal-screen = mouse
 quick-terminal-animation-duration = 0.15
 quick-terminal-autohide = true
-quick-terminal-size = 50%
+quick-terminal-size = 50%,100%
 
 # key binding
 ## global 

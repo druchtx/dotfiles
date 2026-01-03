@@ -626,12 +626,7 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
         "-v"
     ],
     "editor.pasteAs.preferences": [],
-    "github.copilot.enable": {
-        "*": false,
-        "plaintext": false,
-        "markdown": false,
-        "scminput": false
-    },
+    "github.copilot.chat.enabled": false,
     "go.lintFlags": [
         "--path-mode=abs"
     ],
@@ -671,5 +666,8 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
         "git show"
     ],
     "roo-cline.deniedCommands": [],
-    "scm.repositories.selectionMode": "single"
+    "scm.repositories.selectionMode": "single",
+    "containers.containers.label": "ContainerName",
+    "bookmarks.sideBar.expanded": false,
+    "remote.autoForwardPortsSource": "hybrid"
 }

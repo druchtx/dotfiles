@@ -4,3 +4,5 @@ autoconf
 libssl-dev
 m4
 bc
+vim
+python3
