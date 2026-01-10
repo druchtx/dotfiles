@@ -15,7 +15,7 @@ update_self() {
 
 install_tool() {
     # Install toolchains as defined in mise.toml
-    mise trust -y ~/.mise
+    mise trust -y
     mise install -y
 }
 

@@ -1,5 +1,2 @@
-tools/git/gitconfig.local.symlink
-tools/mise/mise.local.toml.symlink
-Brewfile.lock.json
-langs/node/npmrc.local.symlink
 .tmp/
+*.local*
