@@ -35,7 +35,7 @@ brew "cobra-cli"
 brew "protobuf"
 brew "fzf"
 brew "im-select"
-
+brew "neovim"
 
 cask "appcleaner"
 cask "aws-vault-binary"
