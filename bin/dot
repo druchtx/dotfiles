@@ -2,51 +2,63 @@
 #
 # dot
 #
-# `dot` handles installation, updates, things like that. Run it periodically
-# to make sure you're on the latest and greatest.
+# Helper for managing dotfiles
 
 set -e
 
+DOTFILES_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
 displayUsageAndExit() {
-	echo "dot -- dotfiles management"
-	echo ""
-	echo "Usage: dot [options]"
-	echo ""
-	echo "Options:"
-	echo "  -e, --edit    Open dotfiles directory for editing"
-	echo "  -h, --help    Show this help message and exit"
-	exit
+    echo "Usage: dot <command>"
+    echo ""
+    echo "Commands:"
+    echo "  up, update    Update dotfiles (git pull + bootstrap)"
+    echo "  e,  edit      Edit a file in dotfiles (using fzf)"
+    echo "  c,  cd        Go to dotfiles directory (spawns new shell)"
+    echo "  o,  open      Open dotfiles directory in editor"
+    echo "  h,  help      Show this help message"
+    exit 0
 }
 
-while test $# -gt 0; do
-	case "$1" in
-		"-h"|"--help")
-			displayUsageAndExit
-			;;
-		"-e"|"--edit")
-			exec "$EDITOR" "$DOTFILES_ROOT"
-			exit
-			;;
-		*)
-			echo "Invalid option: $1"
-			displayUsageAndExit
-			;;
-	esac
-	shift
-done
-
-# Update dotfiles themselves
-if which git &>/dev/null; then
-    if [ -d "$DOTFILES_ROOT/.git" ]; then
-        echo "Updating dotfiles from git repository..."
-        git -C "$DOTFILES_ROOT" pull && echo "Dotfiles updated successfully." || echo "Failed to update dotfiles from git."
-    else
-        echo "Dotfiles directory is not a git repository. Skipping update."
-    fi
-else
-    echo "Git is not installed. Skipping dotfiles update."
+# If no arguments, show usage
+if [ $# -eq 0 ]; then
+    displayUsageAndExit
 fi
 
-# Install dependencies and set defaults using bootstrap
-echo "Installing dependencies and setting defaults via bootstrap script..."
-"$DOTFILES_ROOT/bootstrap" --install-deps && echo "Bootstrap completed successfully." || echo "Bootstrap execution failed."
+case "$1" in
+    "up"|"update")
+        echo "Updating dotfiles..."
+        if [ -d "$DOTFILES_ROOT/.git" ]; then
+            git -C "$DOTFILES_ROOT" pull
+        fi
+        "$DOTFILES_ROOT/bootstrap"
+        ;;
+    "e"|"edit")
+        cd "$DOTFILES_ROOT"
+        if ! command -v fzf >/dev/null 2>&1; then
+            echo "Error: fzf is not installed."
+            exit 1
+        fi
+        # Use find to list files, excluding .git, pass to fzf, then open with EDITOR
+        FILE=$(find . -path '*/.git*' -prune -o -type f -print | sed 's/^\.\///' | fzf)
+        if [ -n "$FILE" ]; then
+            exec "${EDITOR:-vim}" "$DOTFILES_ROOT/$FILE"
+        fi
+        ;;
+    "c"|"cd")
+        echo "Spawning shell in $DOTFILES_ROOT..."
+        cd "$DOTFILES_ROOT"
+        exec "${SHELL:-/bin/sh}"
+        ;;
+    "o"|"open")
+        echo "Opening $DOTFILES_ROOT..."
+        exec "${EDITOR:-vim}" "$DOTFILES_ROOT"
+        ;;
+    "h"|"help")
+        displayUsageAndExit
+        ;;
+    *)
+        echo "Unknown command: $1"
+        displayUsageAndExit
+        ;;
+esac
