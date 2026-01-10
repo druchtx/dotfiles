@@ -359,10 +359,11 @@ install_dotfiles() {
         local is_dirsymlink=false
         if [[ "$src" == *.dirsymlink ]]; then
             is_dirsymlink=true
-            actual_src=$(grep -v '^#' "$src" | head -1 | xargs)
-            if [[ "$actual_src" != /* ]]; then
-                actual_src="$DOTFILES_ROOT/$actual_src"
-            fi
+            # The source directory is expected to be in the same directory as the
+            # .dirsymlink file and have the same name, minus the extension.
+            local dir_name
+            dir_name=$(basename "${src%.dirsymlink}")
+            actual_src="$(dirname "$src")/$dir_name"
         fi
 
         # Determine destination path

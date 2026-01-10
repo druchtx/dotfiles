@@ -16,8 +16,8 @@ window-padding-x = 6
 window-padding-y = 0
 window-theme = auto
 background-blur-radius = 15
-background-opacity = 0.9
-background-blur = true
+# background-opacity = 0.9 
+# background-blur = true
 mouse-hide-while-typing
 ## quick window
 quick-terminal-position = left
