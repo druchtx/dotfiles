@@ -1,4 +1,4 @@
-/* 
+/*
 DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
 */
 [
@@ -109,7 +109,7 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
         "command": "-extension.vim_ctrl+a",
         "when": "editorTextFocus && vim.active && vim.use<C-a> && !inDebugRepl"
     },
-    /* 
+    /*
     仅在编辑器获得焦点时，禁用 VSCode 对 Ctrl+K 的默认行为
     这样 Vim 的 <C-k> 窗口切换映射才能正常工作
     */
@@ -207,7 +207,7 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/keybindings.json
         "key": "alt+cmd+b",
         "command": "-workbench.action.toggleAuxiliaryBar"
     },
-    
+
     {
         "key": "cmd+n",
         "command": "-workbench.action.files.newUntitledFile"
