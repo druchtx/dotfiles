@@ -42,7 +42,7 @@ case "$1" in
         # Use find to list files, excluding .git, pass to fzf, then open with EDITOR
         FILE=$(find . -path '*/.git*' -prune -o -type f -print | sed 's/^\.\///' | fzf)
         if [ -n "$FILE" ]; then
-            exec "${EDITOR:-vim}" "$DOTFILES_ROOT/$FILE"
+            exec "vim" "$DOTFILES_ROOT/$FILE"
         fi
         ;;
     "c"|"cd")
