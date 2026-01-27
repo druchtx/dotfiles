@@ -1,0 +1,675 @@
+/* 
+DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
+*/
+{
+    /* 
+    Appearance -- font
+    */
+    "editor.fontFamily": "Fira Code",
+    "editor.fontLigatures": true,
+    "editor.fontWeight": "400",
+    "editor.fontSize": 13,
+    "workbench.fontAliasing": "antialiased",
+    /* 
+    Appearance -- theme,icon and ui layout 
+    */
+    "workbench.colorTheme": "GitHub Dark Dimmed",
+    "workbench.iconTheme": "a-file-icon-vscode",
+    "workbench.productIconTheme": "a-file-icon-vscode-product-icon-theme",
+    "workbench.editor.labelFormat": "short",
+    "workbench.editor.showTabIndex": true,
+    "workbench.editor.tabSizing": "shrink",
+    "workbench.secondarySideBar.enableDefaultVisibilityInOldWorkspace": false,
+    "workbench.editor.editorActionsLocation": "titleBar",
+    "workbench.editor.tabActionLocation": "left",
+    "workbench.activityBar.location": "top",
+    "editor.minimap.enabled": false,
+    /* 
+
+    Appearance -- actions
+    */
+    "workbench.startupEditor": "none",
+    "workbench.editor.empty.hint": "hidden",
+    "workbench.secondarySideBar.defaultVisibility": "hidden",
+    "workbench.editor.highlightModifiedTabs": true,
+    "workbench.editor.limit.enabled": true,
+    "workbench.editor.limit.excludeDirty": true,
+    "workbench.editor.limit.value": 8,
+    "workbench.editor.openPositioning": "left",
+    "workbench.hover.delay": 200,
+    "workbench.reduceMotion": "on",
+    "workbench.remoteIndicator.showExtensionRecommendations": false,
+    /* 
+    Files -- general
+    */
+    "files.encoding": "utf8",
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 3000,
+    "window.openFoldersInNewWindow": "on",
+    /* 
+    Functionalities
+    */
+    "terminal.integrated.shellIntegration.enabled": false,
+
+    /*     
+    Extension - Roocode 
+    */
+    "roo-cline.autoImportSettingsPath": "~/.roo-code-settings.json",
+
+    /* 
+    Extensions -- vim
+    */
+    // .vimrc
+    "vim.vimrc.enable": true,
+    "vim.vimrc.path": "~/.vimrc",
+    "vim.leader": "space", // .vimrc not working
+    // vscode vim settings
+    "vim.easymotion": true,
+    "editor.lineNumbers": "relative",
+    "vim.useSystemClipboard": false,
+    "vim.useCtrlKeys": true,
+    "vim.handleKeys": {
+        // delegate to vscode 
+        "<C-l>": false
+    },
+    // IME settings
+    "vim.autoSwitchInputMethod.enable": true,
+    "vim.autoSwitchInputMethod.defaultIM": "com.apple.keylayout.ABC",
+    "vim.autoSwitchInputMethod.obtainIMCmd": "/opt/homebrew/bin/im-select",
+    "vim.autoSwitchInputMethod.switchIMCmd": "/opt/homebrew/bin/im-select {im}",
+    "vim.camelCaseMotion.enable": true,
+    // Keybindings
+    "vim.insertModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "<C-g>"
+            ],
+            "after": [
+                "<Esc>"
+            ],
+            "silent": true
+        }
+    ],
+    "vim.normalModeKeyBindingsNonRecursive": [
+        // Keybindings -- vim fallback
+        {
+            // delegate to vscode
+            "before": [
+                "<C-g>"
+            ],
+            "after": [
+                "<Esc>"
+            ],
+            "silent": true
+        },
+        {
+            //　将tab移动到上一个分组
+            "before": [
+                "<C-[>"
+            ],
+            "commands": [
+                "workbench.action.moveEditorToPreviousGroup"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        {
+            //　将tab移动到下一个分组
+            "before": [
+                "<C-]>"
+            ],
+            "commands": [
+                "workbench.action.moveEditorToNextGroup"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        // Keybindings -- LSP  
+        {
+            "before": [
+                "g",
+                "d"
+            ],
+            "commands": [
+                "editor.action.revealDefinition"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        {
+            "before": [
+                "g",
+                "D"
+            ],
+            "commands": [
+                "editor.action.revealDefinitionAside"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        {
+            "before": [
+                "g",
+                "i"
+            ],
+            "commands": [
+                "editor.action.goToImplementation"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        {
+            "before": [
+                "g",
+                "I"
+            ],
+            "commands": [
+                "editor.action.revealDefinitionAside"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        {
+            "before": [
+                "c",
+                "d"
+            ],
+            "commands": [
+                "editor.action.rename"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        {
+            "before": [
+                "g",
+                "r"
+            ],
+            "commands": [
+                "editor.action.goToReferences"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        {
+            // 文件查找符号
+            "before": [
+                "g",
+                "s"
+            ],
+            "commands": [
+                "workbench.action.gotoSymbol"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        {
+            // 项目查找符号
+            "before": [
+                "g",
+                "S"
+            ],
+            "commands": [
+                "workbench.action.showAllSymbols"
+            ],
+            "when": "editorFocus",
+            "silent": true
+        },
+        {
+            // 打开悬浮提示
+            "before": [
+                "g",
+                "h"
+            ],
+            "commands": [
+                "editor.debug.action.showdebughover"
+            ],
+            "when": "editorfocus",
+            "silent": true
+        },
+        {
+            "before": [
+                "g",
+                "h"
+            ],
+            "commands": [
+                "editor.action.showHover"
+            ],
+            "when": "editorfocus",
+            "silent": true
+        },
+        {
+            // 打开修复建议
+            "before": [
+                "g",
+                "."
+            ],
+            "commands": [
+                "editor.action.quickfix"
+            ],
+            "when": "editorfocus",
+            "silent": true
+        },
+        {
+            // 导航到上一个错误提示
+            "before": [
+                "g",
+                "["
+            ],
+            "commands": [
+                "editor.action.marker.prevInFiles"
+            ],
+            "when": "editorfocus",
+            "silent": true
+        },
+        {
+            // 导航到下一个错误提示
+            "before": [
+                "g",
+                "]"
+            ],
+            "commands": [
+                "editor.action.marker.nextInFiles"
+            ],
+            "when": "editorfocus",
+            "silent": true
+        },
+        {
+            // 格式化
+            "before": [
+                "g",
+                "F"
+            ],
+            "commands": [
+                "editor.action.formatDocument"
+            ],
+            "when": "editorfocus",
+            "silent": true
+        },
+        {
+            // 打开文件与上个版本的差分view 
+            "before": [
+                "<leader>",
+                "c"
+            ],
+            "commands": [
+                "git.openChange"
+            ],
+            "when": "editorfocus",
+            "silent": true
+        },
+        {
+            "before": [
+                "<leader>",
+                "\/"
+            ],
+            "commands": [
+                "workbench.view.search"
+            ],
+            "silent": true
+        },
+        {
+            "before": [
+                "<leader>",
+                "e"
+            ],
+            "commands": [
+                "workbench.view.explorer"
+            ],
+            "silent": true
+        },
+        // {
+        //     "before": [
+        //         "<leader>",
+        //         "["
+        //     ],
+        //     "commands": [
+        //         "workbench.action.toggleSidebarVisibility"
+        //     ],
+        //     "silent": true
+        // },
+        // {
+        //     "before": [
+        //         "<leader>",
+        //         "]"
+        //     ],
+        //     "commands": [
+        //         "workbench.action.toggleAuxiliaryBar"
+        //     ],
+        //     "silent": true
+        // },
+        {
+            "before": [
+                "<leader>",
+                "t"
+            ],
+            "commands": [
+                "workbench.action.terminal.toggleTerminal"
+            ],
+            "silent": true
+        },
+        /* pannel */
+        {
+            "before": [
+                "<leader>",
+                "g"
+            ],
+            "commands": [
+                "workbench.scm.focus"
+            ],
+            "silent": true
+        },
+        /* git */
+        {
+            "before": [
+                "<leader>",
+                "c"
+            ],
+            "commands": [
+                "git.openChange"
+            ],
+            "silent": true
+        },
+        {
+            "before": [
+                "[",
+                "c"
+            ],
+            "commands": [
+                "workbench.action.compareEditor.previousChange"
+            ],
+            "when": "textCompareEditorVisible",
+            "silent": true
+        },
+        {
+            "before": [
+                "]",
+                "c"
+            ],
+            "commands": [
+                "workbench.action.compareEditor.nextChange"
+            ],
+            "when": "textCompareEditorVisible",
+            "silent": true
+        },
+        {
+            "before": [
+                "[",
+                "s"
+            ],
+            "commands": [
+                "diffEditor.revert"
+            ],
+            "when": "inDiffEditor",
+            "silent": true
+        },
+        {
+            "before": [
+                "]",
+                "s"
+            ],
+            "commands": [
+                "git.diff.stageHunk"
+            ],
+            "when": "editorTextFocus && !operationInProgress && resourceScheme == 'file'",
+            "silent": true
+        }
+    ],
+    "vim.visualModeKeyBindings": [
+        // Keybindings  
+        {
+            // delegate to vscode
+            "before": [
+                "<C-g>"
+            ],
+            "after": [
+                "<Esc>"
+            ],
+            "silent": true
+        },
+        {
+            "before": [
+                ">"
+            ],
+            "commands": [
+                "editor.action.indentLines"
+            ]
+        },
+        {
+            "before": [
+                "<"
+            ],
+            "commands": [
+                "editor.action.outdentLines"
+            ]
+        },
+        {
+            "before": [
+                "g",
+                "F"
+            ],
+            "commands": [
+                "editor.action.formatSelection"
+            ],
+            "when": "editorfocus",
+            "silent": true
+        }
+    ],
+    "extensions.experimental.affinity": {
+        "vscodevim.vim": 1,
+        "asvetliakov.vscode-neovim": 1
+    },
+    // Below settings are not classified.
+    "terminal.integrated.fontSize": 13,
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
+    "files.associations": {
+        "*.mdx": "markdown",
+        "*.cjson": "jsonc",
+        "*.wxss": "css",
+        "*.wxs": "javascript",
+        "*.yml": "yaml"
+    },
+    "git.confirmSync": false,
+    "gitlens.advanced.messages": {
+        "suppressCreatePullRequestPrompt": true,
+        "suppressGitMissingWarning": true
+    },
+    "settingsSync.ignoredExtensions": [
+        "vscode.microsoft-authentication"
+    ],
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "git.autofetch": true,
+    "editor.unicodeHighlight.ambiguousCharacters": false,
+    "[css]": {},
+    "git.openRepositoryInParentFolders": "never",
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "emmet.includeLanguages": {
+        "wxml": "html"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "git.enableSmartCommit": true,
+    "[yaml]": {},
+    "editor.unicodeHighlight.nonBasicASCII": false,
+    "explorer.fileNesting.patterns": {
+        "*.ts": "${capture}.js",
+        "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts",
+        "*.jsx": "${capture}.js",
+        "*.tsx": "${capture}.ts",
+        "tsconfig.json": "tsconfig.*.json",
+        "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb",
+        "*.sqlite": "${capture}.${extname}-*",
+        "*.db": "${capture}.${extname}-*",
+        "*.sqlite3": "${capture}.${extname}-*",
+        "*.db3": "${capture}.${extname}-*",
+        "*.sdb": "${capture}.${extname}-*",
+        "*.s3db": "${capture}.${extname}-*"
+    },
+    "debug.console.fontSize": 13,
+    "chat.editor.fontSize": 13,
+    "markdown.preview.fontSize": 13,
+    "terminal.integrated.shellArgs.osx": [
+        "-x"
+    ],
+    "git.ignoreRebaseWarning": true,
+    "git.enableCommitSigning": true,
+    "security.workspace.trust.untrustedFiles": "open",
+    "codeium.enableConfig": {
+        "*": true,
+        "markdown": true,
+        "plaintext": true,
+        "proto": true,
+        "Vimscript": true,
+        "code-runner-output": true
+    },
+    "scm.inputFontSize": 13,
+    "settingsSync.ignoredSettings": [
+        "-window.zoomLevel"
+    ],
+    "workbench.settings.applyToAllProfiles": [
+        "window.zoomLevel"
+    ],
+    "diffEditor.ignoreTrimWhitespace": false,
+    "window.commandCenter": false,
+    "lldb.suppressUpdateNotifications": true,
+    "[wxml]": {},
+    "gitlens.views.scm.grouped.default": "branches",
+    "lldb.library": "/Users/hsulzz/.local/share/mise/installs/swift/6.0.2/System/Library/PrivateFrameworks/LLDB.framework/Versions/A/LLDB",
+    "lldb.launch.expressions": "native",
+    "terminal.explorerKind": "external",
+    "extensions.ignoreRecommendations": true,
+    "terminal.integrated.allowedLinkSchemes": [
+        "file",
+        "http",
+        "https",
+        "mailto",
+        "vscode",
+        "vscode-insiders",
+        "docker-desktop"
+    ],
+    "[markdown]": {
+        "editor.defaultFormatter": "darkriszty.markdown-table-prettify"
+    },
+    "go.toolsManagement.autoUpdate": true,
+    "update.showReleaseNotes": false,
+    "terminal.external.osxExec": "Ghostty.app",
+    "makefile.configureOnOpen": false,
+    "code-runner.executorMap": {
+        "javascript": "node",
+        "java": "cd $dir && javac $fileName && java $fileNameWithoutExt",
+        "c": "cd $dir && gcc $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt && rm $fileNameWithoutExt",
+        "zig": "zig run",
+        "cpp": "cd $dir && g++ $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+        "objective-c": "cd $dir && gcc -framework Cocoa $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+        "php": "php",
+        "python": "python -u",
+        "perl": "perl",
+        "perl6": "perl6",
+        "ruby": "ruby",
+        "go": "go run",
+        "lua": "lua",
+        "groovy": "groovy",
+        "powershell": "powershell -ExecutionPolicy ByPass -File",
+        "bat": "cmd /c",
+        "shellscript": "bash",
+        "fsharp": "fsi",
+        "csharp": "scriptcs",
+        "vbscript": "cscript //Nologo",
+        "typescript": "ts-node",
+        "coffeescript": "coffee",
+        "scala": "scala",
+        "swift": "swift",
+        "julia": "julia",
+        "crystal": "crystal",
+        "ocaml": "ocaml",
+        "r": "Rscript",
+        "applescript": "osascript",
+        "clojure": "lein exec",
+        "haxe": "haxe --cwd $dirWithoutTrailingSlash --run $fileNameWithoutExt",
+        "rust": "cd $dir && rustc $fileName && $dir$fileNameWithoutExt",
+        "racket": "racket",
+        "scheme": "csi -script",
+        "ahk": "autohotkey",
+        "autoit": "autoit3",
+        "dart": "dart",
+        "pascal": "cd $dir && fpc $fileName && $dir$fileNameWithoutExt",
+        "d": "cd $dir && dmd $fileName && $dir$fileNameWithoutExt",
+        "haskell": "runghc",
+        "nim": "nim compile --verbosity:0 --hints:off --run",
+        "lisp": "sbcl --script",
+        "kit": "kitc --run",
+        "v": "v run",
+        "sass": "sass --style expanded",
+        "scss": "scss --style expanded",
+        "less": "cd $dir && lessc $fileName $fileNameWithoutExt.css",
+        "FortranFreeForm": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+        "fortran-modern": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+        "fortran_fixed-form": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+        "fortran": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+        "sml": "cd $dir && sml $fileName",
+        "mojo": "mojo run",
+        "erlang": "escript",
+        "spwn": "spwn build",
+        "pkl": "cd $dir && pkl eval -f yaml $fileName -o $fileNameWithoutExt.yaml",
+        "gleam": "gleam run -m $fileNameWithoutExt"
+    },
+    "go.experiments": {
+        "testExplorer": true
+    },
+    "go.testFlags": [
+        "-count=1",
+        "-v"
+    ],
+    "editor.pasteAs.preferences": [],
+    "github.copilot.chat.enabled": false,
+    "go.lintFlags": [
+        "--path-mode=abs"
+    ],
+    "go.formatTool": "custom",
+    "go.alternateTools": {
+        "customFormatter": "golangci-lint-v2"
+    },
+    "go.formatFlags": [
+        "fmt",
+        "--stdin"
+    ],
+    "go.lintTool": "golangci-lint-v2",
+    "docker.extension.enableComposeLanguageServer": false,
+    "chat.commandCenter.enabled": false,
+    "[swift]": {
+        "editor.defaultFormatter": "sweetpad.sweetpad",
+        "editor.tabSize": 2
+    },
+    "gitlens.ai.model": "vscode",
+    "gitlens.ai.vscode.model": "copilot:gpt-4.1",
+    "workbench.editorAssociations": {
+        "git-rebase-todo": "default"
+    },
+    "workbench.editor.enablePreviewFromCodeNavigation": true,
+    "workbench.editor.enablePreview": false,
+    "githubPullRequests.createOnPublishBranch": "never",
+    // -- end -- 2025-12--01
+    "docker.extension.dockerEngineAvailabilityPrompt": false,
+    "explorer.confirmPasteNative": false,
+    "zig.zls.enabled": "on",
+    "redhat.telemetry.enabled": true,
+    "projectManager.checkInvalidPathsBeforeListing": false,
+    "window.newWindowProfile": "Default",
+    "roo-cline.allowedCommands": [
+        "git log",
+        "git diff",
+        "git show"
+    ],
+    "roo-cline.deniedCommands": [],
+    "scm.repositories.selectionMode": "single",
+    "containers.containers.label": "ContainerName",
+    "bookmarks.sideBar.expanded": false,
+    "remote.autoForwardPortsSource": "hybrid"
+}

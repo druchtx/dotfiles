@@ -1,0 +1,18 @@
+# mise config
+# DOTFILE_CONFIG_PATH: ~/.config/mise/config.toml
+
+[tools]
+go  = "1.25.5"
+python = "3.14"
+node = "lts"
+rust = "latest"
+zig = "latest"
+erlang = "latest"
+elixir = "1.19.4-otp-28"
+java = "corretto-21"
+groovy = "5.0.3"
+gcloud = "539.0.0"
+terraform = "1.14"
+
+[settings]
+disable_backends = ["asdf"]

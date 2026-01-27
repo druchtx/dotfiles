@@ -1,0 +1,282 @@
+{
+    "providerProfiles": {
+        "currentApiConfigName": "default",
+        "apiConfigs": {
+            "default": {
+                "diffEnabled": true,
+                "todoListEnabled": true,
+                "fuzzyMatchThreshold": 1,
+                "rateLimitSeconds": 0,
+                "consecutiveMistakeLimit": 3,
+                "enableReasoningEffort": true,
+                "reasoningEffort": "medium",
+                "apiModelId": "xai/grok-code-fast-1",
+                "apiProvider": "roo",
+                "id": "t1kny6jvqfb"
+            }
+        },
+        "modeApiConfigs": {
+            "architect": "t1kny6jvqfb",
+            "code": "t1kny6jvqfb",
+            "ask": "p5rqn7pku3",
+            "debug": "t1kny6jvqfb",
+            "orchestrator": "t1kny6jvqfb",
+            "coding-teacher": "t1kny6jvqfb"
+        }
+    },
+    "globalSettings": {
+        "lastShownAnnouncementId": "dec-2025-v3.38.0-skills-native-tool-calling",
+        "dismissedUpsells": [
+            "longRunningTask"
+        ],
+        "openRouterImageApiKey": "",
+        "openRouterImageGenerationSelectedModel": "",
+        "condensingApiConfigId": "",
+        "customCondensingPrompt": "",
+        "autoApprovalEnabled": true,
+        "alwaysAllowReadOnly": true,
+        "alwaysAllowReadOnlyOutsideWorkspace": false,
+        "alwaysAllowWrite": false,
+        "alwaysAllowWriteOutsideWorkspace": false,
+        "alwaysAllowWriteProtected": false,
+        "writeDelayMs": 1000,
+        "alwaysAllowBrowser": true,
+        "alwaysAllowMcp": false,
+        "alwaysAllowModeSwitch": true,
+        "alwaysAllowSubtasks": false,
+        "alwaysAllowExecute": false,
+        "alwaysAllowFollowupQuestions": false,
+        "followupAutoApproveTimeoutMs": 60000,
+        "allowedCommands": [
+            "git log",
+            "git diff",
+            "git show"
+        ],
+        "deniedCommands": [],
+        "allowedMaxRequests": null,
+        "allowedMaxCost": null,
+        "autoCondenseContext": true,
+        "autoCondenseContextPercent": 100,
+        "maxConcurrentFileReads": 5,
+        "includeCurrentTime": true,
+        "includeCurrentCost": true,
+        "maxGitStatusFiles": 0,
+        "includeDiagnosticMessages": true,
+        "maxDiagnosticMessages": 50,
+        "browserToolEnabled": true,
+        "browserViewportSize": "900x600",
+        "screenshotQuality": 75,
+        "remoteBrowserEnabled": true,
+        "enableCheckpoints": true,
+        "checkpointTimeout": 15,
+        "ttsEnabled": false,
+        "ttsSpeed": 1,
+        "soundEnabled": true,
+        "soundVolume": 0.3,
+        "maxOpenTabsContext": 20,
+        "maxWorkspaceFiles": 200,
+        "showRooIgnoredFiles": false,
+        "maxReadFileLine": -1,
+        "maxImageFileSize": 5,
+        "maxTotalImageSize": 20,
+        "terminalOutputLineLimit": 500,
+        "terminalOutputCharacterLimit": 50000,
+        "terminalShellIntegrationTimeout": 5000,
+        "terminalShellIntegrationDisabled": true,
+        "terminalCommandDelay": 0,
+        "terminalPowershellCounter": false,
+        "terminalZshClearEolMark": true,
+        "terminalZshOhMy": false,
+        "terminalZshP10k": false,
+        "terminalZdotdir": false,
+        "terminalCompressProgressBar": true,
+        "rateLimitSeconds": 0,
+        "diffEnabled": true,
+        "fuzzyMatchThreshold": 1,
+        "experiments": {
+            "powerSteering": false,
+            "multiFileApplyDiff": false,
+            "preventFocusDisruption": false,
+            "imageGeneration": false,
+            "runSlashCommand": false,
+            "multipleNativeToolCalls": false,
+            "customTools": false
+        },
+        "codebaseIndexModels": {
+            "openai": {
+                "text-embedding-3-small": {
+                    "dimension": 1536
+                },
+                "text-embedding-3-large": {
+                    "dimension": 3072
+                },
+                "text-embedding-ada-002": {
+                    "dimension": 1536
+                }
+            },
+            "ollama": {
+                "nomic-embed-text": {
+                    "dimension": 768
+                },
+                "nomic-embed-code": {
+                    "dimension": 3584
+                },
+                "mxbai-embed-large": {
+                    "dimension": 1024
+                },
+                "all-minilm": {
+                    "dimension": 384
+                }
+            },
+            "openai-compatible": {
+                "text-embedding-3-small": {
+                    "dimension": 1536
+                },
+                "text-embedding-3-large": {
+                    "dimension": 3072
+                },
+                "text-embedding-ada-002": {
+                    "dimension": 1536
+                },
+                "nomic-embed-code": {
+                    "dimension": 3584
+                }
+            },
+            "gemini": {
+                "text-embedding-004": {
+                    "dimension": 768
+                },
+                "gemini-embedding-001": {
+                    "dimension": 3072
+                }
+            },
+            "mistral": {
+                "codestral-embed-2505": {
+                    "dimension": 1536
+                }
+            },
+            "vercel-ai-gateway": {
+                "openai/text-embedding-3-small": {
+                    "dimension": 1536
+                },
+                "openai/text-embedding-3-large": {
+                    "dimension": 3072
+                },
+                "openai/text-embedding-ada-002": {
+                    "dimension": 1536
+                },
+                "cohere/embed-v4.0": {
+                    "dimension": 1024
+                },
+                "google/gemini-embedding-001": {
+                    "dimension": 3072
+                },
+                "google/text-embedding-005": {
+                    "dimension": 768
+                },
+                "google/text-multilingual-embedding-002": {
+                    "dimension": 768
+                },
+                "amazon/titan-embed-text-v2": {
+                    "dimension": 1024
+                },
+                "mistral/codestral-embed": {
+                    "dimension": 1536
+                },
+                "mistral/mistral-embed": {
+                    "dimension": 1024
+                }
+            },
+            "openrouter": {
+                "openai/text-embedding-3-small": {
+                    "dimension": 1536
+                },
+                "openai/text-embedding-3-large": {
+                    "dimension": 3072
+                },
+                "openai/text-embedding-ada-002": {
+                    "dimension": 1536
+                },
+                "google/gemini-embedding-001": {
+                    "dimension": 3072
+                },
+                "mistralai/mistral-embed-2312": {
+                    "dimension": 1024
+                },
+                "mistralai/codestral-embed-2505": {
+                    "dimension": 1536
+                },
+                "qwen/qwen3-embedding-0.6b": {
+                    "dimension": 1024
+                },
+                "qwen/qwen3-embedding-4b": {
+                    "dimension": 2560
+                },
+                "qwen/qwen3-embedding-8b": {
+                    "dimension": 4096
+                }
+            },
+            "bedrock": {
+                "amazon.titan-embed-text-v1": {
+                    "dimension": 1536
+                },
+                "amazon.titan-embed-text-v2:0": {
+                    "dimension": 1024
+                },
+                "amazon.titan-embed-image-v1": {
+                    "dimension": 1024
+                },
+                "amazon.nova-2-multimodal-embeddings-v1:0": {
+                    "dimension": 1024
+                },
+                "cohere.embed-english-v3": {
+                    "dimension": 1024
+                },
+                "cohere.embed-multilingual-v3": {
+                    "dimension": 1024
+                }
+            }
+        },
+        "codebaseIndexConfig": {
+            "codebaseIndexEnabled": true,
+            "codebaseIndexQdrantUrl": "http://localhost:6333",
+            "codebaseIndexEmbedderProvider": "gemini",
+            "codebaseIndexEmbedderBaseUrl": "",
+            "codebaseIndexEmbedderModelId": "text-embedding-004",
+            "codebaseIndexEmbedderModelDimension": 1536,
+            "codebaseIndexSearchMinScore": 0.4,
+            "codebaseIndexSearchMaxResults": 50,
+            "codebaseIndexOpenAiCompatibleBaseUrl": "",
+            "codebaseIndexBedrockRegion": "",
+            "codebaseIndexBedrockProfile": "",
+            "codebaseIndexOpenRouterSpecificProvider": ""
+        },
+        "language": "en",
+        "telemetrySetting": "enabled",
+        "mcpEnabled": true,
+        "mode": "orchestrator",
+        "customModes": [
+            {
+                "slug": "coding-teacher",
+                "name": "💡 Coding Teacher",
+                "roleDefinition": "You are a patient coding teacher. Your primary goal is to build the learner's conceptual understanding, mental models, and reasoning skills BEFORE providing full solutions. You guide via Socratic questions, structured explanations, and incremental, testable steps.",
+                "whenToUse": "Use this mode when you want to learn programming concepts, understand code patterns, or receive guided instruction on coding topics. Perfect for educational sessions, concept explanations, step-by-step learning, code reviews with educational focus, or when you want to understand the 'why' behind coding decisions rather than just getting solutions.\n",
+                "description": "Learn to Code",
+                "customInstructions": "CORE TEACHING PRINCIPLES\nNever Rush to Code - Begin by uncovering the learner's current understanding and misconceptions. Delay full implementations until concepts are solid.\nSocratic Guidance - Prefer well-aimed questions over direct answers when feasible. Help the learner *derive* insights rather than just receive them.\nMental Models First - Before syntax, solidify: data flow, state transitions, control structures, complexity tradeoffs, invariants.\nProgressive Disclosure - Move from concept ➜ pseudo / diagrams ➜ minimal code slice ➜ iterative refinement.\nError-as-Learning - When the learner proposes an idea, explore its strengths and limits; do not immediately correct unless it's a blocking misunderstanding.\nNaming & Semantics - Emphasize clear naming, separation of concerns, cohesion vs. coupling.\nReflection & Retention - After each micro-step, reinforce learning through brief recap and optional analogy.\nConfidence Calibration - Ask the learner to rate confidence (1-5) at key checkpoints; adapt depth accordingly.\n\nMANDATORY USE OF ask_followup_question\nUse ask_followup_question when:\n• Establishing baseline knowledge\n• Offering conceptual pathways\n• Suggesting next micro-learning steps\n• Presenting alternative implementations or refactors\nEach time: 3-5 curated options (distinct in angle or depth), clearly labeled.\n\nBASELINE ASSESSMENT WORKFLOW\n1. Prompt for Current Understanding:\n<ask_followup_question>\n  <question>What's your current understanding or goal for [topic/feature]?</question>\n  <follow_up>\n    <suggest>I have a rough idea but want fundamentals.</suggest>\n    <suggest>I know the concept; need help structuring code.</suggest>\n    <suggest>I tried an approach; want a critique.</suggest>\n    <suggest>Not sure where to start-please outline paths.</suggest>\n  </follow_up>\n</ask_followup_question>\n2. Identify Gaps - Summarize what is *known / unclear / assumptions*.\n3. Present Concept Paths (theory-first, example-first, test-first, analogy-first) via ask_followup_question.\n\nCONCEPT EXPLANATION PATTERN\nFor each concept, use:\n• Definition (succinct)\n• Why it matters (problem it solves)\n• Mental model / analogy\n• Minimal example (pseudo if possible first)\n• Common pitfalls\n• One reflective question\n\nIMPLEMENTATION PHASE (Only After Concept Buy-In)\n1. Present 2-4 implementation strategies with tradeoffs:\n<ask_followup_question>\n  <question>Which implementation path would you like to explore first?</question>\n  <follow_up>\n    <suggest>Path A: Minimal baseline (focus clarity).</suggest>\n    <suggest>Path B: Test-first (learn through specs).</suggest>\n    <suggest>Path C: Performance-aware structure.</suggest>\n    <suggest>Path D: Refactor an intentionally naive version.</suggest>\n  </follow_up>\n</ask_followup_question>\n2. Break chosen path into micro-steps (5-15 min each): Goal, Rationale, Success signal.\n3. Provide ONLY the next code slice needed. Ask for confirmation or reflection before next slice.\n4. After each slice: Quick recap + a comprehension check question.\n\nCODE PRESENTATION GUIDELINES\n• Include file path & where to insert changes.\n• Explain *why* before *what*.\n• Highlight invariants, complexity, possible edge cases.\n• When refactoring, show diff-style or before/after minimal sections-not entire large files unless necessary.\n\nTEST-DRIVEN LEARNING\nBefore implementing a behavior:\n• Ask which form of verification the learner prefers (unit test, REPL probe, logging, property test).\n• Provide 2-3 candidate test cases with expected outcomes.\n• Encourage the learner to predict outcomes first.\n\nREFLECTION & NEXT STEPS\nAfter completing a concept or feature:\n1. Prompt for confidence & lingering questions.\n2. Offer spaced reinforcement options:\n<ask_followup_question>\n  <question>How would you like to reinforce what you learned?</question>\n  <follow_up>\n    <suggest>Explain it back in your own words.</suggest>\n    <suggest>Apply concept to a variant problem.</suggest>\n    <suggest>Refactor for readability.</suggest>\n    <suggest>Write tests for an edge case.</suggest>\n  </follow_up>\n</ask_followup_question>\n3. Suggest 2-3 possible next learning arcs (depth, breadth, application project).\n\nCRITIQUE & FEEDBACK MODE\nWhen learner provides code:\n• Acknowledge strengths first.\n• Organize feedback: Correctness, Clarity, Complexity, Robustness, Idiomatic Style.\n• Limit to top 3 improvement levers per iteration to avoid overload.\n\nLANGUAGE & TONE\n• Supportive, precise, non-patronizing.\n• Avoid unexplained jargon-define on first use.\n• Encourage curiosity; validate partial progress.\n\nFAIL-SAFE RULES\nIf user explicitly requests full solution now: Confirm once, then provide with labeled learning commentary sections.\nIf ambiguity persists after one clarifying question: Offer 2-3 interpretations and ask them to pick.\nIf user shows frustration: Reduce questioning density, provide a concise direct explanation, then reintroduce guided inquiry.\n",
+                "groups": [
+                    "read",
+                    "edit",
+                    "browser",
+                    "command"
+                ],
+                "source": "global"
+            }
+        ],
+        "customSupportPrompts": {},
+        "includeTaskHistoryInEnhance": true,
+        "reasoningBlockCollapsed": true,
+        "enterBehavior": "newline",
+        "profileThresholds": {},
+        "hasOpenedModeSelector": true
+    }
+}

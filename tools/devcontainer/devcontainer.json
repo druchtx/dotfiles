@@ -1,0 +1,108 @@
+{
+  "name": "",
+  "image": "mcr.microsoft.com/devcontainers/base:2.1.3-debian12",
+  // "build": {
+  //   "dockerfile": "${localEnv:DOTFILES_ROOT}/tools/devcontainer/Dockerfile",
+  //   "context": "${localEnv:DOTFILES_ROOT}",
+  //   "options": [
+  //     "--no-cache"
+  //   ] 
+  // },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/Workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/home/vscode/Workspace",
+  "runArgs": [
+    "--name",
+    "devcontainer"
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": false,
+      "installOhMyZshConfig": false
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "onCreateCommand": "docker volume create ssh-keys && docker run --rm -v ssh-keys:/ssh -v ${localEnv:HOME}/.ssh:/host-ssh alpine sh -c 'cp -r /host-ssh/* /ssh/ && chmod 600 /ssh/id_ed25519'",
+  //config dotfiles
+  "postCreateCommand": "rm -rf ~/.dotfiles && git clone https://github.com/druchtx/dotfiles ~/.dotfiles &&  rm  ~/.dotfiles/tools/git/gitconfig* && ~/.dotfiles/bootstrap  --install-dot --install-deps -s",
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/zsh"
+      },
+      "extensions": [
+        // Git Extensions
+        "codezombiech.gitignore",
+        "donjayamanne.git-extension-pack",
+        "donjayamanne.githistory",
+        "eamodio.gitlens",
+        "github.vscode-pull-request-github",
+        "ziyasal.vscode-open-in-github",
+        // Python Extensions
+        "donjayamanne.python-environment-manager",
+        "donjayamanne.python-extension-pack",
+        "kevinrose.vsc-python-indent",
+        "ms-python.debugpy",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.vscode-python-envs",
+        "njpwerner.autodocstring",
+        "batisteo.vscode-django",
+        // JavaScript/TypeScript/React Extensions
+        "dbaeumer.vscode-eslint",
+        "jasonnutter.search-node-modules",
+        "jawandarajbir.react-vscode-extension-pack",
+        "ms-vscode.vscode-typescript-next",
+        "xabikos.javascriptsnippets",
+        "xabikos.reactsnippets",
+        "yandeu.five-server",
+        // Go Extensions
+        "golang.go",
+        "jinliming2.vscode-go-template",
+        // Other Languages
+        "hashicorp.terraform",
+        "kennylong.kubernetes-yaml-formatter",
+        "mathiasfrohlich.kotlin",
+        "tamasfe.even-better-toml",
+        "wholroyd.jinja",
+        // Docker & Containers
+        "docker.docker",
+        "ms-azuretools.vscode-containers",
+        "ms-azuretools.vscode-docker",
+        // Remote Development
+        "ms-vscode-remote.remote-containers",
+        "ms-vscode-remote.remote-ssh",
+        "ms-vscode-remote.remote-ssh-edit",
+        "ms-vscode.remote-explorer",
+        // Markdown Extensions
+        "bierner.markdown-mermaid",
+        "darkriszty.markdown-table-prettify",
+        "marvhen.reflow-markdown",
+        "mathematic.vscode-pdf",
+        "yzhang.markdown-all-in-one",
+        // General Tools & Utilities
+        "alefragnani.bookmarks",
+        "davidkol.fastcompare",
+        "emilast.logfilehighlighter",
+        "fill-labs.dependi",
+        "foxundermoon.shell-format",
+        "ibm.output-colorizer",
+        "ms-vscode.makefile-tools",
+        "ms-vsliveshare.vsliveshare",
+        "oderwat.indent-rainbow",
+        "rooveterinaryinc.roo-cline",
+        "usernamehw.errorlens",
+        "vscodevim.vim"
+      ]
+    }
+  },
+  "mounts": [
+    // mount 
+    "source=vol-vsc-dc,target=/home/vscode,type=volume",
+    "source=${localEnv:HOME}/.gitconfig.local,target=/home/vscode/.gitconfig.local,type=bind",
+    "source=${localEnv:HOME}/.localrc,target=/home/vscode/.localrc,type=bind",
+    "source=${localEnv:HOME}/.config/gcloud,target=/home/vscode/.config/gcloud,type=bind",
+    "source=ssh-keys,target=/home/vscode/.ssh,type=volume"
+  ]
+}

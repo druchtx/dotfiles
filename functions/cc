@@ -1,0 +1,7 @@
+#!/bin/zsh
+#
+
+# Pick a project directory with fzf and cd into it
+local dir
+dir="$(command ls -1 "$PROJECTS" | fzf --prompt='project> ')"
+[[ -n "$dir" ]] && cd "$PROJECTS/$dir"

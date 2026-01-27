@@ -1,0 +1,95 @@
+{
+  "dotfiles": [
+    {
+      "source": "langs/node/npmrc",
+      "target": "~/.npmrc",
+      "type": "file"
+    },
+    {
+      "source": "tools/cobra-cli/cobra.yaml",
+      "target": "~/.cobra.yaml",
+      "type": "file"
+    },
+    {
+      "source": "tools/mise/mise.toml",
+      "target": "~/.mise.toml",
+      "type": "file"
+    },
+    {
+      "source": "tools/tmux/tmux.conf",
+      "target": "~/.tmux.conf",
+      "type": "file"
+    },
+    {
+      "source": "tools/vim/vimrc",
+      "target": "~/.vimrc",
+      "type": "file"
+    },
+    {
+      "source": "tools/vim/ideavimrc",
+      "target": "~/.ideavimrc",
+      "type": "file"
+    },
+    {
+      "source": "tools/neovim",
+      "target": "~/.config/nvim",
+      "type": "dir"
+    },
+    {
+      "source": "tools/vscode/keybindings.json",
+      "target": "~/Library/Application Support/Code/User/keybindings.json",
+      "type": "file"
+    },
+    {
+      "source": "tools/vscode/settings.json",
+      "target": "~/Library/Application Support/Code/User/settings.json",
+      "type": "file"
+    },
+    {
+      "source": "tools/ghostty/config",
+      "target": "~/.config/ghostty/config",
+      "type": "file"
+    },
+    {
+      "source": "zsh/zshrc",
+      "target": "~/.zshrc",
+      "type": "file"
+    },
+    {
+      "source": "tools/ssh/config",
+      "target": "~/.ssh/config",
+      "type": "file"
+    },
+    {
+      "source": "tools/git/gitignore",
+      "target": "~/.config/git/gitignore",
+      "type": "file"
+    },
+    {
+      "source": "tools/git/gitconfig",
+      "target": "~/.config/git/gitconfig",
+      "type": "file"
+    },
+    {
+      "source": "tools/roocode/rules",
+      "target": "~/.roo/rules",
+      "type": "dir"
+    },
+    {
+      "source": "tools/roocode/roo-code-settings.json",
+      "target": "~/.config/roocode/roo-code-settings.json",
+      "type": "file"
+    },
+    {
+      "source": "tools/hammerspoon",
+      "target": "~/.hammerspoon",
+      "type": "dir"
+    },
+    {
+      "source": "tools/git/gitconfig.local.example",
+      "target": "~/.gitconfig.local",
+      "type": "file",
+      "template": true
+    }
+  ]
+}

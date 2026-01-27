@@ -1,0 +1,6 @@
+*.local*
+!*.local.example
+.DS_Store
+.dot/
+.claude/
+.dotenv*

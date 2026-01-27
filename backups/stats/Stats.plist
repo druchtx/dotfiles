@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Battery_state</key>
+	<false/>
+	<key>CPU_processes</key>
+	<integer>5</integer>
+	<key>CPU_state</key>
+	<true/>
+	<key>CPU_updateInterval</key>
+	<integer>3</integer>
+	<key>CPU_updateTopInterval</key>
+	<integer>3</integer>
+	<key>Disk_processes</key>
+	<integer>5</integer>
+	<key>Disk_state</key>
+	<false/>
+	<key>Disk_updateInterval</key>
+	<integer>30</integer>
+	<key>GPU_updateInterval</key>
+	<integer>3</integer>
+	<key>NSNavPanelExpandedSizeForSaveMode</key>
+	<string>{894, 448}</string>
+	<key>NSNavPanelExpandedStateForSaveMode</key>
+	<true/>
+	<key>NSOSPLastRootDirectory</key>
+	<data>
+	Ym9vaxQDAAAAAAQQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA7AEA
+	AAQAAAADAwAAAAQAAAUAAAABAQAAVXNlcnMAAAAHAAAAAQEAAGRydWNodHgACQAAAAEB
+	AAAuZG90ZmlsZXMAAAAHAAAAAQEAAGJhY2t1cHMAEAAAAAEGAAAQAAAAIAAAADAAAABE
+	AAAACAAAAAQDAACeOAAAAAAAAAgAAAAEAwAAuw0wAwAAAAAIAAAABAMAAEZjMgMAAAAA
+	CAAAAAQDAADgAccDAAAAABAAAAABBgAAbAAAAHwAAACMAAAAnAAAAAgAAAAABAAAQccD
+	c2KYw2gYAAAAAQIAAAIAAAAAAAAAHwIAAAAAAAAfAgAAAAAAAAAAAAABBQAACAAAAAQD
+	AAACAAAAAAAAAAQAAAADAwAA9QEAAAgAAAABCQAAZmlsZTovLy8MAAAAAQEAAE1hY2lu
+	dG9zaCBIRAgAAAAEAwAAAFDBGXMAAAAIAAAAAAQAAEHHC8tfAAAAJAAAAAEBAAA5OTBD
+	NEYxOS0zREM4LTQyNzgtQTI0QS03MUI1N0Y4Mjk5NkEYAAAAAQIAAIEAAAABAAAA7xMA
+	AAEAAADvEwAAAQAAAAEAAAABAQAALwAAADAAAAABAgAAZG5pYgAAAAABAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAAAAAAAAAcmRsZgIAAAAAAAAA8AAAAP7///8BAAAAAAAAABMAAAAE
+	EAAAVAAAAAAAAAAFEAAArAAAAAAAAAAQEAAA1AAAAAAAAABAEAAAxAAAAAAAAAACIAAA
+	qAEAAAAAAAAFIAAAGAEAAAAAAAAQIAAAKAEAAAAAAAARIAAAXAEAAAAAAAASIAAAPAEA
+	AAAAAAATIAAATAEAAAAAAAAgIAAAiAEAAAAAAAAwIAAA9AAAAAAAAAABwAAA/AAAAAAA
+	AAARwAAAIAAAAAAAAAASwAAADAEAAAAAAAAB0AAA9AAAAAAAAAAQ0AAABAAAAAAAAAAX
+	8AAARAAAAAAAAAAi8AAAtAEAAAAAAAA=
+	</data>
+	<key>NSStatusItem Preferred Position CPU_mini</key>
+	<integer>375</integer>
+	<key>NSStatusItem Preferred Position Network_speed</key>
+	<integer>422</integer>
+	<key>NSStatusItem Preferred Position RAM_mini</key>
+	<integer>328</integer>
+	<key>NSStatusItem Restore Position Battery_battery</key>
+	<integer>351</integer>
+	<key>NSToolbar Configuration eu.exelban.Stats.Settings.Toolbar</key>
+	<dict>
+		<key>TB Display Mode</key>
+		<integer>1</integer>
+		<key>TB Icon Size Mode</key>
+		<integer>1</integer>
+		<key>TB Is Shown</key>
+		<true/>
+		<key>TB Size Mode</key>
+		<integer>1</integer>
+	</dict>
+	<key>NSWindow Frame NSNavPanelAutosaveName</key>
+	<string>513 450 894 448 0 0 1920 1049 </string>
+	<key>Network_label_position</key>
+	<integer>1</integer>
+	<key>Network_networkChart_position</key>
+	<integer>2</integer>
+	<key>Network_speed_icon</key>
+	<string>dots</string>
+	<key>Network_speed_iconAlignment</key>
+	<string>left</string>
+	<key>Network_speed_iconColor</key>
+	<string>default</string>
+	<key>Network_speed_mode</key>
+	<string>twoRows</string>
+	<key>Network_speed_position</key>
+	<integer>0</integer>
+	<key>Network_speed_valueAlignment</key>
+	<string>center</string>
+	<key>Network_state</key>
+	<true/>
+	<key>Network_state_position</key>
+	<integer>3</integer>
+	<key>Network_text_position</key>
+	<integer>4</integer>
+	<key>Network_widget</key>
+	<string>speed</string>
+	<key>RAM_processes</key>
+	<integer>5</integer>
+	<key>RAM_state</key>
+	<true/>
+	<key>RAM_updateInterval</key>
+	<integer>3</integer>
+	<key>RAM_updateTopInterval</key>
+	<integer>3</integer>
+	<key>Sensors_barChart_position</key>
+	<integer>3</integer>
+	<key>Sensors_fanValue</key>
+	<string>rpm</string>
+	<key>Sensors_hid</key>
+	<false/>
+	<key>Sensors_label_position</key>
+	<integer>2</integer>
+	<key>Sensors_mini_position</key>
+	<integer>1</integer>
+	<key>Sensors_popup_keyboardShortcut</key>
+	<array/>
+	<key>Sensors_sensors_monospacedFont</key>
+	<true/>
+	<key>Sensors_sensors_size</key>
+	<false/>
+	<key>Sensors_speed</key>
+	<false/>
+	<key>Sensors_stack_position</key>
+	<integer>0</integer>
+	<key>Sensors_state</key>
+	<true/>
+	<key>Sensors_updateInterval</key>
+	<integer>3</integer>
+	<key>Sensors_widget</key>
+	<string>sensors</string>
+	<key>pause</key>
+	<false/>
+	<key>remote_monitoring</key>
+	<true/>
+	<key>sensor_Average CPU</key>
+	<true/>
+	<key>sensor_Average System Total</key>
+	<true/>
+	<key>sensor_CPU Power</key>
+	<false/>
+	<key>sensor_PCI Power</key>
+	<false/>
+	<key>sensor_PDTR</key>
+	<false/>
+	<key>sensor_PPBR</key>
+	<false/>
+	<key>sensor_PSTR</key>
+	<false/>
+	<key>sensor_RAM Power</key>
+	<false/>
+	<key>sensor_Total System Consumption</key>
+	<false/>
+	<key>sensor_VD0R</key>
+	<false/>
+	<key>setupProcess</key>
+	<true/>
+	<key>telemetry</key>
+	<false/>
+	<key>updater_check_ts</key>
+	<integer>1752362611</integer>
+	<key>version</key>
+	<string>2.11.46</string>
+</dict>
+</plist>
