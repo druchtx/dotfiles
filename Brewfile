@@ -27,6 +27,7 @@ brew "helm"
 brew "mas"
 brew "cobra-cli"
 brew "protobuf"
+brew "gemini-cli"
 brew "neovim"
 
 cask "ghostty"

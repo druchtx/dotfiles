@@ -1,8 +1,4 @@
-# ghostty config
-#
-# DOTFILE_CONFIG_PATH: ~/.config/ghostty/config
-#
-
+# command
 command = zsh -c "tmux attach || tmux new"
 
 # theme
@@ -32,10 +28,13 @@ quick-terminal-autohide = true
 quick-terminal-size = 50%,100%
 
 # key binding
-## global 
+## global
 keybind = global:ctrl+shift+/=toggle_quick_terminal
 keybind = cmd+\=new_split:right
 keybind = shift+cmd+\=new_split:down
+
+## clear screen
+keybind = cmd+k=text:\x0c
 
 # keybind = ctrl+alt+j=goto_split:down
 # keybind = ctrl+alt+k=goto_split:up

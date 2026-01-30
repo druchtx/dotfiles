@@ -5,3 +5,4 @@
 .claude/
 .dotenv*
 TODO.md
+tmp/

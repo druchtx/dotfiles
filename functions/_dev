@@ -2,7 +2,7 @@
 
 local work_dirs projects_dirs
 
-work_dirs=(${WORK}/*(:t))
+work_dirs=(${WORK_ROOT}/*(:t))
 work_dirs=(${work_dirs:#projects})
 projects_dirs=(${PROJECTS}/*/(:t))
 

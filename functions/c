@@ -13,4 +13,4 @@
 #
 # ...to quickly jump into holman/boom, for example.
 
-cd "$WORK/$1"
+cd "$WORK_ROOT/$1"
