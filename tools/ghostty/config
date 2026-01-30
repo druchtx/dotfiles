@@ -1,8 +1,4 @@
-# ghostty config
-#
-# DOTFILE_CONFIG_PATH: ~/.config/ghostty/config
-#
-
+# command
 command = zsh -c "tmux attach || tmux new"
 
 # theme
