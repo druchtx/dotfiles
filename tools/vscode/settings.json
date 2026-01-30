@@ -671,5 +671,6 @@ DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
     "scm.repositories.selectionMode": "single",
     "containers.containers.label": "ContainerName",
     "bookmarks.sideBar.expanded": false,
-    "remote.autoForwardPortsSource": "hybrid"
+    "remote.autoForwardPortsSource": "hybrid",
+    "claudeCode.preferredLocation": "panel"
 }

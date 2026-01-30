@@ -8,7 +8,8 @@ command = zsh -c "tmux attach || tmux new"
 # theme
 theme = Github Dark Dimmed
 window-theme = dark
-font-family = Fira Code Light
+font-family = Fira Code
+font-style = Regular
 font-size = 13
 
 # window
