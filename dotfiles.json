@@ -95,6 +95,11 @@
       "source": "tools/claude/settings.json",
       "target": "/Users/druchtx/.claude/settings.json",
       "type": "file"
+    },
+    {
+      "source": "tools/claude/statusline-command.sh",
+      "target": "/Users/druchtx/.claude/statusline-command.sh",
+      "type": "file"
     }
   ]
 }
