@@ -652,7 +652,7 @@ class DotApp:
             print(f"{blue('🍺 Installing Homebrew packages...')}")
             self._run_cmd(
                 "brew",
-                ["brew", "bundle", "install", "--file=Brewfile"],
+                ["brew", "bundle", "install", "--upgrade", "--file=Brewfile"],
                 "Homebrew packages updated",
             )
             print()

@@ -39,9 +39,9 @@ return {
 		mods = { "ctrl", "shift" },
 		key = "D",
 		action = function()
-			hs.application.launchOrFocus("Dictionary")
+			hs.application.launchOrFocus("Dictionaries")
 		end,
-		description = "Launch or focus Dictionary",
+		description = "Launch or focus Dictionaries",
 	},
 	{
 		mods = { "ctrl", "shift" },

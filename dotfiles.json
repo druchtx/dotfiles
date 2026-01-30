@@ -90,6 +90,11 @@
       "target": "~/.gitconfig.local",
       "type": "file",
       "template": true
+    },
+    {
+      "source": "tools/claude/settings.json",
+      "target": "/Users/druchtx/.claude/settings.json",
+      "type": "file"
     }
   ]
 }
