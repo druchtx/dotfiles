@@ -638,6 +638,24 @@ class DotApp:
             print(f"{yellow('⚠️  Command not found:')} {cmd[0]}")
             return False
 
+    def _run_streamed_cmd(self, name: str, cmd: List[str], success_msg: str) -> bool:
+        """Run a command, streaming its output, and print status"""
+        import subprocess
+        try:
+            # We don't capture output, it goes straight to the terminal
+            subprocess.run(
+                cmd, cwd=self.dotfiles_dir, check=True
+            )
+            print(f"{green('✓')} {success_msg}")
+            return True
+        except subprocess.CalledProcessError:
+            # Stderr was already printed to the user's terminal
+            print(f"{yellow('⚠️  Failed:')} Previous command returned an error.")
+            return False
+        except FileNotFoundError:
+            print(f"{yellow('⚠️  Command not found:')} {cmd[0]}")
+            return False
+
     def cmd_sync(self, force: bool = False):
         """Sync everything: git pull + brew + mise + link"""
         print(f"\n{bold('🔄 Syncing dotfiles...')}\n")
@@ -650,7 +668,7 @@ class DotApp:
         # 2. Homebrew
         if (self.dotfiles_dir / "Brewfile").exists():
             print(f"{blue('🍺 Installing Homebrew packages...')}")
-            self._run_cmd(
+            self._run_streamed_cmd(
                 "brew",
                 ["brew", "bundle", "install", "--upgrade", "--file=Brewfile"],
                 "Homebrew packages updated",
@@ -660,7 +678,7 @@ class DotApp:
         # 3. Mise
         if (self.dotfiles_dir / "tools" / "mise" / "mise.toml").exists():
             print(f"{blue('🔨 Installing mise tools...')}")
-            self._run_cmd("mise", ["mise", "install"], "Mise tools updated")
+            self._run_streamed_cmd("mise", ["mise", "install"], "Mise tools updated")
             print()
 
         # 4. Link dotfiles
