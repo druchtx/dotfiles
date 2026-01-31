@@ -1,4 +1,4 @@
 #!/bin/zsh
 #
 
-export PATH="${HOME}/.node-globals:$PATH"
+export PATH="${HOME}/.node-globals/bin:$PATH"
