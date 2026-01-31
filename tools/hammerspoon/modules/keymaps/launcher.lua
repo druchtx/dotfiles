@@ -13,6 +13,14 @@ return {
 	},
 	{
 		mods = { "ctrl", "shift" },
+		key = "g",
+		action = function()
+			hs.application.launchOrFocus("Ghostty")
+		end,
+		description = "Launch or focus Ghostty (normal instance)",
+	},
+	{
+		mods = { "ctrl", "shift" },
 		key = "W",
 		action = function()
 			hs.application.launchOrFocus("Safari")
