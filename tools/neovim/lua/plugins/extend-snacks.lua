@@ -1,20 +1,23 @@
 return {
   "snacks.nvim",
   opts = function(_, opts)
-    -- Picker
+    -- Picker global settings (apply to all sources)
     opts.picker = opts.picker or {}
+    opts.picker.hidden = true -- Show hidden files in all pickers
+    opts.picker.ignored = true -- Show gitignored files in all pickers
+    opts.picker.follow = true -- Follow symlinks in all pickers
+
     opts.picker.sources = opts.picker.sources or {}
     opts.picker.sources.explorer = opts.picker.sources.explorer or {}
 
-    -- Explorer configuration
+    -- Explorer
     opts.picker.sources.explorer = {
-      hidden = true, -- Show hidden files by default
       auto_close = true,
       layout = {
         preview = true, -- Enable preview by default
         layout = {
           backdrop = false,
-          width = 0.9, -- Window width (90% of screen)
+          width = 0.99, -- Window width (90% of screen)
           height = 0.9, -- Window height (90% of screen)
           border = "rounded",
           box = "horizontal", -- Horizontal layout (preview on right)
