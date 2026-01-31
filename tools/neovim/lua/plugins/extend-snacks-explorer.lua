@@ -1,14 +1,8 @@
 return {
   "snacks.nvim",
   opts = function(_, opts)
-    -- Picker global settings (apply to all sources)
     opts.picker = opts.picker or {}
-    opts.picker.hidden = true -- Show hidden files in all pickers
-    opts.picker.ignored = true -- Show gitignored files in all pickers
-    opts.picker.follow = true -- Follow symlinks in all pickers
-
     opts.picker.sources = opts.picker.sources or {}
-    opts.picker.sources.explorer = opts.picker.sources.explorer or {}
 
     -- Explorer
     opts.picker.sources.explorer = {
@@ -17,7 +11,7 @@ return {
         preview = true, -- Enable preview by default
         layout = {
           backdrop = false,
-          width = 0.99, -- Window width (90% of screen)
+          width = 0.99, -- Window width (99% of screen)
           height = 0.9, -- Window height (90% of screen)
           border = "rounded",
           box = "horizontal", -- Horizontal layout (preview on right)
@@ -47,13 +41,5 @@ return {
         },
       },
     }
-
-    -- Dashboard
-    opts.dashboard.preset.header = ""
-    table.insert(
-      opts.dashboard.preset.keys,
-      7,
-      { icon = "S", key = "S", desc = "Select Session", action = require("persistence").select }
-    )
   end,
 }
