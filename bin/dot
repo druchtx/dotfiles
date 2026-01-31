@@ -667,11 +667,19 @@ class DotApp:
 
         # 2. Homebrew
         if (self.dotfiles_dir / "Brewfile").exists():
-            print(f"{blue('🍺 Installing Homebrew packages...')}")
+            print(f"{blue('🍺 Updating Homebrew...')}")
+            self._run_streamed_cmd("brew", ["brew", "update"], "Brew formulas updated")
+
+            print(f"{blue('🍺 Upgrading Homebrew packages...')}")
+            self._run_streamed_cmd(
+                "brew", ["brew", "upgrade"], "Homebrew packages upgraded"
+            )
+
+            print(f"{blue('🍺 Installing from Brewfile...')}")
             self._run_streamed_cmd(
                 "brew",
                 ["brew", "bundle", "install", "--upgrade", "--file=Brewfile"],
-                "Homebrew packages updated",
+                "Brewfile packages installed/upgraded",
             )
             print()
 
