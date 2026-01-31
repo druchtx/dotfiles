@@ -31,11 +31,6 @@
       "type": "file"
     },
     {
-      "source": "tools/neovim",
-      "target": "~/.config/nvim",
-      "type": "dir"
-    },
-    {
       "source": "tools/vscode/keybindings.json",
       "target": "~/Library/Application Support/Code/User/keybindings.json",
       "type": "file"
@@ -100,6 +95,11 @@
       "source": "tools/claude/statusline-command.sh",
       "target": "/Users/druchtx/.claude/statusline-command.sh",
       "type": "file"
+    },
+    {
+      "source": "tools/neovim/config",
+      "target": "/Users/druchtx/.config/nvim",
+      "type": "dir"
     }
   ]
 }
