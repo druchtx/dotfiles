@@ -4,37 +4,26 @@ return {
     opts.picker = opts.picker or {}
     opts.picker.sources = opts.picker.sources or {}
 
-    -- Explorer
+    -- Explorer configuration (4:6 ratio, 85% width, 90% height)
     opts.picker.sources.explorer = {
       auto_close = true,
       layout = {
-        preview = true, -- Enable preview by default
+        preview = true,
         layout = {
           backdrop = false,
-          width = 0.99, -- Window width (99% of screen)
-          height = 0.9, -- Window height (90% of screen)
+          width = 0.85,
+          height = 0.9,
           border = "rounded",
-          box = "horizontal", -- Horizontal layout (preview on right)
+          box = "horizontal",
           {
-            -- Left side: input + list
             box = "vertical",
-            width = 0.4, -- List area takes 40% width
-            {
-              win = "input",
-              height = 1, -- Small height for search input
-              border = "rounded",
-              title = "Search",
-            },
-            {
-              win = "list",
-              border = "rounded",
-              title = "{flags}",
-            },
+            width = 0.4,
+            { win = "input", height = 1, border = "rounded", title = "Search" },
+            { win = "list", border = "rounded", title = "{flags}" },
           },
           {
-            -- Right side: preview
             win = "preview",
-            width = 0.6, -- Preview takes 60% width
+            width = 0.6,
             border = "rounded",
             title = "{preview}",
           },
