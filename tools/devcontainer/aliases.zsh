@@ -2,7 +2,7 @@
 
 # Quickly launch the dev container for the user workspace
 dev() {
-    local host_path="$WORK"
+    local host_path="$WORK_ROOT"
     local config_path="$ZSH/tools/devcontainer/devcontainer.json"
     # remote-vsc will generate default simple code-workspace
     # local template_path="$ZSH/tools/devcontainer/remote.code-workspace"
@@ -13,8 +13,8 @@ dev() {
             if [[ $arg == /* ]]; then
                 open_paths+=("$arg")
             else
-                if [[ -e "$WORK/$arg" ]]; then
-                    open_paths+=("$WORK/$arg")
+                if [[ -e "$WORK_ROOT/$arg" ]]; then
+                    open_paths+=("$WORK_ROOT/$arg")
                 else
                     open_paths+=("$PROJECTS/$arg")
                 fi

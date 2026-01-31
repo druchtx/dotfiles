@@ -1,4 +1,5 @@
 # shortcut to this dotfiles path is $ZSH
+# !!! THIS ZSHRC ONLY TAKES EFFECT AFTER RUNNING THE ./bootstrap SCRIPT.
 if [[ -f ~/.dotrc ]]; then
     export ZSH=$(cat ~/.dotrc)
 fi

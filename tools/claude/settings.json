@@ -1,7 +1,10 @@
 {
+  "model": "sonnet",
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline-command.sh"
   },
-  "model": "sonnet"
+  "enabledPlugins": {
+    "lua-lsp@claude-plugins-official": true
+  }
 }
