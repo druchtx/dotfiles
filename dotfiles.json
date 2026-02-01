@@ -88,17 +88,17 @@
     },
     {
       "source": "tools/claude/settings.json",
-      "target": "/Users/druchtx/.claude/settings.json",
+      "target": "~/.claude/settings.json",
       "type": "file"
     },
     {
       "source": "tools/claude/statusline-command.sh",
-      "target": "/Users/druchtx/.claude/statusline-command.sh",
+      "target": "~/.claude/statusline-command.sh",
       "type": "file"
     },
     {
       "source": "tools/neovim/config",
-      "target": "/Users/druchtx/.config/nvim",
+      "target": "~/.config/nvim",
       "type": "dir"
     }
   ]

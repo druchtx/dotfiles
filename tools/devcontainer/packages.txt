@@ -1,0 +1,12 @@
+# Build tools
+build-essential
+curl
+git
+
+# Development tools
+zsh
+neovim
+fzf
+ripgrep
+jq
+unzip

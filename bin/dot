@@ -463,6 +463,18 @@ class DotApp:
             if not filename.startswith("."):
                 filename = f".{filename}"
             target = f"~/{filename}"
+        else:
+            # Normalize target path: convert absolute home path to ~
+            target_path = Path(target).expanduser().resolve()
+            home_path = Path.home().resolve()
+
+            # If target is under home directory, convert to ~/...
+            try:
+                rel_path = target_path.relative_to(home_path)
+                target = f"~/{rel_path}"
+            except ValueError:
+                # Not under home directory, keep as is
+                pass
 
         # Auto-detect template (only .example files are templates)
         template = source.endswith(".example")
