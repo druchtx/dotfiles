@@ -100,6 +100,11 @@
       "source": "tools/neovim/config",
       "target": "/Users/druchtx/.config/nvim",
       "type": "dir"
+    },
+    {
+      "source": "tools/lazygit/config.yml",
+      "target": "~/.config/lazygit/config.yml",
+      "type": "file"
     }
   ]
 }
