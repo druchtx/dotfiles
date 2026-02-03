@@ -24,7 +24,7 @@
   },
   "onCreateCommand": "docker volume create ssh-keys && docker run --rm -v ssh-keys:/ssh -v ${localEnv:HOME}/.ssh:/host-ssh alpine sh -c 'cp -r /host-ssh/* /ssh/ && chmod 600 /ssh/id_ed25519'",
   //config dotfiles
-  "postCreateCommand": "rm -rf ~/.dotfiles && git clone https://github.com/druchtx/dotfiles ~/.dotfiles &&  rm  ~/.dotfiles/tools/git/gitconfig* && ~/.dotfiles/bootstrap  --install-dot --install-deps -s",
+  "postCreateCommand": "bash -c 'if [ ! -d ~/.dotfiles ]; then git clone https://github.com/druchtx/dotfiles ~/.dotfiles; fi && cd ~/.dotfiles && ./bootstrap && ./bin/dot link'",
   "remoteUser": "vscode",
   "customizations": {
     "vscode": {
@@ -98,7 +98,7 @@
     }
   },
   "mounts": [
-    // mount 
+    // mount
     "source=vol-vsc-dc,target=/home/vscode,type=volume",
     "source=${localEnv:HOME}/.gitconfig.local,target=/home/vscode/.gitconfig.local,type=bind",
     "source=${localEnv:HOME}/.localrc,target=/home/vscode/.localrc,type=bind",

@@ -1,10 +1,67 @@
 #!/bin/bash
+set -e
 
-# Check for Homebrew
-if ! command -v brew &>/dev/null; then
-  echo "Homebrew not found. Installing Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo "🚀 Bootstrapping dotfiles..."
+
+# Detect platform
+if [[ "$(uname -s)" == "Darwin" ]]; then
+    PLATFORM="darwin"
+    echo "📍 Platform: macOS"
+else
+    PLATFORM="linux"
+    echo "📍 Platform: Linux"
+fi
+
+# Platform-specific setup
+if [[ "$PLATFORM" == "darwin" ]]; then
+    # macOS: Install Homebrew
+    if ! command -v brew &>/dev/null; then
+        echo "📦 Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo "✅ Homebrew installed"
+    else
+        echo "✅ Homebrew already installed"
+    fi
+
+elif [[ "$PLATFORM" == "linux" ]]; then
+    # Linux: Install packages via apt
+    PACKAGES_FILE="tools/devcontainer/packages.txt"
+    if [[ -f "$PACKAGES_FILE" ]]; then
+        echo "📦 Installing packages..."
+
+        # Read packages (skip comments and empty lines)
+        PACKAGES=$(grep -v '^#' "$PACKAGES_FILE" | grep -v '^$' | tr '\n' ' ')
+
+        export DEBIAN_FRONTEND=noninteractive
+        sudo -E apt-get update
+        sudo -E apt-get install -y $PACKAGES
+
+        echo "✅ Packages installed"
+    else
+        echo "⚠️  Warning: $PACKAGES_FILE not found"
+    fi
+
+    # Install mise (runtime version manager)
+    # Note: mise is not available via apt-get, use official installer
+    if ! command -v mise &>/dev/null; then
+        echo "📦 Installing mise..."
+        curl https://mise.run | sh
+        echo "✅ mise installed"
+    else
+        echo "✅ mise already installed"
+    fi
 fi
 
 # Run dot init
+echo "🔧 Initializing dotfiles..."
 ./bin/dot init
+
+echo ""
+echo "✅ Bootstrap complete!"
+echo ""
+echo "Next steps:"
+echo "  1. Edit .dotenv if you have template variables"
+echo "  2. Run 'dot link' to create symlinks"
+if [[ "$PLATFORM" == "darwin" ]]; then
+    echo "  3. Run 'dot sync' to install Homebrew packages"
+fi
