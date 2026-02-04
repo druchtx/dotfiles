@@ -27,7 +27,7 @@
   // Copy SSH keys to Docker volume (only if ~/.ssh exists)
   "onCreateCommand": "docker volume create ssh-keys 2>/dev/null || true && if [ -d ${localEnv:HOME}/.ssh ]; then docker run --rm -v ssh-keys:/ssh -v ${localEnv:HOME}/.ssh:/host-ssh alpine sh -c 'cp -r /host-ssh/* /ssh/ 2>/dev/null && chmod 755 /ssh && chmod 600 /ssh/* 2>/dev/null || true'; fi",
   // Setup dotfiles with mise tools (neovim, lazygit, etc.)
-  "postCreateCommand": "bash -c 'if [ -f ~/.dotfiles/tools/devcontainer/setup.sh ]; then ~/.dotfiles/tools/devcontainer/setup.sh; else git clone https://github.com/druchtx/dotfiles ~/.dotfiles && ~/.dotfiles/tools/devcontainer/setup.sh; fi'",
+  "postCreateCommand": "bash -c 'if [ ! -d ~/.dotfiles ]; then git clone https://github.com/druchtx/dotfiles ~/.dotfiles; fi && chmod +x ~/.dotfiles/tools/devcontainer/setup.sh && ~/.dotfiles/tools/devcontainer/setup.sh'",
   "remoteUser": "vscode",
   "customizations": {
     "vscode": {

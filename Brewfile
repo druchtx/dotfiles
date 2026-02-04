@@ -29,6 +29,8 @@ brew "cobra-cli"
 brew "protobuf"
 brew "gemini-cli"
 brew "neovim"
+brew "lazygit"
+
 
 cask "ghostty"
 cask "aws-vault-binary"

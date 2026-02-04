@@ -26,11 +26,20 @@ echo "==> Running bootstrap..."
 echo "==> Linking dotfiles..."
 ./bin/dot link --force
 
-# Setup mise and install tools
-echo "==> Installing mise tools (including neovim, lazygit)..."
+# Setup mise PATH (mise is installed to ~/.local/bin by bootstrap)
 export PATH="$HOME/.local/bin:$PATH"
-eval "$(mise activate bash)"
-mise install --yes
+
+# Install mise tools (neovim, lazygit, etc.)
+echo "==> Installing mise tools..."
+if command -v mise &>/dev/null; then
+    # Trust the config file first
+    mise trust ~/.config/mise/config.toml 2>/dev/null || true
+    # Install tools without activation (avoid shell hook issues)
+    mise install --yes
+    echo "==> Mise tools installed successfully"
+else
+    echo "==> Warning: mise not found, skipping tool installation"
+fi
 
 # Install Nerd Fonts for terminal icons
 echo "==> Installing Nerd Fonts..."
@@ -40,5 +49,4 @@ curl -fLo ~/.local/share/fonts/FiraCodeNerdFont.ttf \
 fc-cache -f 2>/dev/null || true
 
 echo "==> Setup complete!"
-echo "    - neovim: $(mise which nvim 2>/dev/null || echo 'will be available after shell restart')"
-echo "    - lazygit: $(mise which lazygit 2>/dev/null || echo 'will be available after shell restart')"
+echo "    Tools will be available after opening a new terminal (mise activates via .zshrc)"
