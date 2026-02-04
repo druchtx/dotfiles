@@ -3,6 +3,9 @@ build-essential
 curl
 git
 
+# Python (required for dot tool)
+python3
+
 # Development tools
 zsh
 tmux
