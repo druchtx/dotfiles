@@ -26,8 +26,8 @@
   "initializeCommand": "bash -c '[ -f ~/.config/git/config.local ] || touch ~/.config/git/config.local; [ -f ~/.localrc ] || touch ~/.localrc'",
   // Copy SSH keys to Docker volume (only if ~/.ssh exists)
   "onCreateCommand": "docker volume create ssh-keys 2>/dev/null || true && if [ -d ${localEnv:HOME}/.ssh ]; then docker run --rm -v ssh-keys:/ssh -v ${localEnv:HOME}/.ssh:/host-ssh alpine sh -c 'cp -r /host-ssh/* /ssh/ 2>/dev/null && chmod 755 /ssh && chmod 600 /ssh/* 2>/dev/null || true'; fi",
-  // Clone and setup dotfiles (use --force to overwrite existing files like .zshrc)
-  "postCreateCommand": "bash -c 'sudo chown -R vscode:vscode ~/.ssh ~/.config/git 2>/dev/null || true && if [ ! -d ~/.dotfiles ]; then git clone https://github.com/druchtx/dotfiles ~/.dotfiles; fi && cd ~/.dotfiles && ./bootstrap && ./bin/dot link --force && export PATH=\"$HOME/.local/bin:$PATH\" && mise install && mkdir -p ~/.local/share/fonts && curl -fLo ~/.local/share/fonts/FiraCodeNerdFont.ttf https://github.com/ryanoasis/nerd-fonts/raw/master/patched-fonts/FiraCode/Regular/FiraCodeNerdFont-Regular.ttf && fc-cache -f'",
+  // Setup dotfiles with mise tools (neovim, lazygit, etc.)
+  "postCreateCommand": "bash -c 'if [ -f ~/.dotfiles/tools/devcontainer/setup.sh ]; then ~/.dotfiles/tools/devcontainer/setup.sh; else git clone https://github.com/druchtx/dotfiles ~/.dotfiles && ~/.dotfiles/tools/devcontainer/setup.sh; fi'",
   "remoteUser": "vscode",
   "customizations": {
     "vscode": {
