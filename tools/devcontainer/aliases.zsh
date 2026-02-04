@@ -1,5 +1,7 @@
 #!/usr/bin/env zsh
 
+alias remote="docker exec -it -u vscode -w /home/vscode devcontainer zsh -c 'tmux attach || tmux new -s remote'"
+
 # Quickly launch the dev container for the user workspace
 dev() {
     local host_path="$WORK_ROOT"

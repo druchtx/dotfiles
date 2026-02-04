@@ -5,9 +5,10 @@ git
 
 # Development tools
 zsh
-neovim
+tmux
 fzf
 ripgrep
 jq
 bc
 unzip
+fontconfig

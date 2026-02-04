@@ -1,5 +1,3 @@
-command = zsh -c "tmux attach || tmux new"
-
 # theme
 theme = Github Dark Dimmed
 window-theme = dark
@@ -24,6 +22,10 @@ mouse-hide-while-typing
 # key binding
 ## global
 keybind = global:ctrl+shift+/=toggle_quick_terminal
+
+# quick terminal
+quick-terminal-position = left
+quick-terminal-size = 35%
 keybind = cmd+\=new_split:right
 keybind = shift+cmd+\=new_split:down
 
