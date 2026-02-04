@@ -6,7 +6,7 @@
   //   "context": "${localEnv:DOTFILES_ROOT}",
   //   "options": [
   //     "--no-cache"
-  //   ] 
+  //   ]
   // },
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/Workspace,type=bind,consistency=cached",
   "workspaceFolder": "/home/vscode/Workspace",
@@ -22,9 +22,12 @@
     },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
-  "onCreateCommand": "docker volume create ssh-keys && docker run --rm -v ssh-keys:/ssh -v ${localEnv:HOME}/.ssh:/host-ssh alpine sh -c 'cp -r /host-ssh/* /ssh/ && chmod 600 /ssh/id_ed25519'",
-  //config dotfiles
-  "postCreateCommand": "bash -c 'if [ ! -d ~/.dotfiles ]; then git clone https://github.com/druchtx/dotfiles ~/.dotfiles; fi && cd ~/.dotfiles && ./bootstrap && ./bin/dot link'",
+  // Create empty files if they don't exist (prevents mount failures)
+  "initializeCommand": "bash -c '[ -f ~/.config/git/config.local ] || touch ~/.config/git/config.local; [ -f ~/.localrc ] || touch ~/.localrc'",
+  // Copy SSH keys to Docker volume (only if ~/.ssh exists)
+  "onCreateCommand": "docker volume create ssh-keys 2>/dev/null || true && if [ -d ${localEnv:HOME}/.ssh ]; then docker run --rm -v ssh-keys:/ssh -v ${localEnv:HOME}/.ssh:/host-ssh alpine sh -c 'cp -r /host-ssh/* /ssh/ 2>/dev/null && chmod 755 /ssh && chmod 600 /ssh/* 2>/dev/null || true'; fi",
+  // Clone and setup dotfiles (use --force to overwrite existing files like .zshrc)
+  "postCreateCommand": "bash -c 'sudo chown -R vscode:vscode ~/.ssh ~/.config/git 2>/dev/null || true && if [ ! -d ~/.dotfiles ]; then git clone https://github.com/druchtx/dotfiles ~/.dotfiles; fi && cd ~/.dotfiles && ./bootstrap && ./bin/dot link --force'",
   "remoteUser": "vscode",
   "customizations": {
     "vscode": {
@@ -98,11 +101,13 @@
     }
   },
   "mounts": [
-    // mount
+    // Persistent home directory volume
     "source=vol-vsc-dc,target=/home/vscode,type=volume",
-    "source=${localEnv:HOME}/.gitconfig.local,target=/home/vscode/.gitconfig.local,type=bind",
+    // Local git config (created by initializeCommand if missing)
+    "source=${localEnv:HOME}/.config/git/config.local,target=/home/vscode/.config/git/config.local,type=bind",
+    // Local shell config (created by initializeCommand if missing)
     "source=${localEnv:HOME}/.localrc,target=/home/vscode/.localrc,type=bind",
-    "source=${localEnv:HOME}/.config/gcloud,target=/home/vscode/.config/gcloud,type=bind",
+    // SSH keys volume (populated by onCreateCommand)
     "source=ssh-keys,target=/home/vscode/.ssh,type=volume"
   ]
 }

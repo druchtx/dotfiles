@@ -2,6 +2,14 @@
 
 Personal dotfiles managed with a custom symlink-based tool.
 
+## Important Notes for AI Assistants
+
+**CRITICAL**: This setup uses **LazyVim starter** for Neovim, not vanilla
+Neovim. Many plugins (gitsigns, telescope, neo-tree, etc.) are
+pre-configured by LazyVim. Always check if a plugin exists before
+adding it. Use `extend-{plugin-name}.lua` pattern for customizing
+existing plugins.
+
 ## Overview
 
 This repository contains configuration files for development tools,
@@ -171,6 +179,88 @@ Located in `ai/rules/`:
 - Config: `tools/mise/mise.toml`
 - Manages runtime versions (node, python, etc.)
 - Auto-installed by `dot sync`
+
+### Neovim (LazyVim)
+
+**IMPORTANT**: This setup uses **LazyVim starter**, not vanilla Neovim.
+
+- Config: `tools/neovim/config` → `~/.config/nvim`
+- Based on: [LazyVim](https://www.lazyvim.org/)
+- Plugin manager: lazy.nvim
+
+#### Plugin System
+
+**Many plugins are pre-configured by LazyVim**, including:
+- gitsigns.nvim (git signs in gutter)
+- which-key.nvim (keybinding help)
+- telescope.nvim (fuzzy finder)
+- neo-tree.nvim (file explorer)
+- And many more...
+
+**To customize plugins:**
+1. Check if plugin exists in LazyVim defaults first:
+   ```bash
+   # Check installed plugins
+   ls ~/.local/share/nvim/lazy/
+
+   # Check LazyVim source
+   grep -r "plugin-name" ~/.local/share/nvim/lazy/LazyVim/lua/lazyvim/plugins/
+   ```
+
+2. **For pre-configured plugins**: Create `extend-{plugin-name}.lua`
+   - Example: `extend-snacks-lazygit.lua` extends snacks.nvim
+   - Example: `extend-lualine.lua` extends lualine.nvim
+
+3. **For new plugins**: Create regular `{plugin-name}.lua`
+   - Only if plugin is NOT in LazyVim defaults
+
+#### Git Workflow Setup
+
+**Three-tool approach for optimal UX:**
+
+1. **gitsigns.nvim** (pre-configured by LazyVim)
+   - Line/hunk staging in normal buffers
+   - Keybindings:
+     - `]h` / `[h` - Navigate hunks
+     - `<leader>ghs` - Stage hunk (in normal or visual mode)
+     - `<leader>ghr` - Reset/discard hunk
+     - `<leader>ghS` - Stage entire buffer
+     - `<leader>ghp` - Preview hunk inline
+
+2. **diffview.nvim** (custom addition)
+   - Beautiful side-by-side diff view
+   - Full file overview with staging
+   - Keybindings:
+     - `dg` - Open diffview (all changes)
+     - `Ctrl+C` - Close diffview
+     - `Space` - Stage/unstage file (in file panel)
+     - `d` - Discard file changes
+     - `j`/`k` - Navigate files
+
+3. **lazygit** (via snacks.nvim)
+   - Delta-powered readonly diffs
+   - Commits, branches, rebasing
+   - Keybindings:
+     - `<leader>gg` - Open lazygit
+     - `Ctrl+D` - View file with delta (pretty)
+     - `c` - Commit
+     - `q` - Close
+
+**Recommended workflow:**
+```
+1. Edit files normally in neovim
+2. ]h / [h to navigate hunks
+3. <leader>ghs to stage hunks/lines (gitsigns)
+4. OR: dg to view all diffs (diffview)
+5. <leader>gg to commit (lazygit)
+```
+
+#### Plugin Extension Examples
+
+See existing files:
+- `extend-snacks-lazygit.lua` - Lazygit configuration
+- `extend-lualine.lua` - Statusline customization
+- `diffview.lua` - New plugin addition (not in LazyVim)
 
 ## Setup (New Machine)
 

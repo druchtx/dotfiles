@@ -16,3 +16,4 @@ terraform = "1.14"
 
 [settings]
 disable_backends = ["asdf"]
+idiomatic_version_file = true

@@ -11,11 +11,6 @@
       "type": "file"
     },
     {
-      "source": "tools/mise/mise.toml",
-      "target": "~/.mise.toml",
-      "type": "file"
-    },
-    {
       "source": "tools/tmux/tmux.conf",
       "target": "~/.tmux.conf",
       "type": "file"
@@ -62,7 +57,7 @@
     },
     {
       "source": "tools/git/gitconfig",
-      "target": "~/.config/git/gitconfig",
+      "target": "~/.config/git/config",
       "type": "file"
     },
     {
@@ -82,7 +77,7 @@
     },
     {
       "source": "tools/git/gitconfig.local.example",
-      "target": "~/.gitconfig.local",
+      "target": "~/.config/git/config.local",
       "type": "file",
       "template": true
     },
@@ -100,6 +95,21 @@
       "source": "tools/neovim/config",
       "target": "~/.config/nvim",
       "type": "dir"
+    },
+    {
+      "source": "ai/rules/",
+      "target": "~/.claude/rules",
+      "type": "dir"
+    },
+    {
+      "source": "tools/lazygit/config.yml",
+      "target": "~/.config/lazygit/config.yml",
+      "type": "file"
+    },
+    {
+      "source": "tools/mise/mise.toml",
+      "target": "~/.config/mise/config.toml",
+      "type": "file"
     }
   ]
 }
