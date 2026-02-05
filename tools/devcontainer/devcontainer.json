@@ -1,32 +1,21 @@
 {
   "name": "",
-  "image": "mcr.microsoft.com/devcontainers/base:2.1.3-debian12",
-  // "build": {
-  //   "dockerfile": "${localEnv:DOTFILES_ROOT}/tools/devcontainer/Dockerfile",
-  //   "context": "${localEnv:DOTFILES_ROOT}",
-  //   "options": [
-  //     "--no-cache"
-  //   ]
-  // },
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "../.."
+  },
   "workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/Workspace,type=bind,consistency=cached",
   "workspaceFolder": "/home/vscode/Workspace",
   "runArgs": [
     "--name",
     "devcontainer"
   ],
-  "features": {
-    "ghcr.io/devcontainers/features/common-utils:2": {
-      "configureZshAsDefaultShell": true,
-      "installOhMyZsh": false,
-      "installOhMyZshConfig": false
-    }
-  },
   // Create empty files if they don't exist (prevents mount failures)
   "initializeCommand": "bash -c '[ -f ~/.localrc ] || touch ~/.localrc'",
   // Copy SSH keys to Docker volume (only if ~/.ssh exists)
   "onCreateCommand": "docker volume create ssh-keys 2>/dev/null || true && if [ -d ${localEnv:HOME}/.ssh ]; then docker run --rm -v ssh-keys:/ssh -v ${localEnv:HOME}/.ssh:/host-ssh alpine sh -c 'cp -r /host-ssh/* /ssh/ 2>/dev/null && chmod 755 /ssh && chmod 600 /ssh/* 2>/dev/null || true'; fi",
-  // Setup dotfiles with mise tools (neovim, lazygit, etc.)
-  "postCreateCommand": "bash -c 'if [ ! -d ~/.dotfiles ]; then git clone https://github.com/druchtx/dotfiles ~/.dotfiles; fi && chmod +x ~/.dotfiles/tools/devcontainer/setup.sh && ~/.dotfiles/tools/devcontainer/setup.sh'",
+  // Fix permissions for mounted volumes
+  "postCreateCommand": "sudo chown -R vscode:vscode ~/.ssh 2>/dev/null || true",
   "remoteUser": "vscode",
   "customizations": {
     "vscode": {
