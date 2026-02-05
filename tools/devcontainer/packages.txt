@@ -1,11 +1,6 @@
-# Build tools
-build-essential
+# AI tools dependencies
 curl
-git
-
-# Development tools
 zsh
-neovim
 fzf
 ripgrep
 jq
