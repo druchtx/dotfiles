@@ -1,17 +1,11 @@
-# Build tools
-build-essential
+# Infrastructure (required for dotfiles setup)
 curl
 git
-
-# Python (required for dot tool)
 python3
 
-# Development tools
+# AI tools dependencies
 zsh
-tmux
 fzf
 ripgrep
 jq
-bc
 unzip
-fontconfig

@@ -19,11 +19,10 @@
       "configureZshAsDefaultShell": true,
       "installOhMyZsh": false,
       "installOhMyZshConfig": false
-    },
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+    }
   },
   // Create empty files if they don't exist (prevents mount failures)
-  "initializeCommand": "bash -c '[ -f ~/.config/git/config.local ] || touch ~/.config/git/config.local; [ -f ~/.localrc ] || touch ~/.localrc'",
+  "initializeCommand": "bash -c '[ -f ~/.localrc ] || touch ~/.localrc'",
   // Copy SSH keys to Docker volume (only if ~/.ssh exists)
   "onCreateCommand": "docker volume create ssh-keys 2>/dev/null || true && if [ -d ${localEnv:HOME}/.ssh ]; then docker run --rm -v ssh-keys:/ssh -v ${localEnv:HOME}/.ssh:/host-ssh alpine sh -c 'cp -r /host-ssh/* /ssh/ 2>/dev/null && chmod 755 /ssh && chmod 600 /ssh/* 2>/dev/null || true'; fi",
   // Setup dotfiles with mise tools (neovim, lazygit, etc.)
@@ -35,67 +34,9 @@
         "terminal.integrated.shell.linux": "/bin/zsh"
       },
       "extensions": [
-        // Git Extensions
-        "codezombiech.gitignore",
-        "donjayamanne.git-extension-pack",
-        "donjayamanne.githistory",
-        "eamodio.gitlens",
-        "github.vscode-pull-request-github",
-        "ziyasal.vscode-open-in-github",
-        // Python Extensions
-        "donjayamanne.python-environment-manager",
-        "donjayamanne.python-extension-pack",
-        "kevinrose.vsc-python-indent",
-        "ms-python.debugpy",
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "ms-python.vscode-python-envs",
-        "njpwerner.autodocstring",
-        "batisteo.vscode-django",
-        // JavaScript/TypeScript/React Extensions
-        "dbaeumer.vscode-eslint",
-        "jasonnutter.search-node-modules",
-        "jawandarajbir.react-vscode-extension-pack",
-        "ms-vscode.vscode-typescript-next",
-        "xabikos.javascriptsnippets",
-        "xabikos.reactsnippets",
-        "yandeu.five-server",
-        // Go Extensions
-        "golang.go",
-        "jinliming2.vscode-go-template",
-        // Other Languages
-        "hashicorp.terraform",
-        "kennylong.kubernetes-yaml-formatter",
-        "mathiasfrohlich.kotlin",
-        "tamasfe.even-better-toml",
-        "wholroyd.jinja",
-        // Docker & Containers
-        "docker.docker",
-        "ms-azuretools.vscode-containers",
-        "ms-azuretools.vscode-docker",
-        // Remote Development
-        "ms-vscode-remote.remote-containers",
-        "ms-vscode-remote.remote-ssh",
-        "ms-vscode-remote.remote-ssh-edit",
-        "ms-vscode.remote-explorer",
-        // Markdown Extensions
-        "bierner.markdown-mermaid",
-        "darkriszty.markdown-table-prettify",
-        "marvhen.reflow-markdown",
-        "mathematic.vscode-pdf",
-        "yzhang.markdown-all-in-one",
-        // General Tools & Utilities
-        "alefragnani.bookmarks",
-        "davidkol.fastcompare",
-        "emilast.logfilehighlighter",
-        "fill-labs.dependi",
-        "foxundermoon.shell-format",
-        "ibm.output-colorizer",
-        "ms-vscode.makefile-tools",
-        "ms-vsliveshare.vsliveshare",
-        "oderwat.indent-rainbow",
+        // AI Coding Assistants
         "rooveterinaryinc.roo-cline",
-        "usernamehw.errorlens",
+        // Editor
         "vscodevim.vim"
       ]
     }
@@ -103,8 +44,6 @@
   "mounts": [
     // Persistent home directory volume
     "source=vol-vsc-dc,target=/home/vscode,type=volume",
-    // Local git config (created by initializeCommand if missing)
-    "source=${localEnv:HOME}/.config/git/config.local,target=/home/vscode/.config/git/config.local,type=bind",
     // Local shell config (created by initializeCommand if missing)
     "source=${localEnv:HOME}/.localrc,target=/home/vscode/.localrc,type=bind",
     // SSH keys volume (populated by onCreateCommand)
