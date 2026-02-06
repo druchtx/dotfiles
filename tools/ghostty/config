@@ -1,0 +1,37 @@
+
+command = zsh -c "tmux attach || tmux new"
+# theme
+theme = Github Dark Dimmed
+window-theme = dark
+font-family = Fira Code
+font-style = Regular
+font-size = 13
+
+# window
+## normal
+window-padding-balance = true
+window-padding-x = 0
+window-padding-y = 0
+window-theme = auto
+macos-titlebar-style = hidden
+window-decoration = false
+# background-blur-radius = 15
+# background-opacity = 0.9
+# background-blur = true
+mouse-hide-while-typing
+
+
+# key binding
+## global
+keybind = global:ctrl+shift+/=toggle_quick_terminal
+
+# quick terminal
+quick-terminal-position = left
+quick-terminal-size = 35%
+keybind = cmd+\=new_split:right
+keybind = shift+cmd+\=new_split:down
+
+# keybind = ctrl+alt+j=goto_split:down
+# keybind = ctrl+alt+k=goto_split:up
+# keybind = ctrl+alt+h=goto_split:left
+# keybind = ctrl+alt+l=goto_split:right

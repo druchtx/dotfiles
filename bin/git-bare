@@ -1,0 +1,199 @@
+#!/bin/sh
+set -eu
+
+usage() {
+  cat <<'EOF'
+Usage: git-bare <command> [options]
+
+Commands:
+  clone <url> [--dir <dir>] [--branch <branch>]
+      Clone a remote repository as bare repo with worktree
+      
+  init <name> [--branch <branch>]
+      Initialize a new bare repository with worktree
+
+Options:
+  -d, --dir <dir>   Target directory name (clone only, default: derived from URL)
+  --branch <branch> Initial worktree branch (default: remote HEAD for clone, 'main' for init)
+  -h, --help        Show this help message
+
+Layout:
+  <dir>/.bare       Bare repository
+  <dir>/.git        Gitdir file pointing to .bare
+  <dir>/<branch>/   Worktree directory
+
+Examples:
+  git-bare clone git@github.com:user/repo.git
+  git-bare clone https://github.com/user/repo.git --dir myproject
+  git-bare clone git@github.com:user/repo.git --branch develop
+  
+  git-bare init myproject
+  git-bare init myproject --branch main
+
+Common worktree operations after setup:
+  cd myproject/main
+  git worktree add ../feature-x           # Add existing branch
+  git worktree add -b feature-y ../feature-y  # Create new branch
+  git worktree list                       # List all worktrees
+  git worktree remove ../feature-x        # Remove worktree
+
+EOF
+}
+
+die() {
+  echo "Error: $1" >&2
+  exit 1
+}
+
+# Parse subcommand
+if [ $# -lt 1 ]; then
+  usage
+  exit 0
+fi
+
+case "$1" in
+-h | --help)
+  usage
+  exit 0
+  ;;
+clone | init)
+  subcommand=$1
+  shift
+  ;;
+*)
+  die "Unknown command: $1"
+  ;;
+esac
+
+# git-bare clone
+do_clone() {
+  repo_url=
+  dir=
+  branch=
+
+  # Parse arguments
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    -d | --dir)
+      [ $# -lt 2 ] && die "--dir requires an argument"
+      dir=$2
+      shift 2
+      ;;
+    --branch)
+      [ $# -lt 2 ] && die "--branch requires an argument"
+      branch=$2
+      shift 2
+      ;;
+    -*)
+      die "Unknown option: $1"
+      ;;
+    *)
+      [ -n "$repo_url" ] && die "Multiple repository URLs provided"
+      repo_url=$1
+      shift
+      ;;
+    esac
+  done
+
+  # Validate required argument
+  [ -z "$repo_url" ] && die "Repository URL is required"
+
+  # Derive directory name from repo URL if not specified
+  if [ -z "$dir" ]; then
+    base=${repo_url##*/}
+    dir=${base%.git}
+  fi
+
+  repo_dir=$dir
+  bare_dir=$repo_dir/.bare
+
+  # Check if target already exists
+  [ -e "$repo_dir" ] && die "Target directory already exists: $repo_dir"
+
+  # Create directory and clone bare repo
+  mkdir -p "$repo_dir"
+  if [ -z "$branch" ]; then
+    branch=$(git ls-remote --symref "$repo_url" HEAD 2>/dev/null | awk '/^ref:/ {sub("refs/heads/","",$2); print $2; exit}')
+    [ -z "$branch" ] && branch=main
+  fi
+  git clone --bare --single-branch --branch "$branch" "$repo_url" "$bare_dir" || {
+    rm -rf "$repo_dir"
+    exit 1
+  }
+  # Ensure remote-tracking refs are populated under refs/remotes/origin/*
+  git --git-dir="$bare_dir" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+  git --git-dir="$bare_dir" fetch origin
+
+  # Create .git file pointing to bare repo
+  printf '%s\n' 'gitdir: .bare' >"$repo_dir/.git"
+
+  # Create worktree
+  worktree_path=$repo_dir/$branch
+  if git --git-dir="$bare_dir" show-ref --verify --quiet "refs/heads/$branch"; then
+    git --git-dir="$bare_dir" worktree add "$worktree_path" "$branch"
+  else
+    git --git-dir="$bare_dir" worktree add -b "$branch" "$worktree_path"
+  fi
+
+  echo "Cloned to: $repo_dir"
+  echo "Worktree: $worktree_path"
+}
+
+# git-bare init
+do_init() {
+  name=
+  branch=main
+
+  # Parse arguments
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    --branch)
+      [ $# -lt 2 ] && die "--branch requires an argument"
+      branch=$2
+      shift 2
+      ;;
+    -*)
+      die "Unknown option: $1"
+      ;;
+    *)
+      [ -n "$name" ] && die "Multiple directory names provided"
+      name=$1
+      shift
+      ;;
+    esac
+  done
+
+  # Validate required argument
+  [ -z "$name" ] && die "Directory name is required"
+
+  repo_dir=$name
+  bare_dir=$repo_dir/.bare
+
+  # Check if target already exists
+  [ -e "$repo_dir" ] && die "Target directory already exists: $repo_dir"
+
+  # Create directory and initialize bare repo
+  mkdir -p "$repo_dir"
+  git init --bare "$bare_dir"
+
+  # Create .git file pointing to bare repo
+  printf '%s\n' 'gitdir: .bare' >"$repo_dir/.git"
+
+  # Create worktree (will be empty, no initial commit)
+  worktree_path=$repo_dir/$branch
+  git --git-dir="$bare_dir" worktree add -b "$branch" "$worktree_path"
+
+  echo "Initialized bare repository: $repo_dir"
+  echo "Worktree: $worktree_path"
+  echo "Make your first commit to create the branch"
+}
+
+# Execute subcommand
+case "$subcommand" in
+clone)
+  do_clone "$@"
+  ;;
+init)
+  do_init "$@"
+  ;;
+esac

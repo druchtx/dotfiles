@@ -1,0 +1,55 @@
+# shortcut to this dotfiles path is $ZSH
+# !!! THIS ZSHRC ONLY TAKES EFFECT AFTER RUNNING THE ./bootstrap SCRIPT.
+if [[ -f ~/.dotrc ]]; then
+    export ZSH=$(cat ~/.dotrc)
+fi
+
+# Load global environment variables (PATH, EDITOR, etc.)
+source "$ZSH/system/env.zsh"
+
+# Load user-specific environment variables from ~/.localrc
+# This file is not tracked in git, so you can put personal settings here
+# such as API keys, custom paths, or machine-specific configurations
+if [[ -a ~/.localrc ]]
+then
+  source ~/.localrc
+fi
+
+setopt extendedglob nullglob
+# Recursively find all .zsh files, excluding system/env.zsh (loaded earlier)
+typeset -U config_files
+config_files=( $ZSH/**/*.zsh~*/system/env.zsh )
+unsetopt extendedglob nullglob
+
+# Load path files from all config files
+for file in ${(M)config_files:#*/path.zsh}
+do
+  source $file
+done
+
+# Load other files (excluding path and completion)
+for file in ${${config_files:#*/path.zsh}:#*/completion*.zsh}
+do
+  source $file
+done
+
+# initialize autocomplete here, otherwise functions won't be loaded
+autoload bashcompinit && bashcompinit
+autoload -Uz compinit && compinit
+
+# Load completion files
+for file in ${(M)config_files:#*/completion*.zsh}
+do
+    source "$file"
+done
+
+unset config_files
+
+# Better history
+# Credits to https://coderwall.com/p/jpj_6q/zsh-better-history-searching-with-arrow-keys
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+bindkey "^[[A" up-line-or-beginning-search # Up
+bindkey "^[[B" down-line-or-beginning-search # Down

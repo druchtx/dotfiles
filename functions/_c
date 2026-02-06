@@ -1,0 +1,5 @@
+#compdef c
+
+_files -W $WORK_ROOT -/
+
+# See further documentation in `functions/c`.
