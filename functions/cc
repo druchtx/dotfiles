@@ -1,0 +1,5 @@
+#!/bin/zsh
+#
+
+# Jump into a project directory (similar to `c` but scoped to $PROJECTS)
+cd "$PROJECTS/$1"

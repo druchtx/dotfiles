@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+pane_id="${1:-}"
+pane_command="${2:-}"
+
+case "$pane_command" in
+  zsh|bash|fish|sh)
+    tmux send-keys -t "$pane_id" ' $EDITOR; clear' C-m
+    ;;
+  *)
+    tmux display-popup -E -w 64 -h 7 "~/.dotfiles/tools/tmux/popup-message \"current pane is not a shell\" 0.6"
+    ;;
+esac

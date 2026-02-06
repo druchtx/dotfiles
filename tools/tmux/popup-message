@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+# display message at the very centre
+message="${1:-}"
+delay="${2:-1}"
+
+printf '\033[?25l'
+trap "printf '\033[?25h'" EXIT
+clear
+
+height="${LINES:-7}"
+width="${COLUMNS:-50}"
+row=$(( height / 2 ))
+padding=$(( (width - ${#message}) / 2 ))
+
+(( row < 1 )) && row=1
+(( padding < 0 )) && padding=0
+
+for _ in {1..$row}; do
+  printf '\n'
+done
+
+printf '%*s%s\n' "$padding" '' "$message"
+sleep "$delay"

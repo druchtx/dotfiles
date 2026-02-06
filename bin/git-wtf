@@ -1,0 +1,600 @@
+#!/usr/bin/env elixir
+
+Mix.install([
+  {:yamel, "~> 2.0.4"}
+])
+
+
+defmodule GitWtf do
+  @key """
+  KEY:
+  () branch only exists locally
+  {} branch only exists on a remote repo
+  [] branch exists locally and remotely
+
+  x merge occurs both locally and remotely
+  ~ merge occurs only locally
+    (space) branch isn't merged in
+
+  (It's possible for merges to occur remotely and not locally, of course, but
+  that's a less common case and git-wtf currently doesn't display anything
+  special for it.)
+  """
+
+  @usage """
+  Usage: git wtf [branch+] [options]
+
+  If [branch] is not specified, git-wtf will use the current branch. The possible
+  [options] are:
+
+    -l, --long          include author info and date for each commit
+    -a, --all           show all branches across all remote repos, not just
+                        those from origin
+    -A, --all-commits   show all commits, not just the first 5
+    -s, --short         don't show commits
+    -k, --key           show key
+    -r, --relations     show relation to features / integration branches
+        --dump-config   print out current configuration and exit
+
+  git-wtf uses some heuristics to determine which branches are integration
+  branches, and and which are feature branches. (Specifically, it assumes the
+  integration branches are named "master", "next" and "edge".) If it guesses
+  incorrectly, you will have to create a .git-wtfrc file.
+
+  To start building a configuration file, run "git-wtf --dump-config >
+  .git-wtfrc" and edit it. The config file is a YAML file that specifies the
+  integration branches, any branches to ignore, and the max number of commits to
+  display when --all-commits isn't used.  git-wtf will look for a .git-wtfrc file
+  starting in the current directory, and recursively up to the root.
+
+  IMPORTANT NOTE: all local branches referenced in .git-wtfrc must be prefixed
+  with heads/, e.g. "heads/master". Remote branches must be of the form
+  remotes/<remote>/<branch>.
+  """
+
+
+  @config_fn ".git-wtfrc"
+
+  # --- Main entry point (for escript) ---
+  def main(argv \\ System.argv()) do
+    if Enum.member?(argv, "--help") || Enum.member?(argv, "-h") do
+      IO.puts(@usage)
+      System.halt(0)
+    end
+
+    if Enum.member?(argv, "--copyright") do
+      IO.puts("""
+        git-wtf Copyright 2008--2009 William Morgan <wmorgan at the masanjin dot nets>.
+        This program is free software: you can redistribute it and/or modify it
+        under the terms of the GNU General Public License as published by the Free
+        Software Foundation, either version 3 of the License, or (at your option)
+        any later version.
+
+        This program is distributed in the hope that it will be useful, but WITHOUT
+        ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+        FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+        more details.
+
+        You can find the GNU General Public License at: http://www.gnu.org/licenses/
+        """)
+      System.halt(0)
+    end
+
+
+    # Parse arguments
+    {options, branches_to_check, unknown_args} = parse_args(argv)
+
+    # Handle unknown arguments
+    if not Enum.empty?(unknown_args) do
+      IO.puts(:stderr, "Error: unknown argument #{hd(unknown_args)}.")
+      System.halt(1)
+    end
+
+    # Load configuration
+    config = load_config()
+
+    # Handle --dump-config
+    if options[:dump_config] do
+      # 使用 Yaml.encode
+      IO.puts(Yamel.encode!(config))
+      System.halt(0)
+    end
+
+    want_color =
+      color_wtf_output =
+        case run_git_cmd(~s(config color.wtf)) do
+          {:ok, output, _} -> String.trim(output)
+          _ -> ""
+        end
+
+      final_color_config_value =
+        if color_wtf_output != "" do
+          color_wtf_output
+        else
+          case run_git_cmd(~s(config color.ui)) do
+            {:ok, output, _} -> String.trim(output)
+            _ -> ""
+          end
+        end
+
+      case final_color_config_value do
+        "true" -> true
+        "auto" -> IO.ANSI.enabled?()
+        _ -> false
+      end
+
+    run(options, config, want_color, branches_to_check)
+  end
+
+  # --- Option Parsing ---
+  defp parse_args(argv) do
+    options = %{
+      long: false,
+      short: false,
+      all: false,
+      all_commits: false,
+      dump_config: false,
+      key: false,
+      relations: false,
+      help: false
+    }
+
+    {options, branches, unknown_args} =
+      Enum.reduce(argv, {options, [], []}, fn
+        "--help", {opts, branches, unknown} -> {%{opts | help: true}, branches, unknown}
+        "-h", {opts, branches, unknown} -> {%{opts | help: true}, branches, unknown}
+        "--long", {opts, branches, unknown} -> {%{opts | long: true}, branches, unknown}
+        "-l", {opts, branches, unknown} -> {%{opts | long: true}, branches, unknown}
+        "--short", {opts, branches, unknown} -> {%{opts | short: true}, branches, unknown}
+        "-s", {opts, branches, unknown} -> {%{opts | short: true}, branches, unknown}
+        "--all", {opts, branches, unknown} -> {%{opts | all: true}, branches, unknown}
+        "-a", {opts, branches, unknown} -> {%{opts | all: true}, branches, unknown}
+        "--all-commits", {opts, branches, unknown} -> {%{opts | all_commits: true}, branches, unknown}
+        "-A", {opts, branches, unknown} -> {%{opts | all_commits: true}, branches, unknown}
+        "--dump-config", {opts, branches, unknown} -> {%{opts | dump_config: true}, branches, unknown}
+        "--key", {opts, branches, unknown} -> {%{opts | key: true}, branches, unknown}
+        "-k", {opts, branches, unknown} -> {%{opts | key: true}, branches, unknown}
+        "--relations", {opts, branches, unknown} -> {%{opts | relations: true}, branches, unknown}
+        "-r", {opts, branches, unknown} -> {%{opts | relations: true}, branches, unknown}
+        # 修复点：将 `when` 守卫移除，并在内部使用 `if`
+        arg, {opts, branches, unknown} ->
+          if String.starts_with?(arg, "--") do
+            {opts, branches, [arg | unknown]} # Unknown flag
+          else
+            {opts, [arg | branches], unknown} # Branch argument
+          end
+      end)
+
+    {options, Enum.reverse(branches), Enum.reverse(unknown_args)}
+  end
+
+  # --- File Utilities ---
+  # Searches for a file upwards from the current directory
+  defp find_file(filename) do
+    current_dir = File.cwd!()
+    do_find_file_up(filename, current_dir)
+  end
+
+  defp do_find_file_up(filename, current_search_dir) do
+    candidate_path = Path.join(current_search_dir, filename)
+    if File.exists?(candidate_path) do
+      candidate_path
+    else
+      parent_dir = Path.dirname(current_search_dir)
+      # If parent_dir is the same as current_search_dir, we've reached the root
+      if parent_dir == current_search_dir do
+        nil
+      else
+        do_find_file_up(filename, parent_dir)
+      end
+    end
+  end
+
+  defp load_config do
+    default_config = %{
+      "integration-branches" => ["heads/master", "heads/next", "heads/edge"],
+      "ignore" => [],
+      "max_commits" => 5
+    }
+
+    case find_file(@config_fn) do
+      nil ->
+        default_config
+      path ->
+        case File.read(path) do
+          {:ok, content} ->
+            case Yamel.decode!(content) do
+              {:ok, config_from_file} when is_map(config_from_file) ->
+                config_from_file =
+                  if Map.has_key?(config_from_file, "versions") do
+                    Map.put(config_from_file, "integration-branches", Map.fetch!(config_from_file, "versions"))
+                  else
+                    config_from_file
+                  end
+
+                Map.merge(default_config, config_from_file)
+              _ ->
+                IO.puts(:stderr, "Warning: Could not parse #{@config_fn}, using default configuration.")
+                default_config
+            end
+          {:error, reason} ->
+            IO.puts(:stderr, "Warning: Could not read #{@config_fn}: #{reason}, using default configuration.")
+            default_config
+        end
+    end
+  end
+
+  # --- Color Functions ---
+  defp colorize(text, color_code, options), do: (if options[:color], do: "\e[#{color_code}m#{text}\e[0m", else: text)
+
+  defp red(s, options), do: colorize(s, "31", options)
+  defp green(s, options), do: colorize(s, "32", options)
+  defp yellow(s, options), do: colorize(s, "33", options)
+  defp cyan(s, options), do: colorize(s, "36", options)
+  defp grey(s, options), do: colorize(s, "1;30", options)
+  defp purple(s, options), do: colorize(s, "35", options)
+
+  # --- Git Command Execution ---
+  defp run_git_cmd(args_string) do
+    # Ruby's backticks suppress stderr. System.cmd can separate stdout/stderr or merge.
+    # We'll merge stderr to stdout to mimic backticks for simpler parsing.
+    args = String.split(args_string, " ", trim: true)
+    case System.cmd("git", args, stderr_to_stdout: true) do
+      {output, 0} -> {:ok, output, 0}
+      {output, exit_code} -> {:error, output, exit_code}
+    end
+  end
+
+  defp run_git_log(from, to, options) do
+    format = if options[:long] do
+      "--pretty=format:\"- %s [#{yellow("%h", options)}; %ar]\""
+    else
+      "--pretty=format:\"- %s [#{yellow("%h", options)}]\""
+    end
+    cmd = "log #{format} #{from}..#{to}"
+    case run_git_cmd(cmd) do
+      {:ok, output, _} -> String.split(output, ~r/[\r\n]+/, trim: true)
+      {:error, _, _} -> [] # Return empty list if command fails
+    end
+  end
+
+  # --- Core Logic ---
+  defp pluralize(count, word) do
+    "#{count} #{word}" <> if count != 1, do: "s", else: ""
+  end
+
+  defp commits_between(from, to, options) do
+    run_git_log(from, to, options)
+  end
+
+  defp show_commits(commits, options, prefix \\ "    ") do
+    if Enum.empty?(commits) do
+      IO.puts "#{prefix} none"
+    else
+      max = if options[:all_commits], do: Enum.count(commits), else: options[:config]["max_commits"]
+      max = if max == Enum.count(commits) - 1, do: max - 1, else: max # never show "and 1 more"
+      max = max |> max(0) # Ensure max is not negative
+
+      Enum.take(commits, max)
+      |> Enum.each(&IO.puts("#{prefix}#{&1}"))
+
+      if Enum.count(commits) > max do
+        IO.puts grey("#{prefix}... and #{Enum.count(commits) - max} more (use -A to see all).", options)
+      end
+    end
+  end
+
+  defp ahead_behind_string(ahead, behind) do
+    parts = []
+    parts = if not Enum.empty?(ahead), do: ["#{pluralize(Enum.count(ahead), "commit")} ahead"] ++ parts, else: parts
+    parts = if not Enum.empty?(behind), do: ["#{pluralize(Enum.count(behind), "commit")} behind"] ++ parts, else: parts
+    Enum.join(parts, "; ")
+  end
+
+  defp widget(merged_in, remote_only, local_only, local_only_merge, options) do
+    {left, right} = cond do
+      remote_only -> {"{", "}"}
+      local_only -> {"(", ")"}
+      true -> {"[", "]"}
+    end
+    middle = cond do
+      merged_in and local_only_merge -> green("~", options)
+      merged_in -> green("x", options)
+      true -> " "
+    end
+    IO.write [left, middle, right]
+  end
+
+  defp show_branch_status(b, options) do
+    have_both = b[:local_branch] && b[:remote_branch]
+
+    {pushc, pullc, oosync} =
+      if have_both do
+        x = commits_between(b[:remote_branch], b[:local_branch], options)
+        y = commits_between(b[:local_branch], b[:remote_branch], options)
+        {x, y, (not Enum.empty?(x) and not Enum.empty?(y))}
+      else
+        {[], [], false}
+      end
+
+    if b[:local_branch] do
+      IO.puts "Local branch: " <> green(String.replace(b[:local_branch], "heads/", ""), options)
+
+      if have_both do
+        if Enum.empty?(pushc) do
+          widget(true, false, false, false, options)
+          IO.puts " in sync with remote"
+        else
+          action = if oosync, do: "push after rebase / merge", else: "push"
+          widget(false, false, false, false, options)
+          IO.puts " NOT in sync with remote (you should #{action})"
+          unless options[:short], do: show_commits(pushc, options)
+        end
+      end
+    end
+
+    if b[:remote_branch] do
+      IO.puts "Remote branch: #{cyan(b[:remote_branch], options)} (#{b[:remote_url]})"
+
+      if have_both do
+        if Enum.empty?(pullc) do
+          widget(true, false, false, false, options)
+          IO.puts " in sync with local"
+        else
+          action = if Enum.empty?(pushc), do: "merge", else: "rebase / merge"
+          widget(false, false, false, false, options)
+          IO.puts " NOT in sync with local (you should #{action})"
+          unless options[:short], do: show_commits(pullc, options)
+        end
+      end
+    end
+
+    if oosync do
+      IO.puts "\n#{red("WARNING", options)}: local and remote branches have diverged. A merge will occur unless you rebase."
+    end
+  end
+
+  defp show_relations(b, all_branches, options) do
+    integration_branches = options[:config]["integration-branches"]
+
+    {ibs, fbs} =
+      Enum.split_with(all_branches, fn {_name, br} ->
+        Enum.member?(integration_branches, br[:local_branch]) or Enum.member?(integration_branches, br[:remote_branch])
+      end)
+
+    if Enum.member?(integration_branches, b[:local_branch]) do # Current branch is an integration branch
+      unless Enum.empty?(fbs), do: IO.puts "\nFeature branches:"
+      Enum.each(fbs, fn {_name, br} ->
+        # Skip if branch is explicitly ignored or marked ignore
+        if (not (br[:local_branch] and Enum.member?(options[:config]["ignore"], br[:local_branch]))) and
+           (not (br[:remote_branch] and Enum.member?(options[:config]["ignore"], br[:remote_branch]))) and
+           not br[:ignore] do
+
+          local_only = is_nil(br[:remote_branch])
+          remote_only = is_nil(br[:local_branch])
+          name = cond do
+            local_only -> purple(br[:name], options)
+            remote_only -> cyan(br[:name], options)
+            true -> green(br[:name], options)
+          end
+
+          head = if remote_only, do: br[:remote_branch], else: br[:local_branch]
+
+          remote_ahead = if b[:remote_branch], do: commits_between(b[:remote_branch], head, options), else: []
+          local_ahead = if b[:local_branch], do: commits_between(b[:local_branch], head, options), else: []
+
+          if Enum.empty?(local_ahead) and Enum.empty?(remote_ahead) do
+            widget(true, remote_only, local_only, false, options)
+            IO.puts " #{name} #{if local_only, do: "(local-only) ", else: ""}is merged in"
+          else if Enum.empty?(local_ahead) do
+            widget(true, remote_only, local_only, true, options)
+            IO.puts " #{name} merged in (only locally)"
+          else
+            # Ruby had a commented out 'behind' calculation here. Elixir won't include it unless needed.
+            ahead_commits = if remote_only, do: remote_ahead, else: local_ahead
+            widget(false, remote_only, local_only, false, options)
+            IO.puts " #{name} #{if local_only, do: "(local-only) ", else: ""}is NOT merged in (#{ahead_behind_string(ahead_commits, [])})"
+            unless options[:short], do: show_commits(ahead_commits, options)
+          end
+          end
+        end
+      end)
+    else # Current branch is a feature branch (or untracked)
+      unless Enum.empty?(ibs), do: IO.puts "\nIntegration branches:"
+      Enum.sort_by(ibs, fn {v, _br} -> v end) # Sort by branch name
+      |> Enum.each(fn {v, br} ->
+        if (not (br[:local_branch] and Enum.member?(options[:config]["ignore"], br[:local_branch]))) and
+           (not (br[:remote_branch] and Enum.member?(options[:config]["ignore"], br[:remote_branch]))) and
+           not br[:ignore] do
+
+          # local_only and remote_only are not used for widget here in Ruby, so keep consistent
+          name = if is_nil(br[:remote_branch]), do: green(br[:name], options), else: cyan(br[:name], options)
+
+          ahead = commits_between(v, (b[:local_branch] || b[:remote_branch]), options)
+          if Enum.empty?(ahead) do
+            widget(true, false, false, false, options)
+            IO.puts " merged into #{name}"
+          else
+            # Ruby had a commented out 'behind' calculation here. Elixir won't include it unless needed.
+            widget(false, false, false, false, options)
+            IO.puts " NOT merged into #{name} (#{pluralize(Enum.count(ahead), "commit")} ahead)"
+            unless options[:short], do: show_commits(ahead, options)
+          end
+        end
+      end)
+    end
+  end
+
+  # --- Main Run Logic ---
+  defp run(options, config, want_color, branches_to_check) do
+    options = Map.put(options, :color, want_color)
+    options = Map.put(options, :config, config)
+
+    # 1. Index registered remotes
+    remotes =
+      run_git_cmd(~s(config --get-regexp ^remote\.\*\.url))
+      |> case do
+        {:ok, output, _} ->
+          String.split(output, ~r/[\r\n]+/, trim: true)
+          |> Enum.reduce(%{}, fn l, acc ->
+            case Regex.run(~r/^remote\.(.+?)\.url (.+)$/, l) do
+              [_, remote_name, url] -> Map.put(acc, remote_name, url)
+              _ -> acc
+            end
+          end)
+        _ -> %{} # Return empty map on error
+      end
+
+    # 2. Index followed branches (tracking branches)
+    branches =
+      run_git_cmd(~s(config --get-regexp ^branch\.))
+      |> case do
+        {:ok, output, _} ->
+          String.split(output, ~r/[\r\n]+/, trim: true)
+          |> Enum.reduce(%{}, fn l, acc ->
+            cond do
+              Regex.run(~r/^branch\.(.*?)\.remote (.+)$/, l) ->
+                [_, name, remote] = Regex.run(~r/^branch\.(.*?)\.remote (.+)$/, l)
+                branch_map = Map.get(acc, name, %{})
+                Map.put(acc, name, Map.merge(branch_map, %{remote: remote, remote_url: Map.get(remotes, remote)}))
+              Regex.run(~r/^branch\.(.*?)\.merge ((refs\/)?heads\/)?(.+)$/, l) ->
+                [_, name, _, _, remote_branch] = Regex.run(~r/^branch\.(.*?)\.merge ((refs\/)?heads\/)?(.+)$/, l)
+                branch_map = Map.get(acc, name, %{})
+                Map.put(acc, name, Map.merge(branch_map, %{remote_mergepoint: remote_branch}))
+              true -> acc
+            end
+          end)
+        _ -> %{} # Return empty map on error
+      end
+
+    # 3. Index all branches (local and remote from git show-ref)
+    {all_branches_map, remote_branches_seen} =
+      run_git_cmd(~s(show-ref))
+      |> case do
+        {:ok, output, _} ->
+          String.split(output, ~r/[\r\n]+/, trim: true)
+          |> Enum.reduce({branches, %{}}, fn l, {acc_branches, acc_remote_map} ->
+            [sha1, ref] = String.split(l, " refs/", parts: 2)
+
+            cond do
+              Regex.run(~r/^heads\/(.+)$/, ref) -> # local branch
+                [_, name] = Regex.run(~r/^heads\/(.+)$/, ref)
+                if name == "HEAD" do
+                  {acc_branches, acc_remote_map}
+                else
+                  branch_map = Map.get(acc_branches, name, %{})
+                  {Map.put(acc_branches, name, Map.merge(branch_map, %{name: name, local_branch: ref, sha1: sha1})), acc_remote_map}
+                end
+              Regex.run(~r/^remotes\/(.+?)\/(.+)$/, ref) -> # remote branch
+                [_, remote, name] = Regex.run(~r/^remotes\/(.+?)\/(.+)$/, ref)
+                remote_branches_map_updated = Map.put(acc_remote_map, "#{remote}/#{name}", true)
+                if name == "HEAD" do
+                  {acc_branches, remote_branches_map_updated}
+                else
+                  branch_key =
+                    if Map.has_key?(acc_branches, name) && Map.get(acc_branches, name)[:remote] == remote do
+                      name # Use simple name if it's a tracking remote
+                    else
+                      "#{remote}/#{name}" # Use full name for untracked remotes
+                    end
+
+                  ignore = not (options[:all] or remote == "origin") # Original Ruby logic
+
+                  branch_map = Map.get(acc_branches, branch_key, %{})
+                  {Map.put(acc_branches, branch_key, Map.merge(branch_map, %{
+                    name: name,
+                    remote: remote,
+                    remote_branch: "#{remote}/#{name}",
+                    remote_url: Map.get(remotes, remote),
+                    ignore: ignore
+                  })), remote_branches_map_updated}
+                end
+              true -> {acc_branches, acc_remote_map}
+            end
+          end)
+        _ -> {branches, %{}} # Return current branches and empty remote map on error
+      end
+
+    # 4. Assemble remotes (link local branches to their actual remote counterparts if tracking)
+    assembled_branches =
+      Enum.reduce(all_branches_map, all_branches_map, fn {k, b}, acc ->
+        if Map.has_key?(b, :remote) && Map.has_key?(b, :remote_mergepoint) do
+          remote_branch_ref =
+            if b[:remote] == "." do # Local remote (unlikely in practice, but `git config` allows it)
+              b[:remote_mergepoint]
+            else
+              t = "#{b[:remote]}/#{b[:remote_mergepoint]}"
+              if Map.get(remote_branches_seen, t), do: t, else: nil # only if remote branch actually exists
+            end
+          Map.put(acc, k, Map.put(b, :remote_branch, remote_branch_ref))
+        else
+          acc
+        end
+      end)
+
+    show_dirty = Enum.empty?(branches_to_check)
+    targets =
+      if Enum.empty?(branches_to_check) do
+        current_branch =
+          run_git_cmd(~s(symbolic-ref HEAD))
+          |> case do
+            {:ok, output, _} ->
+              String.trim(String.replace(output, "refs/heads/", ""))
+            _ ->
+              IO.puts(:stderr, "Error: Could not determine current branch (git symbolic-ref HEAD failed).")
+              System.halt(1)
+          end
+        [current_branch]
+      else
+        Enum.map(branches_to_check, &String.replace(&1, "heads/", "")) # Allow `heads/branch_name` input
+      end
+      |> Enum.map(fn t ->
+        case Map.get(assembled_branches, t) do
+          nil ->
+            IO.puts(:stderr, "Error: can't find branch #{inspect(t)}.")
+            System.halt(1)
+          branch_data -> branch_data
+        end
+      end)
+
+    Enum.each(targets, fn t ->
+      show_branch_status(t, options)
+      if options[:relations] or is_nil(t[:remote_branch]) do # Show relations if explicitly requested or if it's a non-tracking branch
+        show_relations(t, assembled_branches, options)
+      end
+    end)
+
+    # Check for modified/uncommitted files
+    modified_output =
+      case run_git_cmd(~s(ls-files -m)) do
+        {:ok, output, _} -> String.trim(output)
+        _ -> ""
+      end
+    modified = show_dirty and (modified_output != "")
+
+    uncommitted_output =
+      case run_git_cmd(~s(diff-index --cached HEAD)) do
+        {:ok, output, _} -> String.trim(output)
+        _ -> ""
+      end
+    uncommitted = show_dirty and (uncommitted_output != "")
+
+
+    if options[:key] do
+      IO.puts("")
+      IO.puts(@key)
+    end
+
+    if modified or uncommitted do
+      IO.puts("")
+    end
+    if modified do
+      IO.puts "#{red("NOTE", options)}: working directory contains modified files."
+    end
+    if uncommitted do
+      IO.puts "#{red("NOTE", options)}: staging area contains staged but uncommitted files."
+    end
+  end
+end
+
+GitWtf.main()

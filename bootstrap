@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+
+echo "🚀 Bootstrapping dotfiles..."
+
+# Detect platform
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  PLATFORM="darwin"
+  echo "📍 Platform: macOS"
+# else
+#   PLATFORM="linux"
+#   echo "📍 Platform: Linux"
+fi
+
+# Platform-specific setup
+if [[ "$PLATFORM" == "darwin" ]]; then
+  # macOS: Install Homebrew
+  if ! command -v brew &>/dev/null; then
+    echo "📦 Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    echo "✅ Homebrew installed"
+  else
+    echo "✅ Homebrew already installed"
+  fi
+
+fi
+
+# Run dot init
+echo "🔧 Initializing dotfiles..."
+./bin/dot init
+
+# Link managed dotfiles, backing up existing targets before replacing them.
+echo "🔗 Linking dotfiles..."
+./bin/dot link --force
+
+echo ""
+echo "✅ Bootstrap complete!"
+echo ""
+echo "Next steps:"
+echo "  1. Edit .dotenv if you have template variables"
+echo "  2. Re-run 'dot link --force' after changing managed files if needed"
+if [[ "$PLATFORM" == "darwin" ]]; then
+  echo "  3. Run 'dot sync' to install Homebrew packages"
+fi

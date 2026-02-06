@@ -1,0 +1,18 @@
+{
+  "$schema": "https://platform.claude.com/docs/schemas/claude-code/keybindings.json",
+  "$docs": "https://code.claude.com/docs/en/keybindings",
+  "bindings": [
+    {
+      "context": "Chat",
+      "bindings": {
+        "ctrl+e": "chat:externalEditor",
+        "ctrl+r": "chat:retry",
+        "ctrl+k": "chat:clear",
+        "ctrl+t": "chat:toggleTaskList",
+        "ctrl+p": "chat:pinMessage",
+        "ctrl+l": "chat:newConversation",
+        "ctrl+u": null
+      }
+    }
+  ]
+}

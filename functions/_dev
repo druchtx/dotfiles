@@ -1,0 +1,10 @@
+#compdef dev
+
+local work_dirs projects_dirs
+
+work_dirs=(${WORK_ROOT}/*(:t))
+work_dirs=(${work_dirs:#projects})
+projects_dirs=(${PROJECTS}/*/(:t))
+
+compadd -J projects -X "%B%F{3}> projects:%f%b" -a projects_dirs
+compadd -J work -X "%B%F{2}> workspace:%f%b" -a work_dirs

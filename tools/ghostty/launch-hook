@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+set -euo pipefail
+
+# Ghostty runs this launch hook for each terminal surface.
+normal_session="M"
+quick_session="Q"
+
+attach_quick() {
+  exec tmux new-session -A -s "$quick_session"
+}
+
+attach_normal() {
+  exec tmux new-session -A -s "$normal_session"
+}
+
+case "${GHOSTTY_QUICK_TERMINAL:-}" in
+  1 | true | TRUE | yes | YES)
+  attach_quick
+  ;;
+  *)
+  attach_normal
+  ;;
+esac
