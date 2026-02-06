@@ -1,18 +1,254 @@
-# mise config
-# DOTFILE_CONFIG_PATH: ~/.config/mise/config.toml
+# ============================================================================
+# mise Configuration
+# ============================================================================
+# Language/tool-specific environment variables
+#
+# Note: Global settings (EDITOR, PATH, etc.) are managed in:
+#       ~/Workspace/projects/dotfiles/system/env.zsh
+#
+# Execution order:
+#   1. Shell startup -> system/env.zsh (global settings)
+#   2. mise activate -> this file (language settings)
+#   3. mise hook-env runs before each prompt
+#
+# Template variables available:
+#   {{env.HOME}}       - User home directory
+#   {{env.USER}}       - Username
+#   {{config_root}}    - Directory containing this config
+# ============================================================================
 
+# ============================================================================
+# Tools / Language Versions
+# ============================================================================
 [tools]
-go  = "1.25.5"
-python = "3.14"
-node = "lts"
+# Elixir ecosystem
+elixir = "1.19.4-otp-28"
+erlang = "28"
+
+# Systems languages
+go = "1.25.5"
 rust = "latest"
 zig = "latest"
-erlang = "latest"
-elixir = "1.19.4-otp-28"
+swift = "latest"
+
+# JVM languages
 java = "corretto-21"
 groovy = "5.0.3"
+
+# Scripting languages
+python = "3.14"
+node = "lts"
+
+# DevOps tools
 gcloud = "539.0.0"
 terraform = "1.14"
 
+# ============================================================================
+# Global Settings
+# ============================================================================
 [settings]
+# Use .tool-versions, .ruby-version, .node-version, etc.
 idiomatic_version_file = true
+
+# Enable experimental features (needed for Swift)
+experimental = true
+
+# Uncomment to enable verbose logging
+# verbose = false
+
+# Uncomment to disable version checking
+# disable_version_check = true
+
+# ============================================================================
+# Environment Variables
+# ============================================================================
+# Organized by language/tool for easy maintenance
+# mise reruns hook-env before each prompt, so these are always fresh
+#
+# IMPORTANT: PATH Management
+#   - You DON'T need to manually add tool bins to PATH
+#   - mise automatically adds tool bin directories based on [tools] section
+#   - Examples of what mise adds automatically:
+#     • Elixir → $MIX_HOME/.mix/escripts
+#     • Go     → $GOBIN (or $GOPATH/bin if GOBIN not set)
+#     • Python → python site-packages bin
+#     • Node   → node_modules/.bin
+#     • Java   → $JAVA_HOME/bin
+#   - Just set the env vars below, mise handles PATH!
+# ============================================================================
+
+[env]
+
+# ----------------------------------------------------------------------------
+# Elixir / Erlang
+# ----------------------------------------------------------------------------
+# mise automatically adds to PATH:
+#   • ~/.local/share/mise/installs/elixir/<version>/bin
+#   • $MIX_HOME/.mix/escripts (for Mix tasks installed globally)
+#
+# Shared Mix home across all Elixir versions (version-isolated via subdirs)
+MIX_HOME = "{{env.HOME}}/.mix"
+MIX_ARCHIVES = "{{env.HOME}}/.mix/archives"
+
+# Enable Erlang shell history
+ERL_AFLAGS = "-kernel shell_history enabled"
+
+# Uncomment for hex mirror/custom registry
+# HEX_MIRROR = "https://hexpm.upyun.com"
+# HEX_CDN = "https://hexpm.upyun.com"
+
+# Uncomment for custom Mix environment
+# MIX_ENV = "dev"
+
+# Uncomment to skip dependency compilation warnings
+# MIX_QUIET = "1"
+
+# ----------------------------------------------------------------------------
+# Go
+# ----------------------------------------------------------------------------
+# mise automatically adds to PATH:
+#   • ~/.local/share/mise/installs/go/<version>/bin (Go toolchain)
+#   • $GOBIN (Go binaries you install with `go install`)
+#
+GOPATH = "{{env.HOME}}/.go"
+GOBIN = "{{env.HOME}}/.go/bin"
+
+# Go proxy for faster downloads (with fallback to direct)
+GOPROXY = "https://proxy.golang.org,direct"
+
+# Uncomment for private repositories (comma-separated patterns)
+# GOPRIVATE = "github.com/mycompany/*"
+
+# Uncomment to enable CGO
+# CGO_ENABLED = "1"
+
+# Uncomment for Go module mirror
+# GOSUMDB = "sum.golang.org"
+
+# ----------------------------------------------------------------------------
+# Node.js / JavaScript
+# ----------------------------------------------------------------------------
+# mise automatically adds to PATH:
+#   • ~/.local/share/mise/installs/node/<version>/bin (Node & npm)
+#   • $NPM_CONFIG_PREFIX/bin (global npm packages)
+#
+# Global npm packages location
+NPM_CONFIG_PREFIX = "{{env.HOME}}/.node-globals"
+
+# Uncomment for development mode
+# NODE_ENV = "development"
+
+# Uncomment to disable npm update notifier
+# NO_UPDATE_NOTIFIER = "1"
+
+# Uncomment for pnpm
+# PNPM_HOME = "{{env.HOME}}/.local/share/pnpm"
+
+# Uncomment for custom npm registry
+# NPM_CONFIG_REGISTRY = "https://registry.npmmirror.com"
+
+# ----------------------------------------------------------------------------
+# Python
+# ----------------------------------------------------------------------------
+# mise automatically adds to PATH:
+#   • ~/.local/share/mise/installs/python/<version>/bin (Python & pip)
+#   • Python site-packages bin (for packages installed with pip)
+#
+# Don't write .pyc files
+PYTHONDONTWRITEBYTECODE = "1"
+
+# Force unbuffered output (useful for logs)
+PYTHONUNBUFFERED = "1"
+
+# Require virtualenv for pip installs (prevents polluting system Python)
+PIP_REQUIRE_VIRTUALENV = "true"
+
+# Uncomment for custom pip index
+# PIP_INDEX_URL = "https://pypi.tuna.tsinghua.edu.cn/simple"
+
+# Uncomment for pipx home
+# PIPX_HOME = "{{env.HOME}}/.local/pipx"
+# PIPX_BIN_DIR = "{{env.HOME}}/.local/bin"
+
+# ----------------------------------------------------------------------------
+# Rust
+# ----------------------------------------------------------------------------
+# mise automatically adds to PATH:
+#   • ~/.local/share/mise/installs/rust/<version>/bin
+#   • $CARGO_HOME/bin (Rust binaries installed with `cargo install`)
+#
+# Note: mise usually sets these automatically, uncomment to override
+# CARGO_HOME = "{{env.HOME}}/.cargo"
+# RUSTUP_HOME = "{{env.HOME}}/.rustup"
+
+# Uncomment for Rust mirror (China)
+# RUSTUP_DIST_SERVER = "https://mirrors.ustc.edu.cn/rust-static"
+# RUSTUP_UPDATE_ROOT = "https://mirrors.ustc.edu.cn/rust-static/rustup"
+
+# ----------------------------------------------------------------------------
+# Swift
+# ----------------------------------------------------------------------------
+# mise automatically adds to PATH:
+#   • ~/.local/share/mise/installs/swift/<version>/usr/bin (Swift compiler)
+#   • $HOME/.swiftpm/bin (SwiftPM executables like `swift-format`)
+#
+# Note: If you have Xcode installed, you might want to use system Swift
+#       instead. To switch back, remove swift from [tools] section and
+#       use the swift/path.zsh shell config.
+
+# ----------------------------------------------------------------------------
+# Java / JVM
+# ----------------------------------------------------------------------------
+# mise automatically adds to PATH:
+#   • $JAVA_HOME/bin (java, javac, jar, etc.)
+#   • ~/.local/share/mise/installs/groovy/<version>/bin (if groovy installed)
+#
+# mise also sets JAVA_HOME automatically based on installed Java version
+#
+# Maven memory settings
+MAVEN_OPTS = "-Xmx2048m -XX:MaxPermSize=512m"
+
+# Uncomment for Gradle settings
+# GRADLE_OPTS = "-Xmx2048m -Dorg.gradle.daemon=true"
+
+# Uncomment for custom Maven repository
+# MAVEN_REPO = "{{env.HOME}}/.m2/repository"
+
+# ----------------------------------------------------------------------------
+# Zig
+# ----------------------------------------------------------------------------
+# Uncomment for custom Zig cache location
+# ZIG_GLOBAL_CACHE_DIR = "{{env.HOME}}/.cache/zig"
+
+# ----------------------------------------------------------------------------
+# Google Cloud SDK
+# ----------------------------------------------------------------------------
+# Python interpreter for gcloud
+CLOUDSDK_PYTHON = "python3"
+
+# Uncomment to disable usage reporting
+# CLOUDSDK_CORE_DISABLE_USAGE_REPORTING = "true"
+
+# Uncomment for custom config location
+# CLOUDSDK_CONFIG = "{{env.HOME}}/.config/gcloud"
+
+# ----------------------------------------------------------------------------
+# Terraform
+# ----------------------------------------------------------------------------
+# Uncomment for custom plugin directory
+# TF_PLUGIN_CACHE_DIR = "{{env.HOME}}/.terraform.d/plugin-cache"
+
+# Uncomment to disable color output
+# TF_CLI_ARGS = "-no-color"
+
+# ----------------------------------------------------------------------------
+# Other Common Tools
+# ----------------------------------------------------------------------------
+# Uncomment for custom Docker config
+# DOCKER_CONFIG = "{{env.HOME}}/.docker"
+
+# Uncomment for kubectl config
+# KUBECONFIG = "{{env.HOME}}/.kube/config"
+
+# Uncomment for custom SSH auth socket
+# SSH_AUTH_SOCK = "{{env.HOME}}/.ssh/auth-sock"
