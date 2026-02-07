@@ -1,11 +1,6 @@
 {
   "dotfiles": [
     {
-      "source": "langs/node/npmrc",
-      "target": "~/.npmrc",
-      "type": "file"
-    },
-    {
       "source": "tools/cobra-cli/cobra.yaml",
       "target": "~/.cobra.yaml",
       "type": "file"
@@ -109,6 +104,11 @@
     {
       "source": "tools/mise/mise.toml",
       "target": "~/.config/mise/config.toml",
+      "type": "file"
+    },
+    {
+      "source": "zsh/zlogin",
+      "target": "~/.zlogin",
       "type": "file"
     }
   ]
