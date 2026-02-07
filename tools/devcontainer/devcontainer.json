@@ -7,7 +7,7 @@
   "workspaceFolder": "/home/vscode/Workspace",
   "runArgs": [
     "--name",
-    "devcontainer"
+    "sandbox"
   ],
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
