@@ -15,6 +15,7 @@ brew "tree"
 brew "htop"
 brew "ack"
 brew "fzf"
+brew "fzf-tab"
 brew "jq"
 brew "yq"
 

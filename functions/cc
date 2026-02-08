@@ -1,7 +1,5 @@
 #!/bin/zsh
 #
 
-# Pick a project directory with fzf and cd into it
-local dir
-dir="$(command ls -1 "$PROJECTS" | fzf --prompt='project> ' --preview="command ls -1 -- \"${PROJECTS}\"/{}")"
-[[ -n "$dir" ]] && cd "$PROJECTS/$dir"
+# Jump into a project directory (similar to `c` but scoped to $PROJECTS)
+cd "$PROJECTS/$1"
