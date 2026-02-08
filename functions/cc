@@ -3,5 +3,5 @@
 
 # Pick a project directory with fzf and cd into it
 local dir
-dir="$(command ls -1 "$PROJECTS" | fzf --prompt='project> ')"
+dir="$(command ls -1 "$PROJECTS" | fzf --prompt='project> ' --preview="command ls -1 -- \"${PROJECTS}\"/{}")"
 [[ -n "$dir" ]] && cd "$PROJECTS/$dir"
