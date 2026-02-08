@@ -23,7 +23,7 @@ mouse-hide-while-typing
 
 # key binding
 ## global
-keybind = global:ctrl+shift+/=toggle_quick_terminal
+# keybind = global:ctrl+shift+/=toggle_quick_terminal
 
 # quick terminal
 quick-terminal-position = left
