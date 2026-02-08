@@ -65,6 +65,7 @@ cask "font-fira-code-nerd-font"
 
 # Browsers
 cask "google-chrome"
+cask "chatgpt-atlas"
 
 # Dev / Cloud
 cask "visual-studio-code"

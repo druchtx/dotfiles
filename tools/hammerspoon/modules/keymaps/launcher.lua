@@ -3,19 +3,31 @@
 -- ========================================
 
 local windowManager = require("modules.window")
+local defaultApp = require("modules.utils.default_app")
 
 -- Launch or focus an app, then position its main/focused window.
 -- position defaults to "center_keep_size" on the screen of the currently focused window.
 -- Use position = "none" to skip positioning.
-local function launchAppAt(appName, position)
+local function launchAppAt(item, position)
 	local activeWin = hs.window.focusedWindow()
 	local targetScreen = activeWin and activeWin:screen() or hs.screen.mainScreen()
 	local desiredPosition = position or "center_keep_size"
+	local appName = item.app
+	local bundleID = item.bundle_id
 
-	hs.application.launchOrFocus(appName)
+	if not appName and not bundleID then
+		hs.alert.show("No app name or bundle id")
+		return
+	end
+
+	if bundleID then
+		hs.application.launchOrFocusByBundleID(bundleID)
+	else
+		hs.application.launchOrFocus(appName)
+	end
 
 	local function tryMove(attempts)
-		local app = hs.application.get(appName)
+		local app = bundleID and hs.application.get(bundleID) or hs.application.get(appName)
 		local win = app and (app:focusedWindow() or app:mainWindow())
 		if win then
 			win:focus()
@@ -55,9 +67,9 @@ local launchers = {
 	{
 		mods = { "ctrl", "shift" },
 		key = "W",
-		app = "Safari",
+		bundle_id = defaultApp.Browser.bundleID(),
 		position = "none",
-		description = "Launch or focus Safari",
+		description = "Launch or focus Default Browser",
 	},
 	{
 		mods = { "ctrl", "shift" },
@@ -95,9 +107,9 @@ for _, item in ipairs(launchers) do
 		mods = item.mods,
 		key = item.key,
 		action = function()
-			launchAppAt(item.app, item.position)
+			launchAppAt(item, item.position)
 		end,
-		description = item.description or ("Launch or focus " .. item.app),
+		description = item.description or ("Launch or focus " .. (item.app or item.bundle_id or "app")),
 	})
 end
 
