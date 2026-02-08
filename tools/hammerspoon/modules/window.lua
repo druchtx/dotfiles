@@ -145,6 +145,22 @@ local windowPositions = {
 			h = targetHeight,
 		})
 	end,
+
+	-- Center without resizing
+	center_keep_size = function(win, screen)
+		saveFrame(win)
+
+		local frame = win:frame()
+		local centerX = screen.x + (screen.w - frame.w) / 2
+		local centerY = screen.y + (screen.h - frame.h) / 2
+
+		win:setFrame({
+			x = centerX,
+			y = centerY,
+			w = frame.w,
+			h = frame.h,
+		})
+	end,
 }
 
 -- ========================================
