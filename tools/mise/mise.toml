@@ -80,6 +80,16 @@ experimental = true
 [env]
 
 # ----------------------------------------------------------------------------
+# PATH Additions
+# ----------------------------------------------------------------------------
+# Add custom bin directories to PATH
+# mise automatically adds tool bins, but not custom env var bins like GOBIN
+_.path = [
+  "{{env.HOME}}/.go/bin",           # Go binaries (go install)
+  "{{env.HOME}}/.node-globals/bin"  # npm global packages
+]
+
+# ----------------------------------------------------------------------------
 # Elixir / Erlang
 # ----------------------------------------------------------------------------
 # mise automatically adds to PATH:
@@ -108,8 +118,8 @@ ERL_AFLAGS = "-kernel shell_history enabled"
 # ----------------------------------------------------------------------------
 # mise automatically adds to PATH:
 #   • ~/.local/share/mise/installs/go/<version>/bin (Go toolchain)
-#   • $GOBIN (Go binaries you install with `go install`)
 #
+# GOBIN is added to PATH via _.path at top of [env] section
 GOPATH = "{{env.HOME}}/.go"
 GOBIN = "{{env.HOME}}/.go/bin"
 
@@ -130,8 +140,8 @@ GOPROXY = "https://proxy.golang.org,direct"
 # ----------------------------------------------------------------------------
 # mise automatically adds to PATH:
 #   • ~/.local/share/mise/installs/node/<version>/bin (Node & npm)
-#   • $NPM_CONFIG_PREFIX/bin (global npm packages)
 #
+# NPM_CONFIG_PREFIX/bin is added to PATH via _.path at top of [env] section
 # Global npm packages location
 NPM_CONFIG_PREFIX = "{{env.HOME}}/.node-globals"
 

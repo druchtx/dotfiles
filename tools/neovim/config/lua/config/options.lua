@@ -8,6 +8,12 @@ vim.opt.linespace = 2
 
 -- Disable spell checking (doesn't work well with multiple languages)
 vim.opt.spell = false
+vim.api.nvim_create_autocmd({ "BufEnter", "FileType" }, {
+  desc = "Force-disable spell checking (override ftplugins)",
+  callback = function()
+    vim.opt_local.spell = false
+  end,
+})
 
 -- Line wrapping settings
 vim.opt.wrap = true -- Enable line wrapping
