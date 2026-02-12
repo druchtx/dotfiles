@@ -7,6 +7,8 @@ return {
     -- Explorer configuration (4:6 ratio, 85% width, 90% height)
     opts.picker.sources.explorer = {
       auto_close = true,
+      hidden = true,   -- Show hidden files
+      ignored = true,  -- Show gitignored files
       layout = {
         preview = true,
         layout = {

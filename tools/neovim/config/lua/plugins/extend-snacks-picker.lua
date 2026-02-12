@@ -5,9 +5,24 @@ return {
     opts.picker = opts.picker or {}
     opts.picker.enabled = true
 
-    -- Picker global settings (apply to all sources)
-    opts.picker.hidden = true -- Show hidden files in all pickers
-    opts.picker.ignored = true -- Show gitignored files in all pickers
-    opts.picker.follow = true -- Follow symlinks in all pickers
+    -- Global defaults (conservative - exclude hidden/ignored by default)
+    opts.picker.hidden = false
+    opts.picker.ignored = false
+    opts.picker.follow = true -- Follow symlinks
+
+    -- Source-specific overrides
+    opts.picker.sources = opts.picker.sources or {}
+
+    -- File pickers: show hidden and gitignored files
+    opts.picker.sources.files = {
+      hidden = true,
+      ignored = true,
+    }
+
+    -- Grep/search: exclude hidden and gitignored files (use defaults)
+    opts.picker.sources.grep = {
+      hidden = false,
+      ignored = false,
+    }
   end,
 }
