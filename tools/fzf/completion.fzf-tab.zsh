@@ -1,9 +1,21 @@
-# Enable fzf-tab (Homebrew install)
-if [[ -r "$FZF_TAB_HOME/fzf-tab.zsh" ]]; then
-  source "$FZF_TAB_HOME/fzf-tab.zsh"
-else
-  return
-fi
+# Enable fzf-tab (try common installation paths)
+fzf_tab_paths=(
+  "$FZF_TAB_HOME/fzf-tab.zsh"                           # Set by fzf.zsh
+  "$HOME/.local/share/fzf-tab/fzf-tab.zsh"              # XDG data dir
+  "$HOME/.oh-my-zsh/custom/plugins/fzf-tab/fzf-tab.zsh" # Oh My Zsh
+  "/usr/share/fzf-tab/fzf-tab.zsh"                      # System install
+)
+
+for fzf_tab_path in "${fzf_tab_paths[@]}"; do
+  if [[ -r "$fzf_tab_path" ]]; then
+    source "$fzf_tab_path"
+    break
+  fi
+done
+unset fzf_tab_path fzf_tab_paths
+
+# Exit if fzf-tab wasn't loaded
+[[ -n "$__fzf_tab_loaded" ]] || return 0
 
 # Use dedicated fzf-tab styles to avoid conflicts with global FZF_DEFAULT_OPTS.
 zstyle ':fzf-tab:*' use-fzf-default-opts no

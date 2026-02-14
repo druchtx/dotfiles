@@ -18,6 +18,7 @@ brew "fzf"
 brew "fzf-tab"
 brew "jq"
 brew "yq"
+brew "usage"  # CLI completion tool (required by mise)
 
 # Networking / Web
 brew "curl"

@@ -1,4 +1,5 @@
 {
+  "model": "sonnet",
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline-command.sh"
@@ -6,5 +7,5 @@
   "enabledPlugins": {
     "lua-lsp@claude-plugins-official": true
   },
-  "model": "sonnet"
+  "skipDangerousModePermissionPrompt": true
 }
