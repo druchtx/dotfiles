@@ -19,9 +19,10 @@ RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linu
     && rm nvim-linux-arm64.tar.gz
 
 # Install latest Lazygit
-RUN curl -LO https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_$(curl -s https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")')_linux_arm64.tar.gz \
-    && tar xzf lazygit_*_linux_arm64.tar.gz -C /usr/local/bin lazygit \
-    && rm lazygit_*_linux_arm64.tar.gz
+RUN LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | jq -r .tag_name | sed 's/v//') \
+    && curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_arm64.tar.gz" \
+    && tar xf lazygit.tar.gz -C /usr/local/bin lazygit \
+    && rm lazygit.tar.gz
 
 ENV LANG=en_US.UTF-8
 

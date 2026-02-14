@@ -22,6 +22,7 @@
   "mounts": [
     "source=${localEnv:HOME}/Workspace,target=/home/vscode/Workspace,type=bind,consistency=cached",
     "source=${localEnv:ZSH},target=/home/vscode/.dotfiles,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.config/gcloud,target=/home/vscode/.config/gcloud,type=bind,consistency=cached"
   ]
 }

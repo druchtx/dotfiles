@@ -1,14 +1,14 @@
 #!/usr/bin/env zsh
 
 # Quick shell access to running container
-alias remote='docker exec -it -u vscode -w /home/vscode/Workspace devcontainer zsh -l'
+alias remote='docker exec -it -u vscode -w /home/vscode/Workspace sandbox zsh -l'
 
 # Dev container management
 #   dev           Open new tmux window and enter container
 #   dev --vsc     Open VS Code attached to container
 dev() {
     local config_path="$ZSH/tools/devcontainer/devcontainer.json"
-    local container_name="devcontainer"
+    local container_name="sandbox"
     local action="shell"
 
     while [[ $# -gt 0 ]]; do
@@ -38,7 +38,12 @@ dev() {
             ;;
         shell)
             if [[ -n "$TMUX" ]]; then
-                tmux new-window -n "sandbox" "docker exec -it -u vscode -w /home/vscode/Workspace $container_name zsh -l"
+                # Check if SANDBOX window exists, switch to it or create new one
+                if tmux list-windows -F "#{window_name}" | grep -q "^SANDBOX$"; then
+                    tmux select-window -t SANDBOX
+                else
+                    tmux new-window -n "SANDBOX" "docker exec -it -u vscode -w /home/vscode/Workspace $container_name zsh -l"
+                fi
             else
                 docker exec -it -u vscode -w /home/vscode/Workspace "$container_name" zsh -l
             fi
