@@ -110,6 +110,11 @@
       "source": "zsh/zlogin",
       "target": "~/.zlogin",
       "type": "file"
+    },
+    {
+      "source": "tools/maven/mavenrc",
+      "target": "~/.mavenrc",
+      "type": "file"
     }
   ]
 }

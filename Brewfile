@@ -53,6 +53,9 @@ brew "cobra-cli"
 brew "gemini-cli"
 brew "neovim"
 brew "mas"
+ 
+# Java 
+brew "maven"
 
 # ------------------------
 # Cask (GUI)
