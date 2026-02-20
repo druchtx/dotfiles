@@ -40,7 +40,7 @@ python = "3.13"
 node = "lts"
 
 # DevOps tools
-gcloud = "539.0.0"
+gcloud = "latest"
 terraform = "1.14"
 
 # ============================================================================
@@ -86,7 +86,8 @@ experimental = true
 # mise automatically adds tool bins, but not custom env var bins like GOBIN
 _.path = [
   "{{env.HOME}}/.go/bin",           # Go binaries (go install)
-  "{{env.HOME}}/.node-globals/bin"  # npm global packages
+  "{{env.HOME}}/.node-globals/bin", # npm global packages
+  "{{env.HOME}}/.mix/escripts",     # Mix escripts (mix escript.install)
 ]
 
 # ----------------------------------------------------------------------------
@@ -94,7 +95,8 @@ _.path = [
 # ----------------------------------------------------------------------------
 # mise automatically adds to PATH:
 #   • ~/.local/share/mise/installs/elixir/<version>/bin
-#   • $MIX_HOME/.mix/escripts (for Mix tasks installed globally)
+#
+# $MIX_HOME/escripts is added to PATH via _.path above
 #
 # Shared Mix home across all Elixir versions (version-isolated via subdirs)
 MIX_HOME = "{{env.HOME}}/.mix"
