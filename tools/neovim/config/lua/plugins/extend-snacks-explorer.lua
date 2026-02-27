@@ -1,6 +1,11 @@
 return {
   "snacks.nvim",
   opts = function(_, opts)
+    local ds_store_exclude = {
+      ".DS_Store",
+      "**/.DS_Store",
+    }
+
     opts.picker = opts.picker or {}
     opts.picker.sources = opts.picker.sources or {}
 
@@ -9,6 +14,7 @@ return {
       auto_close = true,
       hidden = true,   -- Show hidden files
       ignored = true,  -- Show gitignored files
+      exclude = ds_store_exclude,
       layout = {
         preview = true,
         layout = {

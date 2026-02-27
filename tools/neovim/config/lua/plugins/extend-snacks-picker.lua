@@ -6,7 +6,7 @@ return {
     opts.picker.enabled = true
 
     -- Global defaults (conservative - exclude hidden/ignored by default)
-    opts.picker.hidden = false
+    opts.picker.hidden = true
     opts.picker.ignored = false
     opts.picker.follow = true -- Follow symlinks
 
@@ -17,6 +17,10 @@ return {
     opts.picker.sources.files = {
       hidden = true,
       ignored = true,
+      exclude = {
+        ".DS_Store",
+        "**/.DS_Store",
+      },
     }
 
     -- Grep/search: exclude hidden and gitignored files (use defaults)

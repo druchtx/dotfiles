@@ -1,6 +1,10 @@
 return {
   "snacks.nvim",
   opts = function(_, opts)
+    local function is_ds_store(path)
+      return vim.fs.basename(path or "") == ".DS_Store"
+    end
+
     opts = opts or {}
     opts.picker = opts.picker or {}
     opts.picker.enabled = true
@@ -23,9 +27,10 @@ return {
           )
         )
         if handle then
-          for path in handle:lines() do
+          for raw_path in handle:lines() do
+            local path = raw_path
             path = path:gsub("/$", "")
-            if vim.fn.isdirectory(path) == 1 then
+            if vim.fn.isdirectory(path) == 1 and not is_ds_store(path) then
               table.insert(project_dirs, path)
             end
           end
@@ -40,6 +45,11 @@ return {
       dev = {}, -- Clear dev so it doesn't scan with patterns
       projects = project_dirs, -- Explicit list of project directories
       recent = true, -- Include recent projects
+      filter = {
+        filter = function(item)
+          return not is_ds_store(item.file or item.text)
+        end,
+      },
     })
 
     return opts

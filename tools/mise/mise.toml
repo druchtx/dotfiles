@@ -26,7 +26,7 @@ elixir = "1.19.4-otp-28"
 erlang = "28"
 
 # Systems languages
-go = "1.25.5"
+go = "1.26.0"
 rust = "latest"
 zig = "latest"
 swift = "latest"
