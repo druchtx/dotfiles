@@ -69,7 +69,6 @@ cask "font-fira-code-nerd-font"
 
 # Browsers
 cask "google-chrome"
-cask "chatgpt-atlas"
 
 # Dev / Cloud
 cask "visual-studio-code"
@@ -94,6 +93,7 @@ cask "spotify"
 
 # AI
 cask "codex-app"
+cask "chatgpt"
 cask "claude"
 
 # Misc

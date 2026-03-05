@@ -64,6 +64,12 @@ local launchers = {
 		app = "Finder",
 		description = "Launch or focus Finder",
 	},
+	{
+		mods = { "ctrl", "shift" },
+		key = "X",
+		app = "Codex",
+		description = "Launch or focus Codex",
+	},
 }
 
 local keymaps = {}
