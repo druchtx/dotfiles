@@ -8,8 +8,10 @@ return {
         width = 0, -- 0 means 100% width
         height = 0, -- 0 means 100% height
       },
-      -- Use lazygit's default config (~/.config/lazygit/config.yml)
-      -- which is symlinked from tools/lazygit/config.yml by dot tool
+      -- Force the Neovim-integrated lazygit instance to use the dotfiles-backed config.
+      env = {
+        LG_CONFIG_FILE = vim.fn.expand("~/.config/lazygit/config.yml"),
+      },
       configure = false,
     },
   },
