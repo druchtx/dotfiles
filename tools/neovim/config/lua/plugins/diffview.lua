@@ -3,6 +3,38 @@ local function escape_statusline_text(text)
   return tostring(text or ""):gsub("%%", "%%%%")
 end
 
+local function to_hex(color)
+  if not color then
+    return nil
+  end
+  return string.format("#%06x", color)
+end
+
+local function set_bg_only_highlight(target, source)
+  local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = source, link = false })
+  if not ok then
+    return
+  end
+
+  local spec = { fg = "NONE" }
+  if hl.bg then
+    spec.bg = to_hex(hl.bg)
+  end
+  if hl.sp then
+    spec.sp = to_hex(hl.sp)
+  end
+
+  vim.api.nvim_set_hl(0, target, spec)
+end
+
+local function set_diffview_syntax_preserving_highlights()
+  set_bg_only_highlight("DiffviewDiffAdd", "DiffAdd")
+  set_bg_only_highlight("DiffviewDiffChange", "DiffChange")
+  set_bg_only_highlight("DiffviewDiffText", "DiffText")
+  set_bg_only_highlight("DiffviewDiffDelete", "DiffDelete")
+  set_bg_only_highlight("DiffviewDiffAddAsDelete", "DiffDelete")
+end
+
 local function set_git_term_winbar(bufnr, ctx)
   if not ctx or (ctx.symbol ~= "a" and ctx.symbol ~= "b") then
     return
@@ -254,6 +286,11 @@ return {
     vim.api.nvim_set_hl(0, "DiffviewGitHeader", { fg = "#7aa2f7", bold = true })
     vim.api.nvim_set_hl(0, "DiffviewIndexHeader", { fg = "#7aa2f7", bold = true })
     vim.api.nvim_set_hl(0, "DiffviewWorkingTreeHeader", { fg = "#9ece6a", bold = true })
+    set_diffview_syntax_preserving_highlights()
+    vim.api.nvim_create_autocmd("ColorScheme", {
+      group = vim.api.nvim_create_augroup("dotfiles_diffview_highlights", { clear = true }),
+      callback = set_diffview_syntax_preserving_highlights,
+    })
 
     require("diffview").setup({
       enhanced_diff_hl = true,
