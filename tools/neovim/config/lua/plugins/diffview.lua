@@ -1,4 +1,47 @@
 -- Diffview.nvim - Git diff viewer with side-by-side comparison
+local function escape_statusline_text(text)
+  return tostring(text or ""):gsub("%%", "%%%%")
+end
+
+local function set_git_term_winbar(bufnr, ctx)
+  if not ctx or (ctx.symbol ~= "a" and ctx.symbol ~= "b") then
+    return
+  end
+
+  local view = require("diffview.lib").get_current_view()
+  if not view then
+    return
+  end
+
+  local RevType = require("diffview.vcs.rev").RevType
+  local rev = ctx.symbol == "a" and view.left or view.right
+  if not rev then
+    return
+  end
+
+  local label
+  local highlight
+  if rev.type == RevType.STAGE then
+    label = "Index"
+    highlight = "DiffviewIndexHeader"
+  elseif rev.type == RevType.LOCAL then
+    label = "Working Tree"
+    highlight = "DiffviewWorkingTreeHeader"
+  elseif rev.type == RevType.COMMIT then
+    label = rev:is_head(view.adapter) and "HEAD" or rev:abbrev()
+    highlight = "DiffviewGitHeader"
+  else
+    return
+  end
+
+  local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t")
+  if filename == "" then
+    filename = "[No Name]"
+  end
+
+  vim.wo.winbar = "%#" .. highlight .. "# " .. escape_statusline_text(label) .. " %#WinBar#" .. escape_statusline_text(filename) .. "%*"
+end
+
 local function open_compare(ref)
   ref = vim.trim(ref or "")
   if ref == "" then
@@ -208,9 +251,17 @@ return {
     -- Set custom colors for section headers
     vim.api.nvim_set_hl(0, "DiffviewFilePanelTitle", { fg = "#e0af68", bold = true }) -- Orange
     vim.api.nvim_set_hl(0, "DiffviewFilePanelCounter", { fg = "#9ece6a" }) -- Green
+    vim.api.nvim_set_hl(0, "DiffviewGitHeader", { fg = "#7aa2f7", bold = true })
+    vim.api.nvim_set_hl(0, "DiffviewIndexHeader", { fg = "#7aa2f7", bold = true })
+    vim.api.nvim_set_hl(0, "DiffviewWorkingTreeHeader", { fg = "#9ece6a", bold = true })
 
     require("diffview").setup({
       enhanced_diff_hl = true,
+      hooks = {
+        diff_buf_read = function(bufnr, ctx)
+          set_git_term_winbar(bufnr, ctx)
+        end,
+      },
       view = {
         default = {
           layout = "diff2_horizontal",
