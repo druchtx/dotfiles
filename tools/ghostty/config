@@ -3,10 +3,12 @@ command = zsh -c "tmux attach || tmux new"
 # theme
 theme = Github Dark Dimmed
 window-theme = dark
-font-family = FiraCode Nerd Font
+font-family = FiraCode Nerd Font Mono
+
+
 font-style = Regular
 font-size = 13
-adjust-cell-height = 20%
+adjust-cell-height = 25%
 
 # window
 ## normal
