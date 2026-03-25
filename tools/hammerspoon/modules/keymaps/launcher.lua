@@ -70,6 +70,12 @@ local launchers = {
 		app = "Codex",
 		description = "Launch or focus Codex",
 	},
+	{
+		mods = { "ctrl", "shift" },
+		key = "A",
+		bundle_id = "com.jetbrains.air",
+		description = "Launch or focus Air",
+	},
 }
 
 local keymaps = {}
