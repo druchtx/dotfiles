@@ -95,7 +95,7 @@ cask "spotify"
 cask "codex-app"
 cask "chatgpt"
 cask "claude"
-
+cask "steipete/tap/codexbar"
 # Misc
 cask "antigravity"
 

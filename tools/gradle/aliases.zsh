@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-function gradlew() {
+function gradle() {
   local gradlew_path=$(find . -name 'gradlew' -type f -maxdepth 1)
 
   if [ ! -f "$gradlew_path" ]; then
