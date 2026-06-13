@@ -12,8 +12,8 @@ return {
     lazygit = {
       -- Fullscreen window (not floating)
       win = {
-        -- width = 0, -- 0 means 100% width
-        -- height = 0, -- 0 means 100% height
+        width = 0, -- 0 means 100% width
+        height = 0, -- 0 means 100% height
         keys = {
           ["<a-h>"] = { "<a-h>", "hide", mode = { "n", "t" }, desc = "Hide" },
           ["<a-q>"] = { "<a-q>", quit_terminal, mode = { "n", "t" }, desc = "Quit" },

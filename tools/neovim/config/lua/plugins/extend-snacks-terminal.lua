@@ -1,6 +1,6 @@
 local terminal_win = {
   position = "float",
-  width = 0.8,
+  width = 0.6,
   height = 0.8,
   border = "rounded",
   backdrop = false,
@@ -18,9 +18,10 @@ local function toggle_project_terminal()
     win = vim.deepcopy(terminal_win),
   })
 end
-return { "snacks.nvim", keys = { { "<C-/>", toggle_project_terminal, desc = "Terminal (Project Dir)",
-      mode = { "n", "t" },
-    },
+return {
+  "snacks.nvim",
+  keys = {
+    { "<C-/>", toggle_project_terminal, desc = "Terminal (Project Dir)", mode = { "n", "t" } },
     {
       "<C-_>",
       toggle_project_terminal,
