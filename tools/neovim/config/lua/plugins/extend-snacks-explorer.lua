@@ -23,8 +23,9 @@ return {
         hidden = {},
         layout = {
           backdrop = false,
-          width = 40,
-          min_width = 40,
+          width = 0.24,
+          min_width = 28,
+          max_width = 40,
           height = 0,
           position = "left",
           border = "none",
