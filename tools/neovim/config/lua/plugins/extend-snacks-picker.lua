@@ -1,5 +1,17 @@
 return {
   "snacks.nvim",
+  keys = {
+    {
+      "<leader>gd",
+      "<cmd>DiffviewOpen<cr>",
+      desc = "Git: Diffview",
+    },
+    {
+      "<leader>gD",
+      "<cmd>DiffviewCompare<cr>",
+      desc = "Git: Compare branches",
+    },
+  },
   -- Snacks already uses <a-w> to cycle picker windows. Preview buffers can
   -- become real file buffers, so we reapply the same key there to keep picker
   -- navigation consistent without overriding native <c-w> behavior.
