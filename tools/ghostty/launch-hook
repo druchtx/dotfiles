@@ -13,11 +13,28 @@ attach_normal() {
   exec tmux new-session -A -s "$normal_session"
 }
 
+session_exists() {
+  tmux has-session -t "$1" 2>/dev/null
+}
+
+attach_fallback() {
+  # Ghostty sometimes launches a non-quick surface without preserving the
+  # quick-terminal marker. If M already exists and Q does not, use Q so the two
+  # windows still split across the intended sessions.
+  local target_session="$normal_session"
+
+  if session_exists "$normal_session" && ! session_exists "$quick_session"; then
+    target_session="$quick_session"
+  fi
+
+  exec tmux new-session -A -s "$target_session"
+}
+
 case "${GHOSTTY_QUICK_TERMINAL:-}" in
   1 | true | TRUE | yes | YES)
   attach_quick
   ;;
   *)
-  attach_normal
+  attach_fallback
   ;;
 esac
