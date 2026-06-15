@@ -3,7 +3,7 @@ return {
   keys = {
     {
       "<leader>gd",
-      "<cmd>DiffviewOpen<cr>",
+      "<cmd>DiffviewOpenProject<cr>",
       desc = "Git: Diffview",
     },
     {

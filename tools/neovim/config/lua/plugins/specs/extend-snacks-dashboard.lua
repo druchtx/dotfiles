@@ -1,6 +1,21 @@
 return {
   "snacks.nvim",
-  keys = {},
+  keys = {
+    {
+      "<leader><tab>n",
+      function()
+        local tabs = require("config.tabs")
+        tabs.open_project_tab(tabs.project() or LazyVim.root())
+        require("snacks").dashboard.open()
+      end,
+      desc = "New Dashboard Tab",
+    },
+    {
+      "<leader><tab><tab>",
+      "<cmd>tabnext<cr>",
+      desc = "Next Tab",
+    },
+  },
   opts = function(_, opts)
     opts.dashboard = opts.dashboard or {}
     opts.dashboard.enabled = true
@@ -23,9 +38,23 @@ return {
     table.insert(
       filtered,
       4,
-      { icon = "󰑓", key = "s", desc = "Select Session", action = require("persistence").select }
+      {
+        icon = "󰑓",
+        key = "s",
+        desc = "Select Session",
+        action = function()
+          require("persistence").select()
+        end,
+      }
     )
-    table.insert(filtered, 3, { icon = "", key = "e", desc = "Explore", action = ":lua Snacks.explorer()" })
+    table.insert(filtered, 3, {
+      icon = "",
+      key = "e",
+      desc = "Explore",
+      action = function()
+        Snacks.explorer()
+      end,
+    })
 
     opts.dashboard.preset.keys = filtered
   end,

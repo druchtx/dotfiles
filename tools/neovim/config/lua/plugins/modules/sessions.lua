@@ -1,4 +1,6 @@
-local function decode_session(session)
+local M = {}
+
+local function decode_session_dir(session)
   local config = require("persistence.config")
   local file = session:sub(#config.options.dir + 1, -5)
   local dir = vim.split(file, "%%", { plain = true })[1]:gsub("%%", "/")
@@ -10,6 +12,20 @@ local function decode_session(session)
   return dir
 end
 
+local function is_temporary_dir(dir)
+  local tail = vim.fn.fnamemodify(dir, ":t")
+  return tail:match("^tmp%.") ~= nil or dir:match("[/\\]tmp%.[^/\\]+") ~= nil
+end
+
+local function is_temporary_session_file(session)
+  return session:match("[/\\%%]tmp%.") ~= nil
+end
+
+local function should_skip_current_session(persistence)
+  local branch = persistence.branch()
+  return is_temporary_dir(vim.fn.getcwd()) or (branch and branch:match("^tmp%.") ~= nil)
+end
+
 local function session_items()
   local persistence = require("persistence")
   local items = {}
@@ -18,7 +34,7 @@ local function session_items()
   for _, session in ipairs(persistence.list()) do
     local stat = vim.uv.fs_stat(session)
     if stat then
-      local dir = decode_session(session)
+      local dir = decode_session_dir(session)
       if not seen[dir] then
         seen[dir] = true
         items[#items + 1] = {
@@ -57,8 +73,8 @@ local function delete_sessions(picker)
   picker:refresh()
 end
 
-local function select_session()
-  Snacks.picker.pick({
+function M.select()
+  require("snacks").picker.pick({
     title = "Sessions",
     finder = session_items,
     format = "file",
@@ -83,28 +99,33 @@ local function select_session()
   })
 end
 
-return {
-  "folke/persistence.nvim",
-  keys = {
-    { "<leader>qS", false },
-    {
-      "<leader>qw",
-      function()
-        require("persistence").save()
-      end,
-      desc = "Save Session",
-    },
-    {
-      "<leader>qs",
-      function()
-        require("persistence").select()
-      end,
-      desc = "Select Session",
-    },
-  },
-  config = function(_, opts)
-    local persistence = require("persistence")
-    persistence.setup(opts)
-    persistence.select = select_session
-  end,
-}
+function M.patch(persistence)
+  local list = persistence.list
+  local load = persistence.load
+  local save = persistence.save
+
+  -- Persistence encodes session names from paths. tmp.* entries are created by
+  -- temporary project directories and should not appear in normal session flows.
+  persistence.list = function()
+    return vim.tbl_filter(function(session)
+      return not is_temporary_session_file(session)
+    end, list())
+  end
+
+  persistence.load = function(opts)
+    opts = opts or {}
+    if not opts.last and should_skip_current_session(persistence) then
+      return
+    end
+    return load(opts)
+  end
+
+  persistence.save = function()
+    if should_skip_current_session(persistence) then
+      return
+    end
+    return save()
+  end
+end
+
+return M

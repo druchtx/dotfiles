@@ -37,15 +37,17 @@ return {
     },
     {
       "<leader>e",
-      "<leader>fe",
+      function()
+        Snacks.explorer()
+      end,
       desc = "Explorer Snacks (cwd)",
-      remap = true,
     },
     {
       "<leader>E",
-      "<leader>fE",
+      function()
+        Snacks.explorer({ cwd = LazyVim.root() })
+      end,
       desc = "Explorer Snacks (Root Dir)",
-      remap = true,
     },
     {
       "<leader>ft",
