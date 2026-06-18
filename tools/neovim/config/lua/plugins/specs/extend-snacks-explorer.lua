@@ -12,14 +12,9 @@ return {
       hidden = true, -- Show hidden files
       ignored = true, -- Show gitignored files
       exclude = picker_utils.ds_store_exclude,
-      on_change = function(picker)
-        if picker:is_focused() and picker.resolved_layout.preview == "main" and not picker.preview.win:valid() then
-          picker:toggle("preview", { enable = true, focus = picker:current_win() })
-        end
-      end,
       layout = {
         preset = "sidebar",
-        preview = "main",
+        preview = false,
         hidden = {},
         layout = {
           backdrop = false,
@@ -38,12 +33,6 @@ return {
             title_pos = "center",
           },
           { win = "list", border = "none" },
-          {
-            win = "preview",
-            title = "{preview}",
-            height = 0.4,
-            border = "top",
-          },
         },
       },
       win = {
