@@ -52,7 +52,7 @@ return {
       key = "e",
       desc = "Explore",
       action = function()
-        Snacks.explorer()
+        require("plugins.modules.explorer").open()
       end,
     })
 

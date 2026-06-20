@@ -43,7 +43,12 @@ local function configured_gitlab_host()
 end
 
 local function fetch_remote_names()
-  local lines = systemlist({ "git", "-C", git_root(), "remote", "-v" }) or {}
+  local root = git_root()
+  if not root then
+    return {}
+  end
+
+  local lines = systemlist({ "git", "-C", root, "remote", "-v" }) or {}
   local ret, seen = {}, {}
   for _, line in ipairs(lines) do
     local name = line:match("^(%S+)%s+%S+%s+%(fetch%)$")
@@ -56,8 +61,12 @@ local function fetch_remote_names()
 end
 
 local function preferred_remote_name()
-  local upstream =
-    systemlist({ "git", "-C", git_root(), "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}" })
+  local root = git_root()
+  if not root then
+    return nil
+  end
+
+  local upstream = systemlist({ "git", "-C", root, "rev-parse", "--abbrev-ref", "--symbolic-full-name", "@{upstream}" })
   local name = upstream and trim(upstream[1]) and trim(upstream[1]):match("^([^/]+)/")
   if name and name ~= "" then
     return name
@@ -70,12 +79,17 @@ local function preferred_remote_name()
 end
 
 local function is_gitlab_repo()
+  local root = git_root()
+  if not root then
+    return false
+  end
+
   local name = preferred_remote_name()
   if not name then
     return false
   end
 
-  local output = systemlist({ "git", "-C", git_root(), "remote", "get-url", name })
+  local output = systemlist({ "git", "-C", root, "remote", "get-url", name })
   local remote = output and trim(output[1]) or nil
   if not remote then
     return false
@@ -90,6 +104,11 @@ local function is_gitlab_repo()
 end
 
 local function run_glab_json(args)
+  local root = git_root()
+  if not root then
+    return nil, "not inside a git repository"
+  end
+
   if vim.fn.executable("glab") ~= 1 then
     return nil, "glab is not installed"
   end
@@ -108,7 +127,7 @@ local function run_glab_json(args)
       "-lc",
       "source " .. vim.fn.shellescape(gitlab_env) .. " >/dev/null 2>&1 && " .. table.concat(escaped, " "),
     }, {
-      cwd = git_root(),
+      cwd = root,
       text = true,
     })
     :wait()

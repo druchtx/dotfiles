@@ -1,5 +1,14 @@
+---Bufferline integration for tab-scoped workspaces.
+---
+---This module adapts bufferline.nvim to the local tab workspace model in
+---`config.tabs`: bufferline only shows buffers owned by the active tab, keeps
+---its transparent styling after colorscheme changes, and renders a compact
+---right-aligned tab indicator.
+
 local M = {}
 
+---Bufferline highlight groups whose background should remain transparent.
+---@type string[]
 local transparent_highlights = {
   "BufferLineFill",
   "BufferLineBackground",
@@ -14,6 +23,8 @@ local transparent_highlights = {
   "BufferLineSeparatorVisible",
 }
 
+---Remove the background color from one highlight group if it exists.
+---@param name string Highlight group name
 local function clear_bg(name)
   local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
   if not ok or not hl then
@@ -25,12 +36,18 @@ local function clear_bg(name)
   pcall(vim.api.nvim_set_hl, 0, name, hl)
 end
 
+---Apply transparent backgrounds to all bufferline highlight groups.
 local function apply_transparent_highlights()
   for _, name in ipairs(transparent_highlights) do
     clear_bg(name)
   end
 end
 
+---Build the right-side tab indicator items for bufferline.
+---
+---Each item is a clickable tab target using `%T` tabline syntax. Indicators are
+---hidden when there is only one tab.
+---@return table[] items Bufferline custom area items
 local function tab_indicator_items()
   local current = vim.api.nvim_get_current_tabpage()
   local tabs = vim.api.nvim_list_tabpages()
@@ -51,6 +68,7 @@ local function tab_indicator_items()
   return items
 end
 
+---Force bufferline to recompute and redraw after buffer/tab mutations.
 local function refresh_tabline()
   vim.schedule(function()
     -- Bufferline caches its components. Force a recompute before redraw so
@@ -60,6 +78,7 @@ local function refresh_tabline()
   end)
 end
 
+---Install bufferline-specific highlight definitions and colorscheme refreshes.
 local function setup_highlights()
   vim.api.nvim_set_hl(0, "BufferLineTabUnderlineActive", { fg = "#57ab5a", bg = "NONE" })
   vim.api.nvim_set_hl(0, "BufferLineTabUnderlineInactive", { fg = "#768390", bg = "NONE" })
@@ -72,6 +91,7 @@ local function setup_highlights()
   vim.schedule(apply_transparent_highlights)
 end
 
+---Register autocmds that keep bufferline synchronized with workspace changes.
 local function setup_refresh_autocmds()
   local group = vim.api.nvim_create_augroup("bufferline_tab_indicator_refresh", { clear = true })
 
@@ -97,6 +117,11 @@ local function setup_refresh_autocmds()
   })
 end
 
+---Patch bufferline.nvim options for this configuration.
+---
+---This preserves any existing `custom_filter`, then adds the tab workspace
+---filter so global Neovim buffers only appear in the tab that owns them.
+---@param opts table bufferline.nvim options table provided by lazy.nvim
 function M.setup_opts(opts)
   opts.options = opts.options or {}
   opts.options.show_buffer_close_icons = false

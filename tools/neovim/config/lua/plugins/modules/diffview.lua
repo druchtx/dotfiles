@@ -1,11 +1,21 @@
 local git = require("config.git")
 
+---Diffview integration for project-scoped Git workflows.
+---
+---This module keeps one Diffview tab per project, returns focus to the source
+---workspace after closing Diffview, adds project-aware compare commands, and
+---normalizes Diffview highlights/window options for the active colorscheme.
+
 local M = {}
 
 -- Diffview owns its own tabpages. Keep a project-root -> source-tab mapping so
 -- closing a Diffview returns to the workspace that opened or focused it.
+---@type table<string, integer>
 local diffview_source_tabs = {}
 
+---Convert a numeric Neovim color value to a CSS-style hex color.
+---@param color? integer Neovim RGB integer
+---@return string? hex Hex string such as `#57ab5a`
 local function to_hex(color)
   if not color then
     return nil
@@ -13,6 +23,9 @@ local function to_hex(color)
   return string.format("#%06x", color)
 end
 
+---Copy only background/special colors from one highlight group to another.
+---@param target string Highlight group to update
+---@param source string Highlight group to read
 local function set_bg_only_highlight(target, source)
   local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = source, link = false })
   if not ok then
@@ -30,14 +43,22 @@ local function set_bg_only_highlight(target, source)
   vim.api.nvim_set_hl(0, target, spec)
 end
 
+---Clear background and special color from a highlight group.
+---@param target string Highlight group to update
 local function clear_background_highlight(target)
   vim.api.nvim_set_hl(0, target, { bg = "NONE", sp = "NONE" })
 end
 
+---Resolve the Git root represented by a Diffview view object.
+---@param view? table Diffview view object
+---@return string? root Normalized project root
 local function view_git_root(view)
   return view and view.adapter and view.adapter.ctx and git.root(view.adapter.ctx.toplevel)
 end
 
+---Remember which tab opened or focused a Diffview for a project.
+---@param root? string Project root
+---@param diffview_tab? integer Diffview-owned tabpage handle to ignore
 local function remember_diffview_source(root, diffview_tab)
   if not root then
     return
@@ -51,6 +72,8 @@ local function remember_diffview_source(root, diffview_tab)
   diffview_source_tabs[root] = tab
 end
 
+---Return focus to the tab that launched a Diffview view.
+---@param view? table Diffview view object passed by Diffview hooks
 local function return_to_diffview_source(view)
   local root = view_git_root(view)
   local tab = root and diffview_source_tabs[root]
@@ -70,6 +93,9 @@ local function return_to_diffview_source(view)
   end)
 end
 
+---Focus an existing Diffview tab for a project if one exists.
+---@param root? string Project root
+---@return boolean focused True when an existing Diffview tab was focused
 local function focus_existing_diffview(root)
   local ok, lib = pcall(require, "diffview.lib")
   if not ok then
@@ -87,6 +113,8 @@ local function focus_existing_diffview(root)
   return false
 end
 
+---Open Diffview for the current project, or focus its existing Diffview tab.
+---@param args? string[] Diffview open arguments
 function M.open_or_focus(args)
   -- The current tab workspace, not the current buffer path, is the source of
   -- truth for project-scoped Diffview operations.
@@ -99,6 +127,9 @@ function M.open_or_focus(args)
   require("diffview").open(args or {})
 end
 
+---Open a branch comparison with Diffview.
+---@param source? string Source branch/ref
+---@param target? string Target branch/ref
 local function open_compare(source, target)
   source = vim.trim(source or "")
   target = vim.trim(target or "")
@@ -114,6 +145,10 @@ local function open_compare(source, target)
   M.open_or_focus({ source .. "..." .. target, "--imply-local" })
 end
 
+---Prompt for a Git ref and pass the choice to a callback.
+---@param prompt string vim.ui.select prompt
+---@param refs string[] Candidate refs
+---@param on_choice fun(choice: string) Callback invoked with the selected ref
 local function pick_ref(prompt, refs, on_choice)
   if #refs == 0 then
     vim.notify("No git refs found for comparison", vim.log.levels.WARN)
@@ -127,6 +162,7 @@ local function pick_ref(prompt, refs, on_choice)
   end)
 end
 
+---Interactively choose source and target refs for a Diffview comparison.
 local function compare_pick_source_target()
   local root = git.current_project_root()
   local refs = git.branch_refs(root)
@@ -138,12 +174,20 @@ local function compare_pick_source_target()
   })
 
   pick_ref("Select source branch:", refs, function(source)
-    pick_ref("Select target branch:", refs, function(target)
+    local target_refs = vim.tbl_filter(function(ref)
+      return ref ~= source
+    end, refs)
+
+    pick_ref("Select target branch:", target_refs, function(target)
       open_compare(source, target)
     end)
   end)
 end
 
+---Install Diffview diff highlights that preserve syntax foreground colors.
+---
+---Only diff backgrounds are copied so syntax groups inside changed lines remain
+---readable with the active colorscheme.
 local function set_diffview_syntax_preserving_highlights()
   set_bg_only_highlight("DiffviewDiffAdd", "DiffAdd")
   set_bg_only_highlight("DiffviewDiffChange", "DiffChange")
@@ -153,6 +197,8 @@ local function set_diffview_syntax_preserving_highlights()
   set_bg_only_highlight("DiffviewDiffAddAsDelete", "DiffDelete")
 end
 
+---Configure a Diffview buffer after it is read.
+---@param bufnr integer Buffer handle supplied by Diffview
 local function configure_diffview_buffer(bufnr)
   for _, winid in ipairs(vim.fn.win_findbuf(bufnr)) do
     if vim.api.nvim_win_is_valid(winid) then
@@ -161,12 +207,18 @@ local function configure_diffview_buffer(bufnr)
   end
 end
 
+---Set a window-local option only when the window handle is valid.
+---@param winid? integer Window handle
+---@param name string Option name
+---@param value any Option value
 local function set_window_option_if_valid(winid, name, value)
   if winid and vim.api.nvim_win_is_valid(winid) then
     vim.api.nvim_set_option_value(name, value, { win = winid })
   end
 end
 
+---Apply wrapping and highlight rules to Diffview's side-by-side windows.
+---@param view? table Diffview view object
 local function configure_diffview_layout(view)
   local layout = view and view.cur_layout
   local left_window = layout and layout.a
@@ -201,6 +253,7 @@ local function configure_diffview_layout(view)
   end
 end
 
+---Apply layout configuration to the currently active Diffview view.
 local function configure_current_diffview_layout()
   local ok, lib = pcall(require, "diffview.lib")
   if not ok then
@@ -213,6 +266,7 @@ local function configure_current_diffview_layout()
   end
 end
 
+---Create local Diffview commands that preserve project-scoped behavior.
 local function create_commands()
   pcall(vim.api.nvim_del_user_command, "DiffviewOpen")
   vim.api.nvim_create_user_command("DiffviewOpen", function(opts)
@@ -248,6 +302,7 @@ local function create_commands()
   })
 end
 
+---Configure diffview.nvim and register commands/autocmds.
 function M.setup()
   create_commands()
 

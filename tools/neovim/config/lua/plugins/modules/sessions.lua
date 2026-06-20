@@ -1,5 +1,14 @@
+---Session selection and persistence.nvim integration.
+---
+---This module wraps persistence.nvim so temporary project sessions are hidden
+---and skipped, exposes a Snacks picker for session selection/deletion, and
+---connects session save/load with tab workspace persistence in `config.tabs`.
+
 local M = {}
 
+---Decode a persistence.nvim session file path back into its project directory.
+---@param session string Absolute session file path
+---@return string dir Decoded project directory
 local function decode_session_dir(session)
   local config = require("persistence.config")
   local file = session:sub(#config.options.dir + 1, -5)
@@ -12,20 +21,33 @@ local function decode_session_dir(session)
   return dir
 end
 
+---Return whether a directory belongs to a temporary project tree.
+---@param dir string Directory path
+---@return boolean temporary True when the path or basename starts with `tmp.`
 local function is_temporary_dir(dir)
   local tail = vim.fn.fnamemodify(dir, ":t")
   return tail:match("^tmp%.") ~= nil or dir:match("[/\\]tmp%.[^/\\]+") ~= nil
 end
 
+---Return whether a session file belongs to a temporary project.
+---@param session string Absolute session file path
+---@return boolean temporary True when the encoded session name contains `tmp.`
 local function is_temporary_session_file(session)
   return session:match("[/\\%%]tmp%.") ~= nil
 end
 
+---Return whether persistence should skip saving/loading the current cwd.
+---@param persistence table persistence.nvim module
+---@return boolean skip True when cwd or branch is temporary
 local function should_skip_current_session(persistence)
   local branch = persistence.branch()
   return is_temporary_dir(vim.fn.getcwd()) or (branch and branch:match("^tmp%.") ~= nil)
 end
 
+---Build Snacks picker items from persistence.nvim sessions.
+---
+---Only the newest session per decoded directory is shown.
+---@return table[] items Session picker items sorted newest first
 local function session_items()
   local persistence = require("persistence")
   local items = {}
@@ -55,6 +77,8 @@ local function session_items()
   return items
 end
 
+---Change cwd to the selected session directory and load its session.
+---@param item? table Session picker item
 local function load_session(item)
   if not item then
     return
@@ -64,6 +88,8 @@ local function load_session(item)
   require("persistence").load()
 end
 
+---Delete selected session files from disk and refresh the picker.
+---@param picker table Snacks picker instance
 local function delete_sessions(picker)
   for _, item in ipairs(picker:selected({ fallback = true })) do
     if item.session then
@@ -73,6 +99,9 @@ local function delete_sessions(picker)
   picker:refresh()
 end
 
+---Open the custom session picker.
+---
+---`<c-x>` deletes the selected session file; confirming loads the session.
 function M.select()
   require("snacks").picker.pick({
     title = "Sessions",
@@ -99,6 +128,14 @@ function M.select()
   })
 end
 
+---Patch persistence.nvim with local filtering and tab workspace hooks.
+---
+---The wrapper preserves persistence's public API while:
+---1. hiding temporary sessions from `list`;
+---2. skipping save/load in temporary cwd/branch contexts;
+---3. restoring tab workspace state after load;
+---4. appending tab workspace state after save.
+---@param persistence table persistence.nvim module
 function M.patch(persistence)
   local list = persistence.list
   local load = persistence.load
@@ -117,14 +154,20 @@ function M.patch(persistence)
     if not opts.last and should_skip_current_session(persistence) then
       return
     end
-    return load(opts)
+    local ret = load(opts)
+    require("config.tabs").restore_session_state()
+    return ret
   end
 
   persistence.save = function()
     if should_skip_current_session(persistence) then
       return
     end
-    return save()
+    local tabs = require("config.tabs")
+    tabs.save_session_state()
+    local ret = save()
+    tabs.append_session_state(persistence.current())
+    return ret
   end
 end
 

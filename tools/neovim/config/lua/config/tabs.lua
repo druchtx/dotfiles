@@ -1,11 +1,32 @@
+-- Tab-scoped workspace state for Neovim.
+--
+-- Neovim buffers are process-global, but this config treats each tabpage as an
+-- independent workspace. This module tracks which managed file buffers belong
+-- to each tab, exposes that ownership to bufferline filtering, cleans up hidden
+-- buffers when a tab closes, and persists the workspace mapping across
+-- persistence.nvim sessions.
+--
+-- Core flow:
+-- - remember_tabs() rebuilds the tab-number cache after tab lifecycle events so
+--   TabClosed can resolve the closed tab number back to its tabpage handle.
+-- - attach() records buffer ownership for the current tab, using a monotonic
+--   sequence so the most recent legitimate owner wins when Neovim fires buffer
+--   events during tab creation or session restore.
+-- - contains_current_tab() is the bufferline filter. It only shows buffers
+--   owned by, or visibly displayed in, the active tab.
+-- - save_session_state() serializes each tab workspace as tab index, project
+--   path, and buffer file paths. append_session_state() writes that snapshot
+--   into the generated session file.
+-- - restore_session_state() rebuilds workspace ownership after persistence.nvim
+--   sources a session, because restored buffer ids are not stable.
+
 local M = {}
 
--- Neovim buffers are global, while this setup treats each tab as a lightweight
--- workspace. A workspace owns the buffers opened from that tab and carries the
--- explicit project selected by the project picker.
 local workspaces = {}
 local tabs_by_number = {}
 local setup_done = false
+local session_state_var = "tab_workspaces"
+local attach_sequence = 0
 
 local function current_tab()
   return vim.api.nvim_get_current_tabpage()
@@ -13,6 +34,11 @@ end
 
 local function normalize_path(path)
   return path and vim.fn.fnamemodify(path, ":p"):gsub("/$", "") or nil
+end
+
+local function normalize_buf_name(buf)
+  local name = vim.api.nvim_buf_get_name(buf)
+  return name ~= "" and normalize_path(name) or nil
 end
 
 local function workspace(tab)
@@ -66,6 +92,16 @@ local function buffer_visible_anywhere(buf)
   return false
 end
 
+local function buffer_visible_elsewhere(buf, tab)
+  for _, other_tab in ipairs(vim.api.nvim_list_tabpages()) do
+    if other_tab ~= tab and buffer_visible_in_tab(buf, other_tab) then
+      return true
+    end
+  end
+
+  return false
+end
+
 local function buffer_owned_elsewhere(closed_tab, buf)
   for tab, state in pairs(workspaces) do
     if tab ~= closed_tab and vim.api.nvim_tabpage_is_valid(tab) and state.buffers[buf] then
@@ -76,6 +112,42 @@ local function buffer_owned_elsewhere(closed_tab, buf)
   return false
 end
 
+local function preferred_owner(buf)
+  local owner
+  local owner_score = -1
+
+  for tab, state in pairs(workspaces) do
+    if vim.api.nvim_tabpage_is_valid(tab) and state.buffers[buf] then
+      local order = type(state.buffers[buf]) == "number" and state.buffers[buf] or 1
+      local score = order
+      if buffer_visible_in_tab(buf, tab) then
+        score = score + 1000000
+      end
+
+      if score > owner_score then
+        owner = tab
+        owner_score = score
+      end
+    end
+  end
+
+  return owner
+end
+
+local function tab_project(tab)
+  local state = workspace(tab)
+  if state.project then
+    return state.project
+  end
+
+  local ok, cwd = pcall(vim.fn.getcwd, -1, vim.api.nvim_tabpage_get_number(tab))
+  if ok then
+    return normalize_path(cwd)
+  end
+
+  return nil
+end
+
 function M.attach(buf, tab)
   buf = buf or vim.api.nvim_get_current_buf()
   tab = tab or current_tab()
@@ -84,7 +156,8 @@ function M.attach(buf, tab)
     return false
   end
 
-  workspace(tab).buffers[buf] = true
+  attach_sequence = attach_sequence + 1
+  workspace(tab).buffers[buf] = attach_sequence
   return true
 end
 
@@ -96,6 +169,123 @@ function M.attach_current_tab_buffers(opts)
       M.attach(buf, tab)
     end
   end
+end
+
+function M.save_session_state()
+  remember_tabs()
+
+  local snapshot = {}
+  for index, tab in ipairs(vim.api.nvim_list_tabpages()) do
+    local state = workspace(tab)
+    local seen = {}
+    local buffers = {}
+
+    local function add_buffer(buf, owned)
+      if not is_managed_buffer(buf) then
+        return
+      end
+
+      if owned and preferred_owner(buf) ~= tab then
+        return
+      end
+
+      local name = normalize_buf_name(buf)
+      if name and not seen[name] then
+        seen[name] = true
+        buffers[#buffers + 1] = name
+      end
+    end
+
+    for buf in pairs(state.buffers) do
+      if vim.api.nvim_buf_is_valid(buf) then
+        add_buffer(buf, true)
+      end
+    end
+
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+      if vim.api.nvim_win_is_valid(win) then
+        add_buffer(vim.api.nvim_win_get_buf(win), false)
+      end
+    end
+
+    table.sort(buffers)
+    snapshot[#snapshot + 1] = {
+      index = index,
+      project = tab_project(tab),
+      buffers = buffers,
+    }
+  end
+
+  vim.g[session_state_var] = snapshot
+end
+
+function M.append_session_state(session_file)
+  local snapshot = vim.g[session_state_var]
+  if type(snapshot) ~= "table" or type(session_file) ~= "string" or session_file == "" then
+    return
+  end
+
+  local encoded = vim.json.encode(snapshot)
+  local line = "lua vim.g."
+    .. session_state_var
+    .. " = vim.json.decode("
+    .. string.format("%q", encoded)
+    .. ")"
+  vim.fn.writefile({ "", '" Tab workspace state', line }, session_file, "a")
+end
+
+function M.restore_session_state()
+  local snapshot = vim.g[session_state_var]
+  if type(snapshot) ~= "table" then
+    remember_tabs()
+    return
+  end
+
+  workspaces = {}
+  remember_tabs()
+
+  local buffers_by_name = {}
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if is_managed_buffer(buf) then
+      local name = normalize_buf_name(buf)
+      if name then
+        buffers_by_name[name] = buf
+      end
+    end
+  end
+
+  local tabs = vim.api.nvim_list_tabpages()
+  for index, item in ipairs(snapshot) do
+    local tab = tabs[tonumber(item.index) or index]
+    if tab and vim.api.nvim_tabpage_is_valid(tab) then
+      local state = workspace(tab)
+      state.buffers = {}
+
+      if type(item.project) == "string" then
+        M.set_project(item.project, tab)
+      end
+
+      if type(item.buffers) == "table" then
+        for _, name in ipairs(item.buffers) do
+          local buf = buffers_by_name[normalize_path(name)]
+          if buf then
+            M.attach(buf, tab)
+          end
+        end
+      end
+
+      for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+        if vim.api.nvim_win_is_valid(win) then
+          M.attach(vim.api.nvim_win_get_buf(win), tab)
+        end
+      end
+    end
+  end
+
+  vim.schedule(function()
+    pcall(nvim_bufferline)
+    vim.cmd.redrawtabline()
+  end)
 end
 
 function M.set_project(path, tab)
@@ -117,6 +307,14 @@ end
 function M.contains_current_tab(buf)
   local tab = current_tab()
   if workspace(tab).buffers[buf] then
+    if preferred_owner(buf) ~= tab then
+      return false
+    end
+
+    if buffer_visible_elsewhere(buf, tab) and not buffer_visible_in_tab(buf, tab) then
+      return false
+    end
+
     return true
   end
 
@@ -200,7 +398,11 @@ function M.setup()
       local buf = vim.api.nvim_get_current_buf()
 
       if buffer_owned_elsewhere(tab, buf) then
-        workspace(tab).buffers[buf] = nil
+        if buffer_visible_elsewhere(buf, tab) then
+          workspace(tab).buffers[buf] = nil
+        else
+          M.attach(buf, tab)
+        end
       end
     end,
   })

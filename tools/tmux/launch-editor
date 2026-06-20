@@ -3,10 +3,17 @@ set -euo pipefail
 
 pane_id="${1:-}"
 pane_command="${2:-}"
+editor_command=' ${VISUAL:-${EDITOR:-nvim}}; clear'
+
+if [[ -z "$pane_id" ]] || ! tmux display-message -p -t "$pane_id" '#{pane_id}' >/dev/null 2>&1; then
+    tmux display-popup -E -w 64 -h 7 "~/.dotfiles/tools/tmux/popup-message \"target pane was not found\" 0.6"
+    exit 0
+fi
 
 case "$pane_command" in
   zsh|bash|fish|sh)
-    tmux send-keys -t "$pane_id" ' $EDITOR; clear' C-m
+    tmux send-keys -l -t "$pane_id" -- "$editor_command"
+    tmux send-keys -t "$pane_id" C-m
     ;;
   *)
     tmux display-popup -E -w 64 -h 7 "~/.dotfiles/tools/tmux/popup-message \"current pane is not a shell\" 0.6"

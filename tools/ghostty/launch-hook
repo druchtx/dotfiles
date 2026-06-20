@@ -4,37 +4,41 @@ set -euo pipefail
 # Ghostty runs this launch hook for each terminal surface.
 normal_session="M"
 quick_session="Q"
+bootstrap_session="__restore_bootstrap"
+restore_script="$HOME/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
 
-attach_quick() {
-  exec tmux new-session -A -s "$quick_session"
-}
-
-attach_normal() {
-  exec tmux new-session -A -s "$normal_session"
-}
-
-session_exists() {
-  tmux has-session -t "$1" 2>/dev/null
-}
-
-attach_fallback() {
-  # Ghostty sometimes launches a non-quick surface without preserving the
-  # quick-terminal marker. If M already exists and Q does not, use Q so the two
-  # windows still split across the intended sessions.
-  local target_session="$normal_session"
-
-  if session_exists "$normal_session" && ! session_exists "$quick_session"; then
-    target_session="$quick_session"
+resurrect_last_file() {
+  if [[ -e "$HOME/.tmux/resurrect/last" ]]; then
+    print -r -- "$HOME/.tmux/resurrect/last"
+  else
+    print -r -- "${XDG_DATA_HOME:-$HOME/.local/share}/tmux/resurrect/last"
   fi
-
-  exec tmux new-session -A -s "$target_session"
 }
+
+restore_if_cold_start() {
+  # Existing tmux servers should be left alone; just attach to the target
+  # session below.
+  tmux list-sessions >/dev/null 2>&1 && return
+
+  local resurrect_last
+  resurrect_last="$(resurrect_last_file)"
+  [[ -x "$restore_script" && -e "$resurrect_last" ]] || return
+
+  # Do not create M or Q before restoring. tmux-resurrect skips sessions that
+  # already exist, so a temporary bootstrap session gives restore a clean target.
+  tmux new-session -d -s "$bootstrap_session" -c "$HOME"
+  TMUX="$(tmux display-message -p -t "$bootstrap_session" '#{socket_path},#{pid},0')" \
+    "$restore_script" >/dev/null 2>&1 || true
+  tmux has-session -t "$bootstrap_session" 2>/dev/null && tmux kill-session -t "$bootstrap_session"
+}
+
+target_session="$normal_session"
 
 case "${GHOSTTY_QUICK_TERMINAL:-}" in
   1 | true | TRUE | yes | YES)
-  attach_quick
-  ;;
-  *)
-  attach_fallback
+  target_session="$quick_session"
   ;;
 esac
+
+restore_if_cold_start
+exec tmux new-session -A -s "$target_session"

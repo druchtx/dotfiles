@@ -4,7 +4,7 @@ local terminal_win = {
   height = 0.8,
   border = "rounded",
   backdrop = false,
-  title = " TERMIANL ",
+  title = " TERMINAL ",
   title_pos = "center",
   keys = {
     ["<a-q>"] = { "<a-q>", "close", mode = { "n", "t" }, desc = "Quit" },
