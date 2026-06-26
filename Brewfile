@@ -100,6 +100,6 @@ cask "claude"
 # ------------------------
 # Mac App Store (mas)
 # ------------------------
-mas "Dictionaries", id: 1380563956
-mas "LINE", id: 539883307
-mas "Xcode", id: 497799835
+# mas "Dictionaries", id: 1380563956
+# mas "LINE", id: 539883307
+# mas "Xcode", id: 497799835
