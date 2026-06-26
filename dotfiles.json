@@ -56,11 +56,6 @@
       "type": "file"
     },
     {
-      "source": "tools/roocode/roo-code-settings.json",
-      "target": "~/.config/roocode/roo-code-settings.json",
-      "type": "file"
-    },
-    {
       "source": "tools/hammerspoon",
       "target": "~/.hammerspoon",
       "type": "dir"
