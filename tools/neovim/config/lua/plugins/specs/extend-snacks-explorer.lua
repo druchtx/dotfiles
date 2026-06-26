@@ -12,6 +12,9 @@ return {
       hidden = true, -- Show hidden files
       ignored = true, -- Show gitignored files
       exclude = picker_utils.ds_store_exclude,
+      jump = {
+        close = explorer.is_float(),
+      },
       layout = explorer.layout(),
       win = {
         input = {

@@ -82,14 +82,25 @@ function M.layout()
   return vim.deepcopy(sidebar_layout)
 end
 
+---Return whether Explorer should use the floating layout at the current width.
+---@return boolean floating True when Explorer will open as a floating picker
+function M.is_float()
+  return vim.o.columns < float_threshold
+end
+
 ---Open Snacks Explorer with the responsive layout.
 ---
 ---Call this instead of `Snacks.explorer()` or `Snacks.picker.explorer()` so all
 ---Explorer surfaces share the same sidebar/floating behavior.
+---Floating Explorer closes after opening a file; sidebar Explorer remains open.
 ---@param opts? table Snacks explorer options, such as `{ cwd = path }`
 ---@return any picker The value returned by `Snacks.picker.explorer`
 function M.open(opts)
+  local floating = M.is_float()
   opts = vim.tbl_deep_extend("force", opts or {}, {
+    jump = {
+      close = floating,
+    },
     layout = M.layout(),
   })
   return require("snacks").picker.explorer(opts)
