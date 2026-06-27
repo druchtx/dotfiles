@@ -31,6 +31,9 @@ keybind = global:ctrl+shift+/=toggle_quick_terminal
 # keybind = ctrl+alt+h=goto_split:left
 # keybind = ctrl+alt+l=goto_split:right
 
+# tmux manages windows; disable Ghostty-native creation.
+keybind = cmd+t=ignore
+keybind = cmd+n=ignore
 # quick terminal
 quick-terminal-position = left
 quick-terminal-size = 35%,85%
