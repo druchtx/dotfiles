@@ -10,7 +10,6 @@ adjust-cell-height = 35%
 adjust-cell-width = 3%
 
 # window
-## normal
 window-padding-balance = true
 window-padding-x = 0
 window-padding-y = 0
@@ -34,6 +33,18 @@ keybind = global:ctrl+shift+/=toggle_quick_terminal
 
 # quick terminal
 quick-terminal-position = left
-quick-terminal-size = 35%
+quick-terminal-size = 35%,85%
 keybind = cmd+\=new_split:right
 keybind = shift+cmd+\=new_split:down
+
+
+
+# Temporary workaround for Ghostty losing GHOSTTY_QUICK_TERMINAL while
+# restoring Quick Terminal state. Related upstream issue:
+# https://github.com/ghostty-org/ghostty/issues/12895
+# Remove these window geometry/save-state settings after the restoration bug is fixed.
+window-width = 165
+window-height = 37
+window-position-x = 300
+window-position-y = 122
+window-save-state = never
