@@ -37,7 +37,7 @@ return {
     "folke/which-key.nvim",
     opts = function(_, opts)
       opts.spec = opts.spec or {}
-      table.insert(opts.spec, { "<leader>o", group = "ops/tools", icon = { icon = "󰡨 ", color = "blue" } })
+      table.insert(opts.spec, { "<leader>o", group = "ops/tools", icon = { icon = " ", color = "blue" } })
       table.insert(opts.spec, { "<leader>od", desc = "lazydocker", icon = { icon = "󰡨 ", color = "blue" } })
       table.insert(opts.spec, { "<leader>ok", desc = "k9s", icon = { icon = "⎈ ", color = "cyan" } })
     end,

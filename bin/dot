@@ -69,6 +69,7 @@ class LinkStatus(Enum):
     OK = "ok"  # Symlink exists and points to correct target
     MISSING = "missing"  # Symlink doesn't exist
     BROKEN = "broken"  # Symlink exists but target is missing
+    MISMATCH = "mismatch"  # Symlink exists but points elsewhere
     CONFLICT = "conflict"  # Path exists but is not a symlink
 
 
@@ -289,11 +290,13 @@ class Linker:
             return LinkStatus.MISSING
 
         if target.is_symlink():
+            if not target.exists():
+                return LinkStatus.BROKEN
             link_target = target.resolve()
             if link_target == source.resolve():
                 return LinkStatus.OK
             else:
-                return LinkStatus.BROKEN
+                return LinkStatus.MISMATCH
 
         # Path exists but is not a symlink
         return LinkStatus.CONFLICT
@@ -324,8 +327,10 @@ class Linker:
             return "already linked"
 
         # Handle conflicts
-        if status == LinkStatus.CONFLICT:
+        if status in (LinkStatus.CONFLICT, LinkStatus.MISMATCH):
             if not force:
+                if status == LinkStatus.MISMATCH:
+                    raise FileExistsError(f"Target symlink points elsewhere: {target}")
                 raise FileExistsError(f"Target exists and is not a symlink: {target}")
 
             # Backup existing file/dir
@@ -376,8 +381,15 @@ class Linker:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_name = f"{path.name}.{timestamp}"
         backup_path = self.backup_dir / backup_name
+        counter = 1
+        while backup_path.exists():
+            backup_path = self.backup_dir / f"{backup_name}.{counter}"
+            counter += 1
 
-        if path.is_dir():
+        if path.is_symlink():
+            os.symlink(os.readlink(path), backup_path)
+            path.unlink()
+        elif path.is_dir():
             shutil.copytree(path, backup_path, symlinks=True)
             shutil.rmtree(path)
         else:
@@ -530,7 +542,7 @@ class DotApp:
         except ValueError as e:
             print(f"{red('❌ Error:')} {e}")
 
-    def cmd_link(self, force: bool = False, quiet: bool = False):
+    def cmd_link(self, force: bool = False, quiet: bool = False) -> bool:
         """Create all symlinks"""
         # Load and validate config
         entries, removed = self.config.load(validate=True)
@@ -545,7 +557,7 @@ class DotApp:
             if not quiet:
                 print(f"{yellow('No files to link')}")
                 print(f"Add files with: {cyan('dot add <source>')}")
-            return
+            return True
 
         if not quiet:
             print(f"\n{bold('Creating symlinks...')}\n")
@@ -606,6 +618,8 @@ class DotApp:
                 print(f"  {red('✗')} {len(errors)} failed")
                 print(f"\nTip: Use {cyan('dot link --force')} to backup and overwrite")
 
+        return not errors and not template_errors
+
     def cmd_unlink(self):
         """Remove all symlinks"""
         entries, _ = self.config.load()
@@ -647,6 +661,7 @@ class DotApp:
             LinkStatus.OK: (green("✓"), "OK"),
             LinkStatus.MISSING: (yellow("○"), "Not linked"),
             LinkStatus.BROKEN: (red("✗"), "Broken link"),
+            LinkStatus.MISMATCH: (yellow("⚠️ "), "Wrong link target"),
             LinkStatus.CONFLICT: (yellow("⚠️ "), "Conflict"),
         }
 
@@ -700,38 +715,60 @@ class DotApp:
     def cmd_sync(self, force: bool = False):
         """Sync everything: git pull + brew + mise + link"""
         print(f"\n{bold('🔄 Syncing dotfiles...')}\n")
+        success = True
 
         # 1. Git pull
         print(f"{blue('📥 Updating repository...')}")
-        self._run_cmd(["git", "pull"], "Repository updated")
+        success = self._run_cmd(["git", "pull"], "Repository updated") and success
         print()
 
         # 2. Homebrew
         if (self.dotfiles_dir / "Brewfile").exists():
             print(f"{blue('🍺 Updating Homebrew...')}")
-            self._run_streamed_cmd(["brew", "update"], "Brew formulas updated")
+            success = (
+                self._run_streamed_cmd(["brew", "update"], "Brew formulas updated")
+                and success
+            )
 
             print(f"{blue('🍺 Upgrading Homebrew packages...')}")
-            self._run_streamed_cmd(
-                ["brew", "upgrade", "--yes"], "Homebrew packages upgraded"
+            success = (
+                self._run_streamed_cmd(
+                    ["brew", "upgrade", "--yes"], "Homebrew packages upgraded"
+                )
+                and success
             )
 
             print(f"{blue('🍺 Installing from Brewfile...')}")
-            self._run_streamed_cmd(
-                ["brew", "bundle", "install", "--upgrade", "--file=Brewfile", "--yes"],
-                "Brewfile packages installed/upgraded",
+            success = (
+                self._run_streamed_cmd(
+                    [
+                        "brew",
+                        "bundle",
+                        "install",
+                        "--upgrade",
+                        "--file=Brewfile",
+                    ],
+                    "Brewfile packages installed/upgraded",
+                )
+                and success
             )
             print()
 
         # 3. Mise
         if (self.dotfiles_dir / "tools" / "mise" / "mise.toml").exists():
             print(f"{blue('🔨 Installing mise tools...')}")
-            self._run_streamed_cmd(["mise", "install"], "Mise tools updated")
+            success = (
+                self._run_streamed_cmd(["mise", "install"], "Mise tools updated")
+                and success
+            )
             print()
 
         # 4. Link dotfiles
         print(f"{blue('🔗 Linking dotfiles...')}")
-        self.cmd_link(force=force)
+        success = self.cmd_link(force=force) and success
+
+        if not success:
+            raise RuntimeError("Sync completed with errors")
 
         print(f"\n{bold(green('✓ Sync complete!'))}")
 
@@ -804,7 +841,8 @@ def main():
                 raise ValueError("source is required for add")
             app.cmd_add(args.source, args.target)
         elif command == "link":
-            app.cmd_link(force=force)
+            if not app.cmd_link(force=force):
+                sys.exit(1)
         elif command == "unlink":
             app.cmd_unlink()
         elif command == "status":
