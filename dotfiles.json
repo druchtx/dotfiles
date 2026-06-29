@@ -56,19 +56,15 @@
       "type": "file"
     },
     {
+      "source": "tools/git/gitconfig.local.example",
+      "target": "~/.config/git/config.local",
+      "type": "file",
+      "template": true
+    },
+    {
       "source": "tools/hammerspoon",
       "target": "~/.hammerspoon",
       "type": "dir"
-    },
-    {
-      "source": "tools/claude/settings.json",
-      "target": "~/.claude/settings.json",
-      "type": "file"
-    },
-    {
-      "source": "tools/claude/statusline-command.sh",
-      "target": "~/.claude/statusline-command.sh",
-      "type": "file"
     },
     {
       "source": "tools/neovim/config",
@@ -76,14 +72,13 @@
       "type": "dir"
     },
     {
-      "source": "ai/rules/",
-      "target": "~/.claude/rules",
-      "type": "dir"
-    },
-    {
       "source": "tools/lazygit/config.yml",
       "target": "~/.config/lazygit/config.yml",
       "type": "file"
+    },
+    {
+      "source": "ai/setup-ai.sh",
+      "type": "script"
     },
     {
       "source": "tools/mise/mise.toml",

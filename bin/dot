@@ -10,6 +10,7 @@ import json
 import shutil
 import argparse
 import re
+import subprocess
 from pathlib import Path
 from enum import Enum
 from typing import List, Dict, Optional, Set, Tuple, cast
@@ -78,8 +79,8 @@ class DotfileEntry:
     """Dotfile configuration entry"""
 
     source: str  # Relative to dotfiles dir
-    target: str  # Absolute or ~/ path
-    type: str  # "file" or "dir"
+    target: Optional[str] = None  # Absolute or ~/ path
+    type: str = "file"  # "file", "dir", or "script"
     template: bool = False  # Is this a template file
 
 
@@ -90,6 +91,7 @@ class DotArgs(argparse.Namespace):
     command: Optional[str]
     source: Optional[str]
     target: Optional[str]
+    type: Optional[str]
     force: bool
 
 
@@ -224,7 +226,7 @@ class ConfigManager:
             entries.append(
                 DotfileEntry(
                     source=item["source"],
-                    target=item["target"],
+                    target=item.get("target"),
                     type=item.get("type", "file"),
                     template=item.get("template", False),
                 )
@@ -242,8 +244,8 @@ class ConfigManager:
             "dotfiles": [
                 {
                     "source": e.source,
-                    "target": e.target,
                     "type": e.type,
+                    **({"target": e.target} if e.target is not None else {}),
                     **({"template": True} if e.template else {}),
                 }
                 for e in entries
@@ -261,7 +263,7 @@ class ConfigManager:
         for e in entries:
             if e.source == entry.source:
                 raise ValueError(f"Source already exists: {entry.source}")
-            if e.target == entry.target:
+            if e.target is not None and e.target == entry.target:
                 raise ValueError(f"Target already exists: {entry.target}")
 
         entries.append(entry)
@@ -283,6 +285,24 @@ class Linker:
 
     def check_status(self, entry: DotfileEntry) -> LinkStatus:
         """Check symlink status"""
+        if entry.type == "script":
+            source = self._get_source_path(entry)
+
+            if not source.exists():
+                return LinkStatus.MISSING
+
+            if not source.is_file() or not os.access(source, os.X_OK):
+                return LinkStatus.CONFLICT
+
+            try:
+                self._run_script(entry, action="status")
+                return LinkStatus.OK
+            except Exception:
+                return LinkStatus.MISSING
+
+        if entry.target is None:
+            return LinkStatus.CONFLICT
+
         target = Path(entry.target).expanduser()
         source = self._get_source_path(entry)
 
@@ -302,9 +322,11 @@ class Linker:
         return LinkStatus.CONFLICT
 
     def link(self, entry: DotfileEntry, force: bool = False) -> str:
-        """Create symlink"""
-        target = Path(entry.target).expanduser()
-        source = self._get_source_path(entry)
+        """Create symlink or execute script entry"""
+        if entry.type == "script":
+            if not force and self.check_status(entry) == LinkStatus.OK:
+                return "already linked"
+            return self._run_script(entry, action="link", force=force)
 
         # Handle template rendering
         if entry.template and entry.source.endswith(".example"):
@@ -315,6 +337,12 @@ class Linker:
                 source = rendered
             else:
                 return "template error"
+
+        if entry.target is None:
+            raise ValueError(f"Target is required for type '{entry.type}': {entry.source}")
+
+        target = Path(entry.target).expanduser()
+        source = self._get_source_path(entry)
 
         # Validate source exists
         if not source.exists():
@@ -349,6 +377,12 @@ class Linker:
 
     def unlink(self, entry: DotfileEntry) -> str:
         """Remove symlink"""
+        if entry.type == "script":
+            return self._run_script(entry, action="unlink")
+
+        if entry.target is None:
+            return "not found"
+
         target = Path(entry.target).expanduser()
 
         if not target.exists() and not target.is_symlink():
@@ -359,6 +393,61 @@ class Linker:
 
         target.unlink()
         return "unlinked"
+
+    def _run_script(
+        self, entry: DotfileEntry, action: str, force: bool = False
+    ) -> str:
+        """Execute a managed script entry."""
+        source = self._get_source_path(entry)
+
+        if not source.exists():
+            raise FileNotFoundError(f"Source does not exist: {source}")
+
+        if not source.is_file():
+            raise ValueError(f"Script source must be a file: {source}")
+
+        if not os.access(source, os.X_OK):
+            raise PermissionError(f"Script is not executable: {source}")
+
+        env = os.environ.copy()
+        env["DOTFILES_DIR"] = str(self.dotfiles_dir)
+        env["DOT_ENTRY_SOURCE"] = entry.source
+        env["DOT_ENTRY_TYPE"] = entry.type
+        env["DOT_ACTION"] = action
+        env["DOT_FORCE"] = "1" if force else "0"
+        debug_enabled = env.get("DOT_DEBUG") == "1"
+
+        if debug_enabled:
+            try:
+                subprocess.run(
+                    [str(source), action],
+                    cwd=self.dotfiles_dir,
+                    env=env,
+                    check=True,
+                )
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(
+                    f"Script failed with exit code {e.returncode}: {source}"
+                ) from e
+        else:
+            try:
+                subprocess.run(
+                    [str(source), action],
+                    cwd=self.dotfiles_dir,
+                    env=env,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+            except subprocess.CalledProcessError as e:
+                detail = (e.stderr or e.stdout or "").strip()
+                if detail:
+                    raise RuntimeError(detail) from e
+                raise RuntimeError(
+                    f"Script failed with exit code {e.returncode}: {source}"
+                ) from e
+
+        return "executed"
 
     def _get_source_path(self, entry: DotfileEntry) -> Path:
         """Get actual source path (handles template rendering)"""
@@ -483,7 +572,9 @@ class DotApp:
         print(f"  2. {cyan('dot add <source>')} to add files")
         print(f"  3. {cyan('dot link')} to create symlinks")
 
-    def cmd_add(self, source: str, target: Optional[str] = None):
+    def cmd_add(
+        self, source: str, target: Optional[str] = None, entry_type: Optional[str] = None
+    ):
         """Add file to management"""
         source_path = self.dotfiles_dir / source
 
@@ -493,10 +584,20 @@ class DotApp:
             return
 
         # Auto-detect type
-        file_type = "dir" if source_path.is_dir() else "file"
+        file_type = entry_type or ("dir" if source_path.is_dir() else "file")
+
+        if file_type not in {"file", "dir", "script"}:
+            print(f"{red('❌ Error:')} Unsupported type: {file_type}")
+            return
+
+        if file_type == "script" and target is not None:
+            print(f"{red('❌ Error:')} Script entries do not accept a target path")
+            return
 
         # Auto-generate target
-        if target is None:
+        if file_type == "script":
+            target = None
+        elif target is None:
             filename = source_path.name
             # Remove .example suffix for target
             if filename.endswith(".example"):
@@ -519,7 +620,7 @@ class DotApp:
                 pass
 
         # Auto-detect template (only .example files are templates)
-        template = source.endswith(".example")
+        template = file_type != "script" and source.endswith(".example")
         if template:
             print(f"{blue('ℹ️  Auto-detected as template')}")
 
@@ -533,11 +634,15 @@ class DotApp:
 
             print(f"\n{green('✓')} Added to dotfiles.json")
             print(f"  Source:   {cyan(source)}")
-            print(f"  Target:   {cyan(target)}")
             print(f"  Type:     {file_type}")
+            if target is not None:
+                print(f"  Target:   {cyan(target)}")
             if template:
                 print(f"  Template: {yellow('yes')}")
-            print(f"\nNext: {cyan('dot link')} to create symlinks")
+            if file_type == "script":
+                print(f"\nNext: {cyan('dot link')} to execute the script")
+            else:
+                print(f"\nNext: {cyan('dot link')} to create symlinks")
 
         except ValueError as e:
             print(f"{red('❌ Error:')} {e}")
@@ -575,16 +680,22 @@ class DotApp:
                     if not quiet:
                         print(f"{green('✓')} {entry.target}")
                     success += 1
+                elif result == "executed":
+                    if not quiet:
+                        print(f"{green('✓')} {entry.source} {dim('(script executed)')}")
+                    success += 1
                 elif result == "already linked":
                     if not quiet:
-                        print(f"{dim('○')} {entry.target} {dim('(already linked)')}")
+                        entry_label = entry.target or entry.source
+                        print(f"{dim('○')} {entry_label} {dim('(already linked)')}")
                     already_linked += 1
                 elif result == "template error":
                     template_errors.append(entry)
 
             except Exception as e:
+                entry_label = entry.target or entry.source
                 if not quiet:
-                    print(f"{red('✗')} {entry.target}")
+                    print(f"{red('✗')} {entry_label}")
                     print(f"  {red(f'Error: {e}')}")
                 errors.append((entry, str(e)))
 
@@ -608,7 +719,7 @@ class DotApp:
             # Detailed summary for direct link command
             print(f"\n{bold('Summary:')}")
             if success > 0:
-                print(f"  {green('✓')} {success} linked")
+                print(f"  {green('✓')} {success} applied")
             if template_errors:
                 print(
                     f"  {yellow('⚠️ ')} {len(template_errors)} templates skipped (missing variables)"
@@ -635,6 +746,8 @@ class DotApp:
 
             if result == "unlinked":
                 print(f"{green('✓')} {entry.target}")
+            elif result == "executed":
+                print(f"{green('✓')} {entry.source} {dim('(script executed: unlink)')}")
             elif result == "not found":
                 print(f"{dim('○')} {entry.target} {dim('(not found)')}")
             elif result == "not a symlink":
@@ -670,11 +783,18 @@ class DotApp:
             symbol, label = status_map[status]
 
             tmpl_flag = yellow(" [T]") if entry.template else ""
-            print(
-                f"{symbol} {cyan(entry.source)}{tmpl_flag} → {entry.target} {dim(f'({label})')}"
-            )
+            script_flag = blue(" [S]") if entry.type == "script" else ""
 
-        print(f"\nRun {cyan('dot link')} to create missing symlinks")
+            if entry.type == "script":
+                print(
+                    f"{symbol} {cyan(entry.source)}{script_flag}{tmpl_flag} {dim(f'({label})')}"
+                )
+            else:
+                print(
+                    f"{symbol} {cyan(entry.source)}{script_flag}{tmpl_flag} → {entry.target} {dim(f'({label})')}"
+                )
+
+        print(f"\nRun {cyan('dot link')} to apply missing links and scripts")
 
     def _run_cmd(self, cmd: List[str], success_msg: str) -> bool:
         """Run a command and print status"""
@@ -798,6 +918,11 @@ def create_parser() -> argparse.ArgumentParser:
     add_parser.add_argument(
         "target", nargs="?", help="Target path (default: ~/.<source>)"
     )
+    add_parser.add_argument(
+        "--type",
+        choices=["file", "dir", "script"],
+        help="Entry type override",
+    )
 
     # link
     link_parser = subparsers.add_parser("link", help="Create all symlinks")
@@ -839,7 +964,7 @@ def main():
         elif command == "add":
             if args.source is None:
                 raise ValueError("source is required for add")
-            app.cmd_add(args.source, args.target)
+            app.cmd_add(args.source, args.target, args.type)
         elif command == "link":
             if not app.cmd_link(force=force):
                 sys.exit(1)

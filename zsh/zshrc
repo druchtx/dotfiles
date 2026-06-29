@@ -47,6 +47,3 @@ unset config_files
 
 # Better history search with arrow keys moved to ~/.zlogin
 # (loads after all other configs to ensure bindings stick)
-
-# Added by Devin
-export PATH="/Users/druchtx/.codeium/windsurf/bin:$PATH"
