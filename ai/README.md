@@ -23,8 +23,11 @@ ai/
     agents/
   codex/
     alias.zsh
+    hooks.json
     global/
       AGENTS.md
+    scripts/
+    skills/
     workspace/
       AGENTS.md
     agents/
@@ -109,11 +112,13 @@ Codex is currently organized into:
 - `codex/workspace/AGENTS.md`
 - `codex/agents/`
 - `codex/alias.zsh`
+- `codex/skills/session-workspace/`
 
 Managed targets:
 
 - Global file maps to `~/.codex/AGENTS.md`
 - Workspace file maps to `~/Workspace/AGENTS.md`
+- Skill maps to `~/.codex/skills/session-workspace`
 
 Notes:
 
@@ -122,6 +127,53 @@ Notes:
   behavior.
 - Rules should stay lightweight.
 - Skills should be optional and task-specific.
+- Persistent session state should live under
+  `~/.local/state/ai-workflow/codex/`, not inside dotfiles or repos.
+- Session state should only record lightweight directory memory such as
+  associated repos, short roles, and longer descriptions.
+- Session state is managed manually, not through Codex hooks.
+
+## Codex Session Workspace State
+
+Codex now has a lightweight state workflow for multi-repo sessions.
+
+Design:
+
+- Session transcript history remains the primary source of task context.
+- Extra persisted state only stores a session goal plus associated
+  directories and their role/description metadata.
+- Session state is updated explicitly when needed.
+- State files live under `~/.local/state/ai-workflow/codex/sessions/`.
+- The skill now follows manual lifecycle actions such as `init`,
+  `show`, `save`, and `delete`.
+
+Current state shape:
+
+```json
+{
+  "session_name": "019f...",
+  "goal": "",
+  "description": "",
+  "workspace": {
+    "name": "Workspace",
+    "repos": [
+      {
+        "path": "/absolute/path/to/repo",
+        "role": "",
+        "description": ""
+      }
+    ]
+  }
+}
+```
+
+Notes:
+
+- `session_name` defaults to `session_id` until you set a better label.
+- `current_focus` and `next_step` are intentionally not persisted.
+- Dotfiles only manage the skill and its local helper script.
+- `delete` can also remove matching Codex rollout and shell snapshot
+  artifacts for the same session id.
 
 ## Shell Wrappers
 
