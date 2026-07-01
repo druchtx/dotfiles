@@ -3,6 +3,7 @@
 -- Add any additional keymaps here
 
 vim.keymap.set({ "i", "v", "s", "t" }, "<C-g>", "<Esc>", { desc = "Escape" })
+vim.keymap.set("i", "<S-Tab>", "<C-d>", { desc = "Outdent" })
 
 -- using vim.ui.select (LazyVim will use snacks automatically)
 vim.keymap.set("n", "<leader>fm", function()

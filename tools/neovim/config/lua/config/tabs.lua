@@ -26,7 +26,9 @@ local workspaces = {}
 local tabs_by_number = {}
 local setup_done = false
 local session_state_var = "tab_workspaces"
+local session_project_var = "tab_session_project"
 local attach_sequence = 0
+local session_project_path = nil
 
 local function current_tab()
   return vim.api.nvim_get_current_tabpage()
@@ -39,6 +41,17 @@ end
 local function normalize_buf_name(buf)
   local name = vim.api.nvim_buf_get_name(buf)
   return name ~= "" and normalize_path(name) or nil
+end
+
+local function set_session_project_internal(path)
+  path = normalize_path(path)
+  if not path or vim.fn.isdirectory(path) ~= 1 then
+    return nil
+  end
+
+  session_project_path = path
+  vim.g[session_project_var] = path
+  return path
 end
 
 local function workspace(tab)
@@ -148,6 +161,15 @@ local function tab_project(tab)
   return nil
 end
 
+local function first_tab_project()
+  local first_tab = vim.api.nvim_list_tabpages()[1]
+  if not (first_tab and vim.api.nvim_tabpage_is_valid(first_tab)) then
+    return nil
+  end
+
+  return tab_project(first_tab)
+end
+
 function M.attach(buf, tab)
   buf = buf or vim.api.nvim_get_current_buf()
   tab = tab or current_tab()
@@ -217,27 +239,46 @@ function M.save_session_state()
   end
 
   vim.g[session_state_var] = snapshot
+  vim.g[session_project_var] = first_tab_project() or M.session_project() or M.project()
 end
 
 function M.append_session_state(session_file)
   local snapshot = vim.g[session_state_var]
+  local session_project = vim.g[session_project_var]
   if type(snapshot) ~= "table" or type(session_file) ~= "string" or session_file == "" then
     return
   end
 
   local encoded = vim.json.encode(snapshot)
-  local line = "lua vim.g."
+  local lines = {
+    "",
+    '" Tab workspace state',
+  }
+
+  if type(session_project) == "string" and session_project ~= "" then
+    lines[#lines + 1] = "lua vim.g."
+      .. session_project_var
+      .. " = "
+      .. string.format("%q", session_project)
+  end
+
+  lines[#lines + 1] = "lua vim.g."
     .. session_state_var
     .. " = vim.json.decode("
     .. string.format("%q", encoded)
     .. ")"
-  vim.fn.writefile({ "", '" Tab workspace state', line }, session_file, "a")
+  vim.fn.writefile(lines, session_file, "a")
 end
 
 function M.restore_session_state()
   local snapshot = vim.g[session_state_var]
+  if type(vim.g[session_project_var]) == "string" then
+    set_session_project_internal(vim.g[session_project_var])
+  end
+
   if type(snapshot) ~= "table" then
     remember_tabs()
+    M.session_project()
     return
   end
 
@@ -282,6 +323,17 @@ function M.restore_session_state()
     end
   end
 
+  local first_project = snapshot[1] and type(snapshot[1].project) == "string" and snapshot[1].project or nil
+  if first_project then
+    set_session_project_internal(first_project)
+  elseif not session_project_path then
+    for _, item in ipairs(snapshot) do
+      if type(item.project) == "string" and set_session_project_internal(item.project) then
+        break
+      end
+    end
+  end
+
   vim.schedule(function()
     pcall(nvim_bufferline)
     vim.cmd.redrawtabline()
@@ -297,6 +349,27 @@ function M.set_project(path, tab)
   local state = workspace(tab)
   state.project = path
   return path
+end
+
+function M.set_session_project(path)
+  return set_session_project_internal(path)
+end
+
+function M.session_project()
+  local first_project = first_tab_project()
+  if first_project and set_session_project_internal(first_project) then
+    return session_project_path
+  end
+
+  if session_project_path and vim.fn.isdirectory(session_project_path) == 1 then
+    return session_project_path
+  end
+
+  if type(vim.g[session_project_var]) == "string" and set_session_project_internal(vim.g[session_project_var]) then
+    return session_project_path
+  end
+
+  return set_session_project_internal(vim.fn.getcwd(0))
 end
 
 function M.project(tab)
@@ -365,6 +438,7 @@ function M.open_project_tab(path)
   vim.cmd.tabnew()
   vim.cmd.tcd(vim.fn.fnameescape(cwd))
   M.set_project(cwd)
+  M.session_project()
   M.attach()
 end
 
@@ -413,6 +487,7 @@ function M.setup()
   })
 
   remember_tabs()
+  M.session_project()
   M.set_project(vim.fn.getcwd(0))
   M.attach_current_tab_buffers({ listed = true })
 end

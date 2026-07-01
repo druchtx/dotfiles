@@ -68,6 +68,29 @@ local function tab_indicator_items()
   return items
 end
 
+local function tab_picker_items()
+  local current = vim.api.nvim_get_current_tabpage()
+  local items = {}
+
+  for index, tab in ipairs(vim.api.nvim_list_tabpages()) do
+    local project = require("config.tabs").project(tab)
+    local project_name = project and vim.fn.fnamemodify(project, ":t") or ("tab-" .. index)
+    local wins = vim.api.nvim_tabpage_list_wins(tab)
+    local current_buf = wins[1] and vim.api.nvim_win_get_buf(wins[1]) or nil
+    local current_file = current_buf and vim.api.nvim_buf_get_name(current_buf) or ""
+    current_file = current_file ~= "" and vim.fn.fnamemodify(current_file, ":t") or "[No File]"
+
+    items[#items + 1] = {
+      idx = index,
+      tab = tab,
+      file = project or current_file,
+      text = string.format("%s%d  %s  %s", tab == current and "* " or "  ", index, project_name, current_file),
+    }
+  end
+
+  return items
+end
+
 ---Force bufferline to recompute and redraw after buffer/tab mutations.
 local function refresh_tabline()
   vim.schedule(function()
@@ -142,6 +165,24 @@ function M.setup_opts(opts)
 
   setup_highlights()
   setup_refresh_autocmds()
+end
+
+function M.select_tab()
+  require("snacks").picker.pick({
+    title = "Tabs",
+    finder = tab_picker_items,
+    format = "text",
+    preview = "none",
+    layout = {
+      preset = "select",
+    },
+    confirm = function(picker, item)
+      picker:close()
+      if item and item.tab and vim.api.nvim_tabpage_is_valid(item.tab) then
+        vim.api.nvim_set_current_tabpage(item.tab)
+      end
+    end,
+  })
 end
 
 return M

@@ -40,8 +40,10 @@ end
 ---@param persistence table persistence.nvim module
 ---@return boolean skip True when cwd or branch is temporary
 local function should_skip_current_session(persistence)
+  local tabs = require("config.tabs")
+  local cwd = tabs.session_project() or vim.fn.getcwd()
   local branch = persistence.branch()
-  return is_temporary_dir(vim.fn.getcwd()) or (branch and branch:match("^tmp%.") ~= nil)
+  return is_temporary_dir(cwd) or (branch and branch:match("^tmp%.") ~= nil)
 end
 
 ---Build Snacks picker items from persistence.nvim sessions.
@@ -84,6 +86,7 @@ local function load_session(item)
     return
   end
 
+  require("config.tabs").set_session_project(item.dir)
   vim.fn.chdir(item.dir)
   require("persistence").load()
 end
@@ -137,6 +140,7 @@ end
 ---4. appending tab workspace state after save.
 ---@param persistence table persistence.nvim module
 function M.patch(persistence)
+  local config = require("persistence.config")
   local list = persistence.list
   local load = persistence.load
   local save = persistence.save
@@ -147,6 +151,19 @@ function M.patch(persistence)
     return vim.tbl_filter(function(session)
       return not is_temporary_session_file(session)
     end, list())
+  end
+
+  persistence.current = function(opts)
+    opts = opts or {}
+    local session_dir = require("config.tabs").session_project() or vim.fn.getcwd()
+    local name = session_dir:gsub("[\\/:]+", "%%")
+    if config.options.branch and opts.branch ~= false then
+      local branch = persistence.branch()
+      if branch and branch ~= "main" and branch ~= "master" then
+        name = name .. "%%" .. branch:gsub("[\\/:]+", "%%")
+      end
+    end
+    return config.options.dir .. name .. ".vim"
   end
 
   persistence.load = function(opts)
@@ -164,6 +181,7 @@ function M.patch(persistence)
       return
     end
     local tabs = require("config.tabs")
+    tabs.session_project()
     tabs.save_session_state()
     local ret = save()
     tabs.append_session_state(persistence.current())
