@@ -169,6 +169,9 @@ NPM_CONFIG_PREFIX = "{{env.HOME}}/.node-globals"
 # Don't write .pyc files
 PYTHONDONTWRITEBYTECODE = "1"
 
+# If bytecode is generated explicitly, keep it out of source trees
+PYTHONPYCACHEPREFIX = "{{env.HOME}}/.python/pycache"
+
 # Force unbuffered output (useful for logs)
 PYTHONUNBUFFERED = "1"
 
