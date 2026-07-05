@@ -1,7 +1,6 @@
 local M = {}
 
-M.ds_store_exclude = {
-  ".DS_Store",
+M.ds_store_exclude = { ".DS_Store",
   "**/.DS_Store",
 }
 

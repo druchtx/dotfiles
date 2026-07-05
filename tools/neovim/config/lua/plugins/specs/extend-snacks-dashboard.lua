@@ -17,45 +17,46 @@ return {
     },
   },
   opts = function(_, opts)
-    opts.dashboard = opts.dashboard or {}
-    opts.dashboard.enabled = true
-    opts.dashboard.sections = {
-      { section = "header" },
-      { section = "keys", gap = 1, padding = 1 },
+    opts.dashboard = {
+      enabled = true,
+      width = 40,
+      sections = {
+        { section = "header" },
+        { section = "keys", gap = 1, padding = 1 },
+      },
+      preset = {
+        header = "",
+        keys = {
+          { icon = " ", key = "n", desc = "New File", action = ":ene | startinsert" },
+          { icon = " ", key = "p", desc = "Projects", action = ":lua Snacks.picker.projects()" },
+          {
+            icon = " ",
+            key = "e",
+            desc = "Explore",
+            action = function()
+              require("plugins.modules.explorer").open({ cwd = LazyVim.root() })
+            end,
+          },
+          { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+          {
+            icon = " ",
+            key = "l",
+            desc = "Restore Session",
+            action = function()
+              require("persistence").load({ last = true })
+            end,
+          },
+          {
+            icon = "󰑓 ",
+            key = "s",
+            desc = "Select Session",
+            action = function()
+              require("persistence").select()
+            end,
+          },
+          { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+        },
+      },
     }
-
-    opts.dashboard.preset = opts.dashboard.preset or {}
-    opts.dashboard.preset.header = ""
-    opts.dashboard.preset.keys = opts.dashboard.preset.keys or {}
-
-    local filtered = {}
-    for _, item in ipairs(opts.dashboard.preset.keys) do
-      if not vim.tbl_contains({ "f", "g", "c", "l", "x", "s" }, item.key) then
-        table.insert(filtered, item)
-      end
-    end
-
-    table.insert(
-      filtered,
-      4,
-      {
-        icon = "󰑓",
-        key = "s",
-        desc = "Select Session",
-        action = function()
-          require("persistence").select()
-        end,
-      }
-    )
-    table.insert(filtered, 3, {
-      icon = "",
-      key = "e",
-      desc = "Explore",
-      action = function()
-        require("plugins.modules.explorer").open()
-      end,
-    })
-
-    opts.dashboard.preset.keys = filtered
   end,
 }

@@ -87,6 +87,12 @@ function M.is_float()
   return vim.o.columns < float_threshold
 end
 
+local function equalize_editor_windows()
+  vim.schedule(function()
+    vim.cmd("wincmd =")
+  end)
+end
+
 ---Open Snacks Explorer with the responsive layout.
 ---
 ---Call this instead of `Snacks.explorer()` or `Snacks.picker.explorer()` so all
@@ -96,12 +102,31 @@ end
 ---@return any picker The value returned by `Snacks.picker.explorer`
 function M.open(opts)
   local floating = M.is_float()
+  local on_show = opts and opts.on_show
+  local on_close = opts and opts.on_close
+
   opts = vim.tbl_deep_extend("force", opts or {}, {
     jump = {
       close = floating,
     },
     layout = M.layout(),
   })
+
+  if not floating then
+    opts.on_show = function(picker)
+      if on_show then
+        on_show(picker)
+      end
+      equalize_editor_windows()
+    end
+    opts.on_close = function(picker)
+      if on_close then
+        on_close(picker)
+      end
+      equalize_editor_windows()
+    end
+  end
+
   return require("snacks").picker.explorer(opts)
 end
 

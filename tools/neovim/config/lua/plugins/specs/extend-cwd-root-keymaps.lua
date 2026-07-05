@@ -50,20 +50,6 @@ return {
       desc = "Explorer Snacks (Root Dir)",
     },
     {
-      "<leader>ft",
-      function()
-        Snacks.terminal()
-      end,
-      desc = "Terminal (cwd)",
-    },
-    {
-      "<leader>fT",
-      function()
-        Snacks.terminal(nil, { cwd = LazyVim.root() })
-      end,
-      desc = "Terminal (Root Dir)",
-    },
-    {
       "<leader>gg",
       function()
         Snacks.lazygit()
