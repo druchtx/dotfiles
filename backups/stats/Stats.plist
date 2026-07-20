@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>Battery_notifications_high</key>
+	<string></string>
+	<key>Battery_notifications_low</key>
+	<string>low</string>
 	<key>Battery_state</key>
 	<false/>
 	<key>CPU_processes</key>
@@ -26,29 +30,30 @@
 	<true/>
 	<key>NSOSPLastRootDirectory</key>
 	<data>
-	Ym9vaxQDAAAAAAQQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA7AEA
-	AAQAAAADAwAAAAQAAAUAAAABAQAAVXNlcnMAAAAHAAAAAQEAAGRydWNodHgACQAAAAEB
-	AAAuZG90ZmlsZXMAAAAHAAAAAQEAAGJhY2t1cHMAEAAAAAEGAAAQAAAAIAAAADAAAABE
-	AAAACAAAAAQDAACeOAAAAAAAAAgAAAAEAwAAuw0wAwAAAAAIAAAABAMAAEZjMgMAAAAA
-	CAAAAAQDAADgAccDAAAAABAAAAABBgAAbAAAAHwAAACMAAAAnAAAAAgAAAAABAAAQccD
-	c2KYw2gYAAAAAQIAAAIAAAAAAAAAHwIAAAAAAAAfAgAAAAAAAAAAAAABBQAACAAAAAQD
-	AAACAAAAAAAAAAQAAAADAwAA9QEAAAgAAAABCQAAZmlsZTovLy8MAAAAAQEAAE1hY2lu
-	dG9zaCBIRAgAAAAEAwAAAFDBGXMAAAAIAAAAAAQAAEHHC8tfAAAAJAAAAAEBAAA5OTBD
-	NEYxOS0zREM4LTQyNzgtQTI0QS03MUI1N0Y4Mjk5NkEYAAAAAQIAAIEAAAABAAAA7xMA
-	AAEAAADvEwAAAQAAAAEAAAABAQAALwAAADAAAAABAgAAZG5pYgAAAAABAAAAAAAAAAAA
-	AAAAAAAAAAAAAAAAAAAAAAAAcmRsZgIAAAAAAAAA8AAAAP7///8BAAAAAAAAABMAAAAE
-	EAAAVAAAAAAAAAAFEAAArAAAAAAAAAAQEAAA1AAAAAAAAABAEAAAxAAAAAAAAAACIAAA
-	qAEAAAAAAAAFIAAAGAEAAAAAAAAQIAAAKAEAAAAAAAARIAAAXAEAAAAAAAASIAAAPAEA
-	AAAAAAATIAAATAEAAAAAAAAgIAAAiAEAAAAAAAAwIAAA9AAAAAAAAAABwAAA/AAAAAAA
-	AAARwAAAIAAAAAAAAAASwAAADAEAAAAAAAAB0AAA9AAAAAAAAAAQ0AAABAAAAAAAAAAX
-	8AAARAAAAAAAAAAi8AAAtAEAAAAAAAA=
+	Ym9va/wCAAAAAAUQQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+	AAAAAAAAAAAAAAAAANwBAAAEAAAAAwMAAAAAACAFAAAAAQEAAFVzZXJzAAAABwAAAAEB
+	AABkcnVjaHR4AAkAAAABAQAALmRvdGZpbGVzAAAABwAAAAEBAABiYWNrdXBzAAUAAAAB
+	AQAAc3RhdHMAAAAUAAAAAQYAABAAAAAgAAAAMAAAAEQAAABUAAAACAAAAAQDAACeOAAA
+	AAAAAAgAAAAEAwAAuw0wAwAAAAAIAAAABAMAAMdZ2gUAAAAACAAAAAQDAAAdWtoFAAAA
+	AAgAAAAEAwAAHlraBQAAAAAUAAAAAQYAAIAAAACQAAAAoAAAALAAAADAAAAACAAAAAAE
+	AABBx5e2GpCUXBgAAAABAgAAAgAAAAAAAAAPAAAAAAAAAAAAAAAAAAAAAAAAAAEFAAAI
+	AAAABAMAAAMAAAAAAAAABAAAAAMDAAD1AQAACAAAAAEJAABmaWxlOi8vLwwAAAABAQAA
+	TWFjaW50b3NoIEhECAAAAAQDAAAAUMEZcwAAAAgAAAAABAAAQcf/mYiAAAAkAAAAAQEA
+	ADk5MEM0RjE5LTNEQzgtNDI3OC1BMjRBLTcxQjU3RjgyOTk2QRgAAAABAgAAgQAAAAEA
+	AADvEwAAAQAAAAAAAAAAAAAAAQAAAAEBAAAvAAAA2AAAAP7///8BAAAAAAAAABEAAAAE
+	EAAAZAAAAAAAAAAFEAAA0AAAAAAAAAAQEAAA/AAAAAAAAABAEAAA7AAAAAAAAAACIAAA
+	0AEAAAAAAAAFIAAAQAEAAAAAAAAQIAAAUAEAAAAAAAARIAAAhAEAAAAAAAASIAAAZAEA
+	AAAAAAATIAAAdAEAAAAAAAAgIAAAsAEAAAAAAAAwIAAAHAEAAAAAAAABwAAAJAEAAAAA
+	AAARwAAAIAAAAAAAAAASwAAANAEAAAAAAAAB0AAAHAEAAAAAAAAQ0AAABAAAAAAAAAA=
 	</data>
 	<key>NSStatusItem Preferred Position CPU_mini</key>
-	<integer>375</integer>
+	<real>415</real>
 	<key>NSStatusItem Preferred Position Network_speed</key>
-	<integer>422</integer>
+	<real>462</real>
 	<key>NSStatusItem Preferred Position RAM_mini</key>
-	<integer>328</integer>
+	<real>368</real>
+	<key>NSStatusItem Preferred Position Sensors_sensors</key>
+	<real>533</real>
 	<key>NSStatusItem Restore Position Battery_battery</key>
 	<integer>351</integer>
 	<key>NSToolbar Configuration eu.exelban.Stats.Settings.Toolbar</key>
@@ -64,6 +69,8 @@
 	</dict>
 	<key>NSWindow Frame NSNavPanelAutosaveName</key>
 	<string>513 450 894 448 0 0 1920 1049 </string>
+	<key>NSWindow Frame eu.exelban.Stats.Settings.WindowFrame</key>
+	<string>739 388 728 480 0 0 1920 1050 </string>
 	<key>Network_label_position</key>
 	<integer>1</integer>
 	<key>Network_networkChart_position</key>
@@ -98,6 +105,8 @@
 	<integer>3</integer>
 	<key>Sensors_barChart_position</key>
 	<integer>3</integer>
+	<key>Sensors_fanControl</key>
+	<true/>
 	<key>Sensors_fanValue</key>
 	<string>rpm</string>
 	<key>Sensors_hid</key>
@@ -122,9 +131,19 @@
 	<integer>3</integer>
 	<key>Sensors_widget</key>
 	<string>sensors</string>
+	<key>fan_0_mode</key>
+	<integer>0</integer>
+	<key>fan_0_speed</key>
+	<integer>6800</integer>
+	<key>fan_1_mode</key>
+	<integer>0</integer>
+	<key>fan_1_speed</key>
+	<integer>6800</integer>
 	<key>pause</key>
 	<false/>
 	<key>remote_monitoring</key>
+	<true/>
+	<key>remote_tokens_migrated_to_keychain</key>
 	<true/>
 	<key>sensor_Average CPU</key>
 	<true/>
@@ -144,6 +163,30 @@
 	<false/>
 	<key>sensor_Total System Consumption</key>
 	<false/>
+	<key>sensor_Tp01_popup</key>
+	<false/>
+	<key>sensor_Tp05_popup</key>
+	<false/>
+	<key>sensor_Tp09_popup</key>
+	<false/>
+	<key>sensor_Tp0D_popup</key>
+	<false/>
+	<key>sensor_Tp0X_popup</key>
+	<false/>
+	<key>sensor_Tp0b_popup</key>
+	<false/>
+	<key>sensor_Tp0f_popup</key>
+	<false/>
+	<key>sensor_Tp0j_popup</key>
+	<false/>
+	<key>sensor_Tp1h_popup</key>
+	<false/>
+	<key>sensor_Tp1l_popup</key>
+	<false/>
+	<key>sensor_Tp1p_popup</key>
+	<false/>
+	<key>sensor_Tp1t_popup</key>
+	<false/>
 	<key>sensor_VD0R</key>
 	<false/>
 	<key>setupProcess</key>
@@ -151,8 +194,10 @@
 	<key>telemetry</key>
 	<false/>
 	<key>updater_check_ts</key>
-	<integer>1752362611</integer>
+	<integer>1784511028</integer>
+	<key>updater_install_ts</key>
+	<integer>1784203124</integer>
 	<key>version</key>
-	<string>2.11.46</string>
+	<string>3.0.8</string>
 </dict>
 </plist>
