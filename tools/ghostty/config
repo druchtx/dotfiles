@@ -1,4 +1,4 @@
-# command = zsh -lc "~/.dotfiles/tools/ghostty/launch-hook"
+command = zsh -lc "~/.dotfiles/tools/ghostty/launch-hook"
 
 # theme
 theme = Github Dark Dimmed
@@ -14,7 +14,7 @@ window-padding-balance = true
 window-padding-x = 0
 window-padding-y = 0
 window-theme = auto
-macos-titlebar-style = hidden
+# macos-titlebar-style = hidden
 macos-option-as-alt = true
 window-decoration = true
 # background-blur-radius = 18

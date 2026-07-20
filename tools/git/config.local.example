@@ -1,10 +1,9 @@
 [user]
         name = #{GIT_AUTHORNAME}
         email = #{GIT_AUTHOREMAIL}
-        signingkey = #{GIT_SIGNING_KEY}
+        signingkey = ~/.ssh/id_ed25519
 [credential]
-        helper = #{GIT_CREDENTIAL_HELPER}
-
+        helper = osxkeychain
 [commit]
 	gpgSign = true
 [gpg]

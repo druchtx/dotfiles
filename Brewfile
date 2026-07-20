@@ -8,37 +8,36 @@ tap "daipeihust/tap"
 # Brew (CLI)
 # ------------------------
 
-# Core CLI
+# Core CLI / Shell
 brew "coreutils"
 brew "gawk"
-brew "tree"
-brew "htop"
+brew "readline"
 brew "ack"
+brew "fd"
 brew "fzf"
 brew "fzf-tab"
 brew "jq"
 brew "yq"
-brew "usage"  # CLI completion tool (required by mise)
-
-# Networking / Web
+brew "tree"
+brew "htop"
 brew "curl"
 brew "wget"
-# brew "w3m"
 
-# Security / Crypto
-brew "gnupg"
-brew "openssl@3"
-
-# Dev / Build
+# Development
+brew "mise"
+brew "usage"  # CLI completion tool (required by mise)
 brew "perl"
-brew "readline"
 brew "autoconf"
 brew "automake"
 brew "cmake"
 brew "protobuf"
-brew "lazydocker"
+brew "maven"
+brew "cobra-cli"
+brew "neovim"
+brew "mas"
+brew "gemini-cli"
 
-# VCS
+# Git
 brew "git"
 brew "git-lfs"
 brew "gh"
@@ -46,60 +45,45 @@ brew "lazygit"
 
 # Containers / Infra
 brew "devcontainer"
+brew "lazydocker"
 brew "kustomize"
 brew "helm"
 
-# CLIs / Editors
-brew "cobra-cli"
-brew "gemini-cli"
-brew "neovim"
-brew "mas"
- 
-# Java 
-brew "maven"
+# Security
+brew "gnupg"
+brew "openssl@3"
 
 # ------------------------
 # Cask (GUI)
 # ------------------------
 
-# Terminal
+# Development / System
 cask "ghostty"
-
-# Fonts
 cask "font-fira-code-nerd-font"
-
-# Browsers
 cask "google-chrome"
-
-# Dev / Cloud
 cask "visual-studio-code"
+cask "zed"
 cask "tableplus"
 cask "orbstack"
 cask "aws-vault-binary"
-
-# Productivity / System
 cask "hammerspoon"
 cask "stats"
 cask "appcleaner"
-
-# Remote
 cask "rustdesk"
 
-# Social / Chat
+# Communication / Entertainment
 cask "slack"
 cask "wechat"
-
-# Entertainment
 cask "spotify"
 
 # AI
-cask "codex-app"
 cask "chatgpt"
 cask "claude"
+cask "codex"
 
 # ------------------------
 # Mac App Store (mas)
 # ------------------------
-# mas "Dictionaries", id: 1380563956
-# mas "LINE", id: 539883307
-# mas "Xcode", id: 497799835
+mas "Dictionaries", id: 1380563956
+mas "LINE", id: 539883307
+mas "Xcode", id: 497799835

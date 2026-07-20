@@ -22,13 +22,20 @@ local hammerspoon_cli = "/opt/homebrew/bin/hs"
 local english_input_method = "com.apple.keylayout.ABC"
 
 if vim.fn.executable(hammerspoon_cli) == 1 then
-  vim.api.nvim_create_autocmd("InsertLeave", {
+  local function switch_to_english_in_normal_mode()
+    local mode = vim.api.nvim_get_mode().mode
+    if mode:match("^i") then
+      return
+    end
+
+    local command = ('return hs.keycodes.currentSourceID("%s")'):format(english_input_method)
+    -- Keep the mode transition responsive while Hammerspoon handles the request.
+    vim.system({ hammerspoon_cli, "-c", command })
+  end
+
+  vim.api.nvim_create_autocmd({ "InsertLeave", "BufEnter", "WinEnter", "FocusGained" }, {
     group = vim.api.nvim_create_augroup("dotfiles_normal_mode_input_method", { clear = true }),
-    desc = "Switch to the English input method after leaving Insert mode",
-    callback = function()
-      local command = ('return hs.keycodes.currentSourceID("%s")'):format(english_input_method)
-      -- Keep the mode transition responsive while Hammerspoon handles the request.
-      vim.system({ hammerspoon_cli, "-c", command })
-    end,
+    desc = "Use the English input method outside Insert mode",
+    callback = switch_to_english_in_normal_mode,
   })
 end

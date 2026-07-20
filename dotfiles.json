@@ -51,15 +51,20 @@
       "type": "file"
     },
     {
-      "source": "tools/git/gitconfig",
+      "source": "tools/git/config",
       "target": "~/.config/git/config",
       "type": "file"
     },
     {
-      "source": "tools/git/gitconfig.local.example",
+      "source": "tools/git/config.local.example",
       "target": "~/.config/git/config.local",
       "type": "file",
       "template": true
+    },
+    {
+      "source": "tools/gh/config.yml",
+      "target": "~/.config/gh/config.yml",
+      "type": "file"
     },
     {
       "source": "tools/hammerspoon",

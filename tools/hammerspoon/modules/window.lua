@@ -132,8 +132,7 @@ local windowPositions = {
 
 		-- Set desired window size
 		local targetWidth = screen.w * 0.85
-		local targetHeight = screen.h * 0.95
-
+		local targetHeight = screen.h * 0.93
 		-- Calculate position to center the window
 		local centerX = screen.x + (screen.w - targetWidth) / 2
 		local centerY = screen.y + (screen.h - targetHeight) / 2
