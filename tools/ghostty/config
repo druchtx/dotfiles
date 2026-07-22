@@ -1,6 +1,6 @@
-command = zsh -lc "~/.dotfiles/tools/ghostty/launch-hook"
+command =zsh -lc "tmux attach-session || tmux new-session"
 
-# theme
+### theme
 theme = Github Dark Dimmed
 window-theme = dark
 font-family = Fira Code
@@ -9,45 +9,18 @@ font-size = 13
 adjust-cell-height = 35%
 adjust-cell-width = 3%
 
-# window
+### window
 window-padding-balance = true
 window-padding-x = 0
 window-padding-y = 0
 window-theme = auto
-# macos-titlebar-style = hidden
 macos-option-as-alt = true
 window-decoration = true
-# background-blur-radius = 18
-# background-opacity = 0.95
-# background-blur = true
 mouse-hide-while-typing
 
-# key binding
-## global
-keybind = global:ctrl+shift+/=toggle_quick_terminal
-
-# keybind = ctrl+alt+j=goto_split:down
-# keybind = ctrl+alt+k=goto_split:up
-# keybind = ctrl+alt+h=goto_split:left
-# keybind = ctrl+alt+l=goto_split:right
-
+### key binding
 # tmux manages windows; disable Ghostty-native creation.
 keybind = cmd+t=ignore
 keybind = cmd+n=ignore
-# quick terminal
-quick-terminal-position = left
-quick-terminal-size = 35%,85%
-keybind = cmd+\=new_split:right
-keybind = shift+cmd+\=new_split:down
-
-
-
-# Temporary workaround for Ghostty losing GHOSTTY_QUICK_TERMINAL while
-# restoring Quick Terminal state. Related upstream issue:
-# https://github.com/ghostty-org/ghostty/issues/12895
-# Remove these window geometry/save-state settings after the restoration bug is fixed.
-window-width = 165
-window-height = 37
-window-position-x = 300
-window-position-y = 122
-window-save-state = never
+keybind = cmd+d=ignore
+keybind = shift+cmd+d=ignore
