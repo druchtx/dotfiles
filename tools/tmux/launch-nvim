@@ -1,11 +1,12 @@
 #!/usr/bin/env zsh
 set -euo pipefail
 
-# Replaces the current shell pane with nvim.
+# Replaces the current shell pane with nvim, then starts a fresh login shell.
 pane_id="$(tmux display-message -p '#{pane_id}')"
 pane_command="$(tmux display-message -p '#{pane_current_command}')"
 pane_path="$(tmux display-message -p '#{pane_current_path}')"
 popup_message="$HOME/.dotfiles/tools/tmux/popup-message"
+shell_command="${SHELL:-zsh} -l"
 
 if ! tmux display-message -p -t "$pane_id" '#{pane_id}' >/dev/null 2>&1; then
     tmux display-popup -E -w 64 -h 7 "$popup_message \"target pane was not found\" 0.5"
@@ -14,7 +15,7 @@ fi
 
 case "$pane_command" in
   zsh|bash|fish|sh)
-    tmux respawn-pane -k -t "$pane_id" -c "$pane_path" nvim
+    tmux respawn-pane -k -t "$pane_id" -c "$pane_path" "nvim; exec $shell_command"
     ;;
   *)
     tmux display-popup -E -w 64 -h 7 "$popup_message \"current pane is not a shell\" 0.5"
