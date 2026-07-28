@@ -1,5 +1,12 @@
--- Tab workspaces must be tracked before plugins start opening buffers.
-require("config.tabs").setup()
+-- Neovim rebuild entrypoint.
+--
+-- Keep this file intentionally minimal. Add behavior only after its native
+-- Neovim responsibility and any plugin dependency have been understood.
 
--- bootstrap lazy.nvim, LazyVim and your plugins
-require("config.lazy")
+require("core.options")
+require("core.keymaps")
+require("core.lazy")
+
+local startup = require("learning.startup")
+
+assert(startup.config_dir == vim.fn.stdpath("config"))
