@@ -33,8 +33,8 @@
 | 2 | Buffer、Window 与 Tabpage | DONE | 2026-07-28 |
 | 3 | Mode、Option、Keymap、Command 与 Autocmd | DONE | 2026-07-29 |
 | 4 | Filetype、Syntax 与 Treesitter 基础 | DONE | 2026-07-29 |
-| 5 | 使用 lazy.nvim 管理插件和版本 | DOING | - |
-| 6 | 为 Go 加入 Treesitter | TODO | - |
+| 5 | 使用 lazy.nvim 管理插件和版本 | DONE | 2026-07-29 |
+| 6 | 为 Go 加入 Treesitter | DOING | - |
 | 7 | 原生 LSP 与外部 Language Server | TODO | - |
 | 8 | 补全、格式化与静态检查 | TODO | - |
 | 9 | 文件导航与搜索 | TODO | - |
@@ -137,10 +137,10 @@
 
 完成标准：
 
-- [ ] 完成最小 bootstrap
-- [ ] 插件声明按能力组织且可以审计
-- [ ] 提交 `lazy-lock.json`
-- [ ] 能更新并回退一个插件版本
+- [x] 完成最小 bootstrap
+- [x] 插件声明按能力组织且可以审计
+- [x] 提交 `lazy-lock.json`
+- [x] 使用全新 data 目录按 lockfile 恢复插件版本
 
 ### 6. 为 Go 加入 Treesitter
 

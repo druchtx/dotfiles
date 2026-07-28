@@ -78,7 +78,41 @@
 
 ### 下一步
 
-- 提交当前重建基线后，进入阶段 6 安装 Go parser。
+- 阶段 6：安装并启用 Go Treesitter parser。
+
+### 完成确认
+
+状态变化：DOING -> DONE
+
+- 已提交包含 `lazy-lock.json` 的最小重建基线。
+- 已在全新 XDG data 目录执行 `:Lazy restore`。
+- `lazy.nvim`、`nvim-treesitter` 和 registry 的实际 HEAD 均与 lockfile
+  一致。
+- bootstrap 的 stable commit 与 lockfile 在 restore 后统一。
+
+## 2026-07-29 — 阶段 6：Go Treesitter
+
+状态变化：TODO -> DOING
+
+### 理解
+
+- 下一步只处理 Go parser、query 和 highlighter。
+
+### 实装
+
+- 尚未安装 Go parser。
+
+### 验证
+
+- 待验证 Go parser、query 和 Treesitter highlighter。
+
+### 未解决问题
+
+- 需要决定 parser 安装是在首次配置时显式执行，还是由命令手动管理。
+
+### 下一步
+
+- 安装 Go parser，并为 Go Filetype 启用 Treesitter highlighter。
 
 ## 2026-07-28 — 阶段 3：编辑器原生行为
 
