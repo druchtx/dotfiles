@@ -131,8 +131,8 @@ local windowPositions = {
 		saveFrame(win)
 
 		-- Set desired window size
-		local targetWidth = screen.w * 0.86875
-		local targetHeight = screen.h * 0.952381
+		local targetWidth = screen.w * 0.884375
+		local targetHeight = screen.h * 0.952380952
 
 		-- Calculate position to center the window
 		local centerX = screen.x + (screen.w - targetWidth) / 2

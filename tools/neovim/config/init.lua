@@ -5,8 +5,5 @@
 
 require("core.options")
 require("core.keymaps")
+require("core.autocmds")
 require("core.lazy")
-
-local startup = require("learning.startup")
-
-assert(startup.config_dir == vim.fn.stdpath("config"))

@@ -24,7 +24,7 @@
 
 ## 总体进度
 
-最近更新：2026-07-29
+最近更新：2026-07-31
 
 | 阶段 | 主题 | 状态 | 完成日期 |
 |---|---|---|---|
@@ -34,10 +34,10 @@
 | 3 | Mode、Option、Keymap、Command 与 Autocmd | DONE | 2026-07-29 |
 | 4 | Filetype、Syntax 与 Treesitter 基础 | DONE | 2026-07-29 |
 | 5 | 使用 lazy.nvim 管理插件和版本 | DONE | 2026-07-29 |
-| 6 | 为 Go 加入 Treesitter | DOING | - |
-| 7 | 原生 LSP 与外部 Language Server | TODO | - |
-| 8 | 补全、格式化与静态检查 | TODO | - |
-| 9 | 文件导航与搜索 | TODO | - |
+| 6 | 为 Go 加入 Treesitter | DONE | 2026-07-29 |
+| 7 | 原生 LSP 与外部 Language Server | DONE | 2026-07-30 |
+| 8 | 补全、格式化与静态检查 | DONE | 2026-07-31 |
+| 9 | 文件导航与搜索 | DOING | - |
 | 10 | Git 基础能力 | TODO | - |
 | 11 | 按实际需求扩展开发语言 | TODO | - |
 | 12 | 恢复个人项目、Session 与 Workspace 工作流 | TODO | - |
@@ -153,10 +153,10 @@
 
 完成标准：
 
-- [ ] 只安装 Go parser 和 query
-- [ ] 为 Go Filetype 启用 Treesitter highlighter
-- [ ] 传统 Go Syntax 不再作为主要高亮来源
-- [ ] `:checkhealth nvim-treesitter` 通过必要检查
+- [x] 只安装 Go parser 和 query
+- [x] 为 Go Filetype 启用 Treesitter highlighter
+- [x] 传统 Go Syntax 不再作为主要高亮来源
+- [x] `:checkhealth nvim-treesitter` 通过必要检查
 
 ### 7. 原生 LSP 与外部 Language Server
 
@@ -169,10 +169,10 @@
 
 完成标准：
 
-- [ ] 先用 Go 和 `gopls` 打通一条完整 LSP 链路
-- [ ] 能检查客户端是否 attach
-- [ ] 能定位跳转、重命名、诊断分别来自哪里
-- [ ] 能判断问题在 Neovim、配置还是外部 Server
+- [x] 先用 Go 和 `gopls` 打通一条完整 LSP 链路
+- [x] 能检查客户端是否 attach
+- [x] 能定位跳转、重命名、诊断分别来自哪里
+- [x] 能判断问题在 Neovim、配置还是外部 Server
 
 ### 8. 补全、格式化与静态检查
 
@@ -181,14 +181,14 @@
 - LSP completion 与补全 UI 的区别
 - snippet source 与补全引擎的关系
 - formatter、linter 与 LSP 的独立职责
-- 保存时格式化的调用链和超时策略
+- 手动格式化与保存时格式化的取舍
 
 完成标准：
 
-- [ ] 用 `blink.cmp` 打通 Go 补全
-- [ ] 用 `gofmt` 打通保存格式化
-- [ ] 仅在确有需求时加入 Go linter
-- [ ] 能解释一次补全和一次保存格式化的完整调用链
+- [x] 用 `blink.cmp` 打通 Go 补全
+- [x] 使用原生 LSP formatting 手动格式化
+- [x] 使用 `golangci-lint` 完成 Go 静态检查
+- [x] 能解释补全、格式化和 lint 的完整调用链
 
 ### 9. 文件导航与搜索
 
@@ -200,10 +200,10 @@
 
 完成标准：
 
-- [ ] 选择一个主要 picker/explorer 实现
-- [ ] 完成找文件、搜文本、切 Buffer 三条高频流程
-- [ ] 明确项目 root 策略
-- [ ] 不保留重复的搜索入口
+- [x] 使用 Snacks Picker 与 Neo-tree 分别承担查找和目录浏览
+- [x] 完成找文件、搜文本、切 Buffer 三条高频流程
+- [x] 当前以 cwd 作为 Picker 和 Explorer 的起点
+- [x] 基础键位与高频别名调用同一能力，不保留功能重复的实现
 
 ### 10. Git 基础能力
 
@@ -214,9 +214,9 @@
 
 完成标准：
 
-- [ ] 使用 `gitsigns.nvim` 提供行级状态与 hunk 操作
-- [ ] 明确是否真的需要 `diffview.nvim`
-- [ ] 明确 lazygit 属于外部程序而不是 Git 插件依赖
+- [x] 使用 `gitsigns.nvim` 提供行级状态与 hunk 操作
+- [x] Diffview 暂缓，等仓库级集中审查、历史或冲突需求出现再引入
+- [x] lazygit 是 Homebrew 管理的外部程序，Snacks 只提供终端集成
 
 ### 11. 按实际需求扩展开发语言
 
@@ -231,11 +231,13 @@
 
 完成标准：
 
-- [ ] 只加入当前实际使用的语言
-- [ ] 每种语言都能独立验证
-- [ ] 不复制尚未理解的 LazyVim extra
+- [x] 当前只保留已经验证的 Go 开发链路
+- [x] Go 的 parser、LSP、补全、格式化和 lint 均能独立验证
+- [x] 不加入暂无实际需求的语言，也不复制 LazyVim language extra
 
 ### 12. 恢复个人工作流
+
+状态：DONE
 
 候选能力：
 
@@ -247,6 +249,18 @@
 - Git review workflow
 - 自动切换英文输入法
 
+当前进度：
+
+- [x] 最小 project picker：三层内发现 Git 项目，没有时回退到一级目录
+- [x] 使用 tab-local cwd，并打开对应的 Neo-tree
+- [x] 理解原生 Session 与 `sessionoptions`
+- [x] 使用 `<leader>qs` 选择并恢复完整 Neovim Session
+- [x] 实际验证 Session 保存与恢复
+- [x] tab-scoped workspace 暂缓，当前只保留 tab-local cwd
+- [x] 配置 Neovim Window 与 tmux Pane 的连续导航
+- [x] 实机验证连续导航；Explorer 响应式布局暂缓
+- [x] 实机验证离开 Insert Mode 后自动切换到 ABC
+
 完成标准：
 
 - [ ] 按使用频率逐个恢复
@@ -254,6 +268,8 @@
 - [ ] 通用插件配置与个人工作流逻辑分离
 
 ### 13. 插件审计、精简和最终验收
+
+状态：DONE
 
 每个插件回答：
 
@@ -265,11 +281,11 @@
 
 完成标准：
 
-- [ ] 每个插件都有职责和依赖记录
-- [ ] 没有重复的主要能力实现
-- [ ] 从空数据目录可以完成首次安装
-- [ ] 完成启动、健康检查和真实项目验证
-- [ ] 文档与实际配置一致
+- [x] 每个插件都有职责和依赖记录
+- [x] 没有重复的主要能力实现
+- [x] 从空数据目录可以完成首次安装
+- [x] 完成启动、健康检查和真实项目验证
+- [x] 文档与实际配置一致
 
 ## 推荐实装结构
 
