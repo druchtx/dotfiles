@@ -45,9 +45,12 @@ return {
 
             if empty_window then
               vim.api.nvim_set_current_win(empty_window)
-              vim.cmd("Neotree filesystem show current dir=" .. vim.fn.fnameescape(vim.fn.getcwd()))
+              -- A session may restore a window-local directory for the active
+              -- file. Use the saved global project root so Neo-tree does not
+              -- reopen inside a nested source directory such as `lua/`.
+              vim.cmd("Neotree filesystem show current dir=" .. vim.fn.fnameescape(vim.fn.getcwd(-1, -1)))
             else
-              vim.cmd("Neotree filesystem show right dir=" .. vim.fn.fnameescape(vim.fn.getcwd()))
+              vim.cmd("Neotree filesystem show right dir=" .. vim.fn.fnameescape(vim.fn.getcwd(-1, -1)))
             end
           end
         end)

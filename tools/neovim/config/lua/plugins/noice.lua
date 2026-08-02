@@ -42,14 +42,21 @@ return {
         position = { row = "50%", col = "50%" },
       },
       mini = {
-        position = { row = 1, col = "100%" },
-        reverse = false,
+        position = { row = -1, col = "100%" },
+        reverse = true,
         timeout = 3000,
       },
       cmdline_popup = {
         position = { row = -1, col = 0 },
         size = { width = "100%", height = "auto" },
         border = { style = "none", padding = { 0, 0 } },
+      },
+      -- Keep vim.ui.input prompts, such as Save As, away from the bottom
+      -- status area while leaving the regular command line in place.
+      cmdline_input = {
+        position = { row = "50%", col = "50%" },
+        size = { width = 60, height = "auto" },
+        border = { style = "rounded", padding = { 0, 1 } },
       },
     },
   },

@@ -1,6 +1,27 @@
 -- Provide a small start screen for opening work quickly.
 return {
   "folke/snacks.nvim",
+  init = function()
+    vim.api.nvim_create_autocmd("User", {
+      group = vim.api.nvim_create_augroup("dashboard_which_key_mappings", { clear = true }),
+      pattern = "SnacksDashboardUpdatePre",
+      callback = function()
+        -- Dashboard registers its own action mappings during every update.
+        -- Run afterwards so <leader>e stays disabled without exposing the
+        -- plugin's generic "Dashboard action" label in WhichKey.
+        vim.schedule(function()
+          for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+            if vim.bo[buf].filetype == "snacks_dashboard" then
+              vim.keymap.set("n", "<leader>e", "<Nop>", {
+                buffer = buf,
+                desc = "Explorer (cwd)",
+              })
+            end
+          end
+        end)
+      end,
+    })
+  end,
   opts = {
     dashboard = {
       enabled = true,
@@ -12,7 +33,7 @@ return {
           {
             icon = " ",
             key = "n",
-            desc = "New",
+            desc = "New File",
             action = function()
               vim.cmd.enew()
             end,
@@ -34,7 +55,7 @@ return {
           {
             icon = " ",
             key = "p",
-            desc = "Project",
+            desc = "Projects",
             action = function()
               require("features.projects").pick()
             end,

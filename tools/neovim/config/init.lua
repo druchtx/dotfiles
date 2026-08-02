@@ -6,4 +6,10 @@
 require("core.options")
 require("core.keymaps")
 require("core.autocmds")
+
+-- Load native user workflows. Each feature owns its implementation and mappings.
+require("features.close")
+require("features.filetype")
+require("features.buffer_save")
+
 require("core.lazy")

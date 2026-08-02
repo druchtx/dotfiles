@@ -7,6 +7,12 @@ return {
     options = {
       dim_inactive = false,
     },
+    -- Match the editor cursor line to Lualine's normal branch background.
+    groups = {
+      all = {
+        CursorLine = { bg = "#2c3e56" },
+      },
+    },
   },
   config = function(_, opts)
     require("github-theme").setup(opts)
