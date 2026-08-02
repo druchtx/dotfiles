@@ -22,6 +22,7 @@ brew "tree"
 brew "htop"
 brew "curl"
 brew "wget"
+brew "rg"
 
 # Development
 brew "mise"
@@ -33,6 +34,7 @@ brew "cmake"
 brew "protobuf"
 brew "maven"
 brew "cobra-cli"
+brew "tree-sitter-cli"
 brew "neovim"
 brew "mas"
 brew "gemini-cli"
@@ -70,6 +72,7 @@ cask "hammerspoon"
 cask "stats"
 cask "appcleaner"
 cask "rustdesk"
+cask "intellij-idea"
 
 # Communication / Entertainment
 cask "slack"

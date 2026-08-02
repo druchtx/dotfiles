@@ -1,5 +1,8 @@
--- Tab workspaces must be tracked before plugins start opening buffers.
-require("config.tabs").setup()
+-- Load dependency-free Neovim options before plugins begin opening buffers.
+require("core.options")
 
 -- bootstrap lazy.nvim, LazyVim and your plugins
-require("config.lazy")
+require("core.lazy")
+
+-- Native mappings use LazyVim's leader, which is initialized by core.lazy.
+require("core.keymaps")

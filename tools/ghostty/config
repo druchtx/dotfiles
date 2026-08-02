@@ -6,7 +6,7 @@ window-theme = dark
 font-family = Fira Code
 font-style = Regular
 font-size = 13
-adjust-cell-height = 35%
+adjust-cell-height = 38%
 adjust-cell-width = 3%
 
 ### window

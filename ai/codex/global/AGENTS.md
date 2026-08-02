@@ -16,3 +16,8 @@ Global defaults:
 - Prioritize bugs, regressions, and missing tests during reviews.
 - Explain blockers and assumptions directly.
 - Avoid scanning unrelated directories unless explicitly requested.
+
+Workspace-specific guidance:
+
+- When working under ~/Workspace, also read and follow
+  ~/.codex/AGENTS.md.
