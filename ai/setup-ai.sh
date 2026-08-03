@@ -29,6 +29,7 @@ ai/shared/rules,~/.claude/rules
 ai/codex/global/AGENTS.md,~/.codex/AGENTS.md
 ai/codex/workspace/AGENTS.md,$WORK_ROOT/.codex/AGENTS.md
 ai/codex/skills/session-workspace,~/.codex/skills/session-workspace
+ai/codex/pets/horse-suit-pet,~/.codex/pets/horse-suit-pet
 EOF
 }
 
