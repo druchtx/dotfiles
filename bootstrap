@@ -25,20 +25,20 @@ if [[ "$PLATFORM" == "darwin" ]]; then
 
 fi
 
-# Run dot init
+# Run dfm init
 echo "🔧 Initializing dotfiles..."
-./bin/dot init
+./bin/dfm init
 
 # Link managed dotfiles, backing up existing targets before replacing them.
 echo "🔗 Linking dotfiles..."
-./bin/dot link --force
+./bin/dfm link --force
 
 echo ""
 echo "✅ Bootstrap complete!"
 echo ""
 echo "Next steps:"
 echo "  1. Edit .dotenv if you have template variables"
-echo "  2. Re-run 'dot link --force' after changing managed files if needed"
+echo "  2. Re-run 'dfm link --force' after changing managed files if needed"
 if [[ "$PLATFORM" == "darwin" ]]; then
-  echo "  3. Run 'dot sync' to install Homebrew packages"
+  echo "  3. Run 'dfm sync' to install Homebrew packages"
 fi

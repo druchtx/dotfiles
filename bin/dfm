@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-dot - Symlink-based dotfiles manager
+dfm - Symlink-based dotfiles manager
 Simple, fast, and maintainable
 """
 
