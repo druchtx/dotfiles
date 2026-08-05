@@ -32,9 +32,7 @@ return {
             icon = " ",
             key = "p",
             desc = "Projects",
-            action = function()
-              require("utils.project_index").pick()
-            end,
+            action = "<cmd>ProjectPicker<cr>",
           },
           {
             icon = " ",
