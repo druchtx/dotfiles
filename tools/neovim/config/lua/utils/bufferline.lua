@@ -14,7 +14,7 @@ local function keep_last_bufferline_buffer_visible()
   local last_bufferline_buffer
 
   local function is_listed_buffer(buf)
-    return vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buflisted
+    return type(buf) == "number" and vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buflisted
   end
 
   local buffer = require("bufferline.models").Buffer

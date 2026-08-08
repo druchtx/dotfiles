@@ -110,30 +110,43 @@ do_clone() {
   # Check if target already exists
   [ -e "$repo_dir" ] && die "Target directory already exists: $repo_dir"
 
-  # Create directory and clone bare repo
+  # Create the project directory. The trap only removes content created by
+  # this invocation if any of the setup steps fail.
   mkdir -p "$repo_dir"
+  cleanup_clone() {
+    rm -rf "$repo_dir"
+  }
+  trap cleanup_clone 0 1 2 3 15
+
   if [ -z "$branch" ]; then
     branch=$(git ls-remote --symref "$repo_url" HEAD 2>/dev/null | awk '/^ref:/ {sub("refs/heads/","",$2); print $2; exit}')
     [ -z "$branch" ] && branch=main
   fi
-  git clone --bare --single-branch --branch "$branch" "$repo_url" "$bare_dir" || {
-    rm -rf "$repo_dir"
-    exit 1
-  }
-  # Ensure remote-tracking refs are populated under refs/remotes/origin/*
+
+  # Initialize an empty bare repository so remote branches are stored as
+  # remote-tracking refs, matching a normal clone.
+  git init --quiet --bare --initial-branch="$branch" "$bare_dir"
+  git --git-dir="$bare_dir" config core.logallrefupdates true
+  git --git-dir="$bare_dir" remote add origin "$repo_url"
   git --git-dir="$bare_dir" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
   git --git-dir="$bare_dir" fetch origin
+
+  # Record the remote's default branch and create only that branch locally.
+  if ! git --git-dir="$bare_dir" remote set-head origin --auto >/dev/null 2>&1; then
+    git --git-dir="$bare_dir" symbolic-ref "refs/remotes/origin/HEAD" "refs/remotes/origin/$branch"
+  fi
+  git --git-dir="$bare_dir" branch --track "$branch" "refs/remotes/origin/$branch"
+  git --git-dir="$bare_dir" symbolic-ref HEAD "refs/heads/$branch"
 
   # Create .git file pointing to bare repo
   printf '%s\n' 'gitdir: .bare' >"$repo_dir/.git"
 
   # Create worktree
   worktree_path=$repo_dir/$branch
-  if git --git-dir="$bare_dir" show-ref --verify --quiet "refs/heads/$branch"; then
-    git --git-dir="$bare_dir" worktree add "$worktree_path" "$branch"
-  else
-    git --git-dir="$bare_dir" worktree add -b "$branch" "$worktree_path"
-  fi
+  mkdir -p "$(dirname "$worktree_path")"
+  git --git-dir="$bare_dir" worktree add "$worktree_path" "$branch"
+
+  trap - 0 1 2 3 15
 
   echo "Cloned to: $repo_dir"
   echo "Worktree: $worktree_path"
@@ -174,14 +187,22 @@ do_init() {
 
   # Create directory and initialize bare repo
   mkdir -p "$repo_dir"
-  git init --bare "$bare_dir"
+  cleanup_init() {
+    rm -rf "$repo_dir"
+  }
+  trap cleanup_init 0 1 2 3 15
+
+  git init --quiet --bare --initial-branch="$branch" "$bare_dir"
+  git --git-dir="$bare_dir" config core.logallrefupdates true
 
   # Create .git file pointing to bare repo
   printf '%s\n' 'gitdir: .bare' >"$repo_dir/.git"
 
   # Create worktree (will be empty, no initial commit)
   worktree_path=$repo_dir/$branch
-  git --git-dir="$bare_dir" worktree add -b "$branch" "$worktree_path"
+  git --git-dir="$bare_dir" worktree add --orphan -b "$branch" "$worktree_path"
+
+  trap - 0 1 2 3 15
 
   echo "Initialized bare repository: $repo_dir"
   echo "Worktree: $worktree_path"

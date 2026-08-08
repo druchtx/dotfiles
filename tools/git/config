@@ -3,6 +3,7 @@
         path = ~/.config/git/config.local
 [alias]
         co = checkout
+        wt = worktree
         promote = !$ZSH/bin/git-promote
         wtf     = !$ZSH/bin/git-wtf
         rank-contributors = !$ZSH/bin/git-rank-contributors
