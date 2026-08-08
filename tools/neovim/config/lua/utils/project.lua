@@ -113,17 +113,15 @@ function Project:projects()
 end
 
 ---@param path string
+---@return boolean opened True when the directory became the current tab cwd.
 function Project:open(path)
   path = normalize_path(path)
   if vim.fn.isdirectory(path) ~= 1 then
-    return
+    return false
   end
 
   vim.cmd.tcd(vim.fn.fnameescape(path))
-  local tabs = require("utils.tabs")
-  tabs.set_project(path)
-  tabs.attach_current_tab_buffers()
-  require("utils.explorer_layout").open({ cwd = path })
+  return true
 end
 
 return M

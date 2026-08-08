@@ -24,7 +24,10 @@ local function pick_projects()
       end
 
       picker:close()
-      project:open(item.file or item.text)
+      local path = item.file or item.text
+      if project:open(path) then
+        require("snacks").picker.explorer(require("utils.explorer").options({ cwd = path }))
+      end
     end,
   })
 end

@@ -24,30 +24,22 @@ return {
       },
       {
         "<leader>fe",
-        function()
-          require("utils.explorer_layout").open()
-        end,
+        "<cmd>ExplorerCwd<cr>",
         desc = "Explorer Snacks (cwd)",
       },
       {
         "<leader>fE",
-        function()
-          require("utils.explorer_layout").open({ cwd = LazyVim.root() })
-        end,
+        "<cmd>ExplorerRoot<cr>",
         desc = "Explorer Snacks (Root Dir)",
       },
       {
         "<leader>e",
-        function()
-          require("utils.explorer_layout").open()
-        end,
+        "<cmd>ExplorerCwd<cr>",
         desc = "Explorer Snacks (cwd)",
       },
       {
         "<leader>E",
-        function()
-          require("utils.explorer_layout").open({ cwd = LazyVim.root() })
-        end,
+        "<cmd>ExplorerRoot<cr>",
         desc = "Explorer Snacks (Root Dir)",
       },
       {

@@ -30,9 +30,7 @@ function M.root(path)
 end
 
 function M.current_project_root()
-  local ok, tabs = pcall(require, "utils.tabs")
-  local project = ok and tabs.project() or nil
-  return M.root(project) or M.root(vim.fn.getcwd(0))
+  return M.root(vim.fn.getcwd(0))
 end
 
 function M.current_branch(cwd)

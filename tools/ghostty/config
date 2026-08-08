@@ -4,6 +4,7 @@ command =zsh -lc "tmux attach-session || tmux new-session"
 theme = Github Dark Dimmed
 window-theme = dark
 font-family = Fira Code
+font-codepoint-map = U+3040-U+30FF,U+FF65-U+FF9F=HackGen
 font-style = Regular
 font-size = 13
 adjust-cell-height = 38%

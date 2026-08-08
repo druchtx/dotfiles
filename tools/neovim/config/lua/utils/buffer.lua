@@ -50,6 +50,8 @@ local function save_new_buffer(buf)
   end)
 end
 
+---Install disk-version tracking for file buffers.
+---@return nil
 function M.setup()
   if setup_done then
     return
@@ -57,14 +59,16 @@ function M.setup()
   setup_done = true
 
   vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
-    group = vim.api.nvim_create_augroup("buffer_save_disk_versions", { clear = true }),
+    group = vim.api.nvim_create_augroup("buffer_disk_versions", { clear = true }),
     callback = function(args)
       remember_disk_version(args.buf)
     end,
   })
 end
 
-function M.sync_and_save()
+---Synchronize an external disk change and save the current buffer.
+---@return nil
+function M.save()
   -- Saving is a command-style action: leave Insert mode before writing.
   if vim.api.nvim_get_mode().mode:match("^i") then
     vim.api.nvim_feedkeys(vim.keycode("<Esc>"), "n", false)

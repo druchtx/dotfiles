@@ -302,11 +302,10 @@ local function create_commands()
   })
 end
 
----Configure diffview.nvim and register commands/autocmds.
-function M.setup()
-  create_commands()
-
-  require("diffview").setup({
+---Build diffview.nvim options for the plugin specification.
+---@return table options Diffview configuration.
+function M.options()
+  return {
     enhanced_diff_hl = true,
     hooks = {
       view_closed = return_to_diffview_source,
@@ -326,7 +325,13 @@ function M.setup()
         { "n", "<A-q>", "<cmd>DiffviewClose<cr>", { desc = "Close Diffview" } },
       },
     },
-  })
+  }
+end
+
+---Register project-aware commands and view lifecycle autocmds.
+---@return nil
+function M.setup()
+  create_commands()
 
   set_diffview_syntax_preserving_highlights()
 

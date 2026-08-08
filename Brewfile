@@ -38,6 +38,7 @@ brew 'tree-sitter-cli'
 brew 'neovim'
 brew 'mas'
 brew 'gemini-cli'
+brew 'plantuml'
 
 # Git
 brew 'git'
@@ -62,6 +63,7 @@ brew 'openssl@3'
 # Development / System
 cask 'ghostty'
 cask 'font-fira-code-nerd-font'
+cask 'font-hackgen'
 cask 'google-chrome'
 cask 'visual-studio-code'
 cask 'zed'

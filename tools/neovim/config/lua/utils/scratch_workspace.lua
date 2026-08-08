@@ -31,16 +31,6 @@ local function configured_roots()
   return ret
 end
 
----Open a picker that combines scratch buffers and scratch-searchable files.
-function M.open()
-  require("snacks").picker.pick({ source = "scratch_workspace" })
-end
-
----Open a file-name picker over the configured scratch roots.
-function M.files()
-  require("snacks").picker.pick({ source = "scratch_files" })
-end
-
 ---Configure Snacks picker sources for scratch workspace search.
 ---@param opts snacks.Config
 ---@return snacks.Config opts The same options table after mutation

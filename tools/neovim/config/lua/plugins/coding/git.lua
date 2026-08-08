@@ -104,7 +104,7 @@ local function is_gitlab_repo()
     return false
   end
 
-  local host = require("snacks.gitbrowse").get_repo(remote):match("^https?://([^/]+)")
+  local host = remote:match("^https?://([^/]+)") or remote:match("^git@([^:]+):")
   local gitlab_host = configured_gitlab_host()
   if gitlab_host and host == gitlab_host then
     return true
@@ -274,7 +274,9 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
     cmd = { "DiffviewOpen", "DiffviewCompare", "DiffviewOpenProject" },
     config = function()
-      require("utils.diffview").setup()
+      local diffview = require("utils.diffview")
+      require("diffview").setup(diffview.options())
+      diffview.setup()
     end,
   },
 }

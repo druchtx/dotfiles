@@ -93,33 +93,33 @@ local function equalize_editor_windows()
   end)
 end
 
----Open Snacks Explorer with the responsive layout.
+---Build Snacks Explorer options with the responsive layout.
 ---
----Call this instead of `Snacks.explorer()` or `Snacks.picker.explorer()` so all
----Explorer surfaces share the same sidebar/floating behavior.
----Floating Explorer closes after opening a file; sidebar Explorer remains open.
+---The plugin feature owns the final `Snacks.picker.explorer()` call. This
+---module only provides the shared layout policy and lifecycle callbacks.
 ---@param opts? table Snacks explorer options, such as `{ cwd = path }`
----@return any picker The value returned by `Snacks.picker.explorer`
-function M.open(opts)
+---@return table options Explorer options for Snacks.
+function M.options(opts)
   local floating = M.is_float()
   local on_show = opts and opts.on_show
   local on_close = opts and opts.on_close
 
-  opts = vim.tbl_deep_extend("force", opts or {}, {
+  local merged = vim.tbl_deep_extend("force", opts or {}, {
     jump = {
       close = floating,
     },
     layout = M.layout(),
   })
+  local options = merged or {}
 
   if not floating then
-    opts.on_show = function(picker)
+    options.on_show = function(picker)
       if on_show then
         on_show(picker)
       end
       equalize_editor_windows()
     end
-    opts.on_close = function(picker)
+    options.on_close = function(picker)
       if on_close then
         on_close(picker)
       end
@@ -127,7 +127,7 @@ function M.open(opts)
     end
   end
 
-  return require("snacks").picker.explorer(opts)
+  return options
 end
 
 return M

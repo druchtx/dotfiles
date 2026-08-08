@@ -3,8 +3,7 @@ local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 -- These integrations must be ready before LazyVim and plugins begin opening
 -- buffers. Keeping the calls here leaves init.lua as a core-only entry point.
 require("utils.ime").setup()
-require("utils.tabs").setup()
-require("utils.buffer_save").setup()
+require("utils.tabpage").setup()
 
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
   local lazyrepo = "https://github.com/folke/lazy.nvim.git"
@@ -25,6 +24,8 @@ require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
     { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+    -- LazyVim extras must be imported before the repository's own plugins.
+    { import = "lazyvim.plugins.extras.lang.sql" },
     -- Plugin configuration is grouped by user-facing functionality.
     { import = "plugins" },
     { import = "plugins.coding" },

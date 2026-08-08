@@ -1,4 +1,5 @@
 {
+  "terminal.integrated.enableImages": true,
   /* 
     Appearance -- font
     */
@@ -667,5 +668,6 @@
   "containers.containers.label": "ContainerName",
   "bookmarks.sideBar.expanded": false,
   "remote.autoForwardPortsSource": "hybrid",
-  "claudeCode.preferredLocation": "panel"
+  "claudeCode.preferredLocation": "panel",
+  "chat.titleBar.openInAgentsWindow.enabled": false
 }

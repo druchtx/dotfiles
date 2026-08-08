@@ -1,8 +1,8 @@
 ---Bufferline integration for tab-scoped workspaces.
 ---
----This module adapts bufferline.nvim to the local tab workspace model in
----`utils.tabs`: bufferline only shows buffers owned by the active tab and renders a compact
----right-aligned tab indicator.
+---This module adapts bufferline.nvim to the local tabpage model in
+---`utils.tabpage`: bufferline only shows buffers associated with the active
+---tabpage and renders a right-aligned tab indicator.
 
 local M = {}
 
@@ -62,13 +62,15 @@ local function tab_indicator_items()
   return items
 end
 
-local function tab_picker_items()
+---Return the tab entries used by the bufferline tab picker.
+---@return table[] items Tab picker entries.
+function M.tab_items()
   local current = vim.api.nvim_get_current_tabpage()
   local items = {}
 
   for index, tab in ipairs(vim.api.nvim_list_tabpages()) do
-    local project = require("utils.tabs").project(tab)
-    local project_name = project and vim.fn.fnamemodify(project, ":t") or ("tab-" .. index)
+    local tabpage = require("utils.tabpage")
+    local tab_name = tabpage.name(tab)
     local wins = vim.api.nvim_tabpage_list_wins(tab)
     local current_buf = wins[1] and vim.api.nvim_win_get_buf(wins[1]) or nil
     local current_file = current_buf and vim.api.nvim_buf_get_name(current_buf) or ""
@@ -77,8 +79,8 @@ local function tab_picker_items()
     items[#items + 1] = {
       idx = index,
       tab = tab,
-      file = project or current_file,
-      text = string.format("%s%d  %s  %s", tab == current and "* " or "  ", index, project_name, current_file),
+      file = current_file,
+      text = string.format("%s%d  %s  %s", tab == current and "* " or "  ", index, tab_name, current_file),
     }
   end
 
@@ -127,12 +129,12 @@ local function setup_refresh_autocmds()
   })
 end
 
----Patch bufferline.nvim options for this configuration.
+---Build bufferline.nvim options for this configuration.
 ---
 ---This preserves any existing `custom_filter`, then adds the tab workspace
 ---filter so global Neovim buffers only appear in the tab that owns them.
 ---@param opts table bufferline.nvim options table provided by lazy.nvim
-function M.setup_opts(opts)
+function M.configure(opts)
   opts.options = opts.options or {}
   -- Theme integration: inactive buffers use the editor background instead of a
   -- separate black strip, while the active indicator matches the text color.
@@ -145,6 +147,24 @@ function M.setup_opts(opts)
       background = { bg = background },
       buffer_visible = { bg = background, fg = foreground, bold = true },
       fill = { bg = background },
+      -- Keep diagnostic indicators on the same background as the rest of the
+      -- bufferline. Bufferline's defaults shade these groups, which becomes a
+      -- distracting dark block in the current colorscheme.
+      diagnostic = { bg = background },
+      diagnostic_visible = { bg = background },
+      diagnostic_selected = { bg = background },
+      error_diagnostic = { bg = background },
+      error_diagnostic_visible = { bg = background },
+      error_diagnostic_selected = { bg = background },
+      warning_diagnostic = { bg = background },
+      warning_diagnostic_visible = { bg = background },
+      warning_diagnostic_selected = { bg = background },
+      info_diagnostic = { bg = background },
+      info_diagnostic_visible = { bg = background },
+      info_diagnostic_selected = { bg = background },
+      hint_diagnostic = { bg = background },
+      hint_diagnostic_visible = { bg = background },
+      hint_diagnostic_selected = { bg = background },
       indicator_selected = { fg = foreground },
       indicator_visible = { fg = foreground },
       separator = { bg = background, fg = background },
@@ -152,6 +172,12 @@ function M.setup_opts(opts)
     }
   end
   opts.options.mode = "buffers"
+  -- Snacks' sidebar offset would also move custom_areas.right to the
+  -- editor/sidebar boundary. Keep Bufferline full-width so the tab switcher
+  -- remains anchored to the screen edge when Explorer is open.
+  opts.options.offsets = vim.tbl_filter(function(offset)
+    return offset.filetype ~= "snacks_layout_box"
+  end, opts.options.offsets or {})
   opts.options.diagnostics = "nvim_lsp"
   opts.options.separator_style = "thin"
   opts.options.show_buffer_close_icons = false
@@ -164,7 +190,7 @@ function M.setup_opts(opts)
     if previous_filter and not previous_filter(buf, buffers) then
       return false
     end
-    return require("utils.tabs").contains_current_tab(buf)
+    return require("utils.tabpage").filter_buffer(buf)
   end
 
   opts.options.custom_areas = opts.options.custom_areas or {}
@@ -174,29 +200,10 @@ function M.setup_opts(opts)
   setup_refresh_autocmds()
 end
 
----Install Bufferline after LazyVim has merged this module's options.
----@param opts table bufferline.nvim options table provided by lazy.nvim
-function M.setup(opts)
-  require("bufferline").setup(opts)
+---Install bufferline-specific behavior after bufferline has been configured.
+---@return nil
+function M.setup()
   keep_last_bufferline_buffer_visible()
-end
-
-function M.select_tab()
-  require("snacks").picker.pick({
-    title = "Tabs",
-    finder = tab_picker_items,
-    format = "text",
-    preview = "none",
-    layout = {
-      preset = "select",
-    },
-    confirm = function(picker, item)
-      picker:close()
-      if item and item.tab and vim.api.nvim_tabpage_is_valid(item.tab) then
-        vim.api.nvim_set_current_tabpage(item.tab)
-      end
-    end,
-  })
 end
 
 return M

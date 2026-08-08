@@ -131,6 +131,7 @@ local windowPositions = {
 		saveFrame(win)
 
 		-- Set desired window size
+		-- Matches the current Ghostty frame: 1336x902 on a 1512x949 screen.
 		local targetWidth = screen.w * 0.88
 		local targetHeight = screen.h * 0.95
 

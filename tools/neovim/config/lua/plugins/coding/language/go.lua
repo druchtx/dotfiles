@@ -110,7 +110,13 @@ return {
               and client.config.init_options.semanticTokens
               and not client.server_capabilities.semanticTokensProvider
             then
-              local semantic = client.config.capabilities.textDocument.semanticTokens
+              local capabilities = client.config.capabilities
+              local text_document = capabilities and capabilities.textDocument
+              local semantic = text_document and text_document.semanticTokens
+              if not semantic then
+                return
+              end
+
               client.server_capabilities.semanticTokensProvider = {
                 full = true,
                 legend = {

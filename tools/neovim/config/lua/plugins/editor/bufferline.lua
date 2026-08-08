@@ -1,3 +1,19 @@
+local function select_tab()
+  require("snacks").picker.pick({
+    title = "Tabs",
+    finder = require("utils.bufferline").tab_items,
+    format = "text",
+    preview = "none",
+    layout = { preset = "select" },
+    confirm = function(picker, item)
+      picker:close()
+      if item and item.tab and vim.api.nvim_tabpage_is_valid(item.tab) then
+        vim.api.nvim_set_current_tabpage(item.tab)
+      end
+    end,
+  })
+end
+
 -- Editing UI configuration. Complex Bufferline behavior lives in `utils` so
 -- this file stays focused on plugin declarations and user-facing mappings.
 return {
@@ -12,17 +28,16 @@ return {
       { "<leader>wq", "<C-W>c", desc = "Close Window", remap = true },
       {
         "<leader><tab>s",
-        function()
-          require("utils.bufferline").select_tab()
-        end,
+        select_tab,
         desc = "Select Tab",
       },
     },
     opts = function(_, opts)
-      require("utils.bufferline").setup_opts(opts)
+      require("utils.bufferline").configure(opts)
     end,
     config = function(_, opts)
-      require("utils.bufferline").setup(opts)
+      require("bufferline").setup(opts)
+      require("utils.bufferline").setup()
     end,
   },
   {

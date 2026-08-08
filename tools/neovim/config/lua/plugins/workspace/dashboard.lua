@@ -4,8 +4,10 @@ return {
     {
       "<leader><tab>n",
       function()
-        local tabs = require("utils.tabs")
-        tabs.open_project_tab(tabs.project() or LazyVim.root())
+        require("utils.tabpage").create({
+          name = "dashboard",
+          cwd = LazyVim.root(),
+        })
         require("snacks").dashboard.open()
       end,
       desc = "New Dashboard Tab",
@@ -38,26 +40,20 @@ return {
             icon = " ",
             key = "e",
             desc = "Explore",
-            action = function()
-              require("utils.explorer_layout").open({ cwd = LazyVim.root() })
-            end,
+            action = ":ExplorerRoot",
           },
           { icon = " ", key = "r", desc = "Recent Files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
           {
             icon = " ",
             key = "l",
             desc = "Restore Session",
-            action = function()
-              require("persistence").load({ last = true })
-            end,
+            action = ":SessionLoadLast",
           },
           {
             icon = "󰑓 ",
             key = "s",
             desc = "Select Session",
-            action = function()
-              require("persistence").select()
-            end,
+            action = ":SessionSelect",
           },
           { icon = " ", key = "q", desc = "Quit", action = ":qa" },
         },
