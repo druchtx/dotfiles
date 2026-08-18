@@ -34,3 +34,5 @@
         autoSetupRemote = true
 [init]
 	defaultBranch = main
+[worktree]
+	useRelativePaths = true

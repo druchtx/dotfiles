@@ -144,7 +144,7 @@ do_clone() {
   # Create worktree
   worktree_path=$repo_dir/$branch
   mkdir -p "$(dirname "$worktree_path")"
-  git --git-dir="$bare_dir" worktree add "$worktree_path" "$branch"
+  git --git-dir="$bare_dir" worktree add --relative-paths "$worktree_path" "$branch"
 
   trap - 0 1 2 3 15
 
@@ -200,7 +200,7 @@ do_init() {
 
   # Create worktree (will be empty, no initial commit)
   worktree_path=$repo_dir/$branch
-  git --git-dir="$bare_dir" worktree add --orphan -b "$branch" "$worktree_path"
+  git --git-dir="$bare_dir" worktree add --relative-paths --orphan -b "$branch" "$worktree_path"
 
   trap - 0 1 2 3 15
 
