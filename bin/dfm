@@ -109,19 +109,24 @@ class TemplateManager:
         self.dotfiles_dir = dotfiles_dir
         self.dotenv_path = dotfiles_dir / ".dotenv"
 
-    def scan_templates(self) -> Set[str]:
-        """Scan all *.example files for #{VAR} placeholders"""
-        variables = set()
+    def scan_templates(self) -> Dict[str, Set[str]]:
+        """Map each rendered local file to its template variables."""
+        templates: Dict[str, Set[str]] = {}
 
         for example_file in self.dotfiles_dir.rglob("*.example"):
             try:
                 content = example_file.read_text()
-                matches = self.PATTERN.findall(content)
-                variables.update(matches)
+                variables = set(self.PATTERN.findall(content))
+                if not variables:
+                    continue
+
+                rendered_file = example_file.with_suffix("")
+                label = rendered_file.relative_to(self.dotfiles_dir).as_posix()
+                templates[label] = variables
             except Exception:
                 pass
 
-        return variables
+        return templates
 
     def load_dotenv(self) -> Dict[str, str]:
         """Load existing .dotenv variables"""
@@ -141,22 +146,76 @@ class TemplateManager:
 
         return env_vars
 
-    def update_dotenv(self, variables: Set[str]) -> int:
-        """Add missing variables to .dotenv, return count of added"""
-        existing = set(self.load_dotenv().keys())
-        missing = variables - existing
-
-        if not missing:
+    def update_dotenv(self, templates: Dict[str, Set[str]]) -> int:
+        """Group template variables in .dotenv and return newly added count."""
+        if not templates:
             return 0
 
-        # Append missing variables
-        with open(self.dotenv_path, "a") as f:
-            if self.dotenv_path.exists() and self.dotenv_path.stat().st_size > 0:
-                f.write("\n")
+        existing_values = self.load_dotenv()
+        template_variables = set().union(*(variables for variables in templates.values()))
+        missing = template_variables - existing_values.keys()
 
-            f.write("# Auto-generated from templates\n")
-            for var in sorted(missing):
-                f.write(f"{var}=\n")
+        existing_text = (
+            self.dotenv_path.read_text() if self.dotenv_path.exists() else ""
+        )
+        template_comments = {f"# {label}" for label in templates}
+        dotenv_headers = {
+            "# Auto-generated from templates",
+            "# .dotenv: variables used to render local configuration files.",
+            "# Each section below corresponds to a rendered local file.",
+            "# Edit values before running dfm link.",
+        }
+        preserved_lines = []
+
+        # Keep user-managed content while removing the previous flat/generated
+        # entries for template variables. They are rebuilt below in groups.
+        for line in existing_text.splitlines():
+            stripped = line.strip()
+            if stripped in dotenv_headers:
+                continue
+            if stripped in template_comments:
+                continue
+
+            match = re.match(r"^([A-Z][A-Z0-9_]*)=", stripped)
+            if match and match.group(1) in template_variables:
+                continue
+
+            preserved_lines.append(line)
+
+        while preserved_lines and not preserved_lines[-1].strip():
+            preserved_lines.pop()
+
+        generated_lines = [
+            "# .dotenv: variables used to render local configuration files.",
+            "# Each section below corresponds to a rendered local file.",
+            "# Edit values before running dfm link.",
+        ]
+        assigned_variables = set()
+        for label in sorted(templates):
+            variables = sorted(
+                variable
+                for variable in templates[label]
+                if variable not in assigned_variables
+            )
+            if not variables:
+                continue
+
+            generated_lines.append("")
+            generated_lines.append(f"# {label}")
+            for variable in variables:
+                generated_lines.append(
+                    f"{variable}={existing_values.get(variable, '')}"
+                )
+            assigned_variables.update(variables)
+
+        output_lines = preserved_lines
+        if output_lines:
+            output_lines.append("")
+        output_lines.extend(generated_lines)
+        new_content = "\n".join(output_lines) + "\n"
+
+        if new_content != existing_text:
+            self.dotenv_path.write_text(new_content)
 
         return len(missing)
 
@@ -171,7 +230,7 @@ class TemplateManager:
         # Check if all variables are defined
         content = source.read_text()
         required_vars = set(self.PATTERN.findall(content))
-        missing_vars = [v for v in required_vars if not env_vars.get(v)]
+        missing_vars = sorted(v for v in required_vars if not env_vars.get(v))
 
         if missing_vars:
             print(
@@ -525,7 +584,7 @@ class DotApp:
 
     def cmd_init(self):
         """Initialize dotfiles management"""
-        print(f"\n{bold('🚀 Initializing dot...')}\n")
+        print(f"\n{bold('🚀 Initializing dfm...')}\n")
 
         # Save dotfiles directory
         with open(self.DOTRC_PATH, "w") as f:
@@ -551,12 +610,20 @@ class DotApp:
 
         # Scan templates and update .dotenv
         print(f"{blue('🔍 Scanning templates...')}")
-        variables = self.template_manager.scan_templates()
+        templates = self.template_manager.scan_templates()
+        variables = (
+            set().union(*(template_vars for template_vars in templates.values()))
+            if templates
+            else set()
+        )
 
         if variables:
-            print(f"  Found {len(variables)} variables: {', '.join(sorted(variables))}")
+            print(
+                f"  Found {len(variables)} variables across "
+                f"{len(templates)} templates: {', '.join(sorted(variables))}"
+            )
 
-            added = self.template_manager.update_dotenv(variables)
+            added = self.template_manager.update_dotenv(templates)
             if added:
                 print(f"{green('✓')} Added {added} variables to .dotenv")
                 print(f"  {dim('Please edit .dotenv to fill in values')}")
@@ -566,11 +633,23 @@ class DotApp:
             print(f"  {dim('No templates found')}")
 
         print()
-        print(f"{bold(green('✓ Ready to use!'))}")
+        print(f"{bold(green('✓ Almost ready — complete the steps below to get started.'))}")
         print("\nNext steps:")
         print(f"  1. {cyan('edit .dotenv')} to set template variables")
-        print(f"  2. {cyan('dot add <source>')} to add files")
-        print(f"  3. {cyan('dot link')} to create symlinks")
+        print(
+            f"     {dim('These values are used to render local configuration files.')}"
+        )
+        print(
+            f"     {dim('Templates with unset variables will be skipped during rendering.')}"
+        )
+        print(f"\n  2. {cyan('dfm sync --force')}")
+        print(
+            f"     {dim('Pull the repository, install/update Homebrew and mise tools,')}"
+        )
+        print(f"     {dim('and link the managed configurations.')}")
+        print(
+            f"     {dim('--force backs up conflicting existing files before replacing them.')}"
+        )
 
     def cmd_add(
         self, source: str, target: Optional[str] = None, entry_type: Optional[str] = None
@@ -640,9 +719,9 @@ class DotApp:
             if template:
                 print(f"  Template: {yellow('yes')}")
             if file_type == "script":
-                print(f"\nNext: {cyan('dot link')} to execute the script")
+                print(f"\nNext: {cyan('dfm link')} to execute the script")
             else:
-                print(f"\nNext: {cyan('dot link')} to create symlinks")
+                print(f"\nNext: {cyan('dfm link')} to create symlinks")
 
         except ValueError as e:
             print(f"{red('❌ Error:')} {e}")
@@ -661,7 +740,7 @@ class DotApp:
         if not entries:
             if not quiet:
                 print(f"{yellow('No files to link')}")
-                print(f"Add files with: {cyan('dot add <source>')}")
+                print(f"Add files with: {cyan('dfm add <source>')}")
             return True
 
         if not quiet:
@@ -724,10 +803,10 @@ class DotApp:
                 print(
                     f"  {yellow('⚠️ ')} {len(template_errors)} templates skipped (missing variables)"
                 )
-                print(f"      Run {cyan('dot init')} and edit .dotenv")
+                print(f"      Run {cyan('dfm init')} and edit .dotenv")
             if errors:
                 print(f"  {red('✗')} {len(errors)} failed")
-                print(f"\nTip: Use {cyan('dot link --force')} to backup and overwrite")
+                print(f"\nTip: Use {cyan('dfm link --force')} to backup and overwrite")
 
         return not errors and not template_errors
 
@@ -794,7 +873,7 @@ class DotApp:
                     f"{symbol} {cyan(entry.source)}{script_flag}{tmpl_flag} → {entry.target} {dim(f'({label})')}"
                 )
 
-        print(f"\nRun {cyan('dot link')} to apply missing links and scripts")
+        print(f"\nRun {cyan('dfm link')} to apply missing links and scripts")
 
     def _run_cmd(self, cmd: List[str], success_msg: str) -> bool:
         """Run a command and print status"""
@@ -833,7 +912,7 @@ class DotApp:
             return False
 
     def cmd_sync(self, force: bool = False):
-        """Sync everything: git pull + brew + mise + link"""
+        """Sync everything: git pull + brew + link + mise."""
         print(f"\n{bold('🔄 Syncing dotfiles...')}\n")
         success = True
 
@@ -874,7 +953,12 @@ class DotApp:
             )
             print()
 
-        # 3. Mise
+        # 3. Link dotfiles before installing mise tools so a fresh machine
+        # sees the global configuration managed by tools/mise/mise.toml.
+        print(f"{blue('🔗 Linking dotfiles...')}")
+        success = self.cmd_link(force=force) and success
+
+        # 4. Mise
         if (self.dotfiles_dir / "tools" / "mise" / "mise.toml").exists():
             print(f"{blue('🔨 Installing mise tools...')}")
             success = (
@@ -882,10 +966,6 @@ class DotApp:
                 and success
             )
             print()
-
-        # 4. Link dotfiles
-        print(f"{blue('🔗 Linking dotfiles...')}")
-        success = self.cmd_link(force=force) and success
 
         if not success:
             raise RuntimeError("Sync completed with errors")
@@ -901,7 +981,7 @@ class DotApp:
 def create_parser() -> argparse.ArgumentParser:
     """Create CLI parser"""
     parser = argparse.ArgumentParser(
-        description="dot - Symlink-based dotfiles manager",
+        description="dfm - Symlink-based dotfiles manager",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--dir", type=Path, help="Dotfiles directory")
@@ -938,7 +1018,7 @@ def create_parser() -> argparse.ArgumentParser:
 
     # sync
     sync_parser = subparsers.add_parser(
-        "sync", help="Sync everything (git pull + brew + mise + link)"
+        "sync", help="Sync repository and machine environment (git pull + brew + link + mise)"
     )
     sync_parser.add_argument(
         "--force", action="store_true", help="Force overwrite existing files"

@@ -1,7 +1,7 @@
 # Dotfiles
 
 Personal dotfiles for macOS, managed through a local manifest-driven
-tool: `./bin/dot`.
+tool: `./bin/dfm`.
 
 ## Overview
 
@@ -12,7 +12,7 @@ This repository manages two kinds of setup:
   cleanly as many individual symlinks
 
 The source of truth is [dotfiles.json](/Users/druchtx/.dotfiles/dotfiles.json).
-Each entry is applied by `./bin/dot`.
+Each entry is applied by `./bin/dfm`.
 
 ## Repository Layout
 
@@ -22,11 +22,11 @@ Each entry is applied by `./bin/dot`.
   Hammerspoon
 - `ai/`: AI-related config for Claude, Codex, shared rules, and future
   script-driven setup
-- `bin/`: local management scripts, including `./bin/dot`
+- `bin/`: local management scripts, including `./bin/dfm`
 
-## dot
+## dfm
 
-`./bin/dot` is the local dotfiles manager. It supports:
+`./bin/dfm` is the local dotfiles manager. It supports:
 
 - `file` entries: symlink a single file
 - `dir` entries: symlink a directory
@@ -37,15 +37,27 @@ Each entry is applied by `./bin/dot`.
 
 ```bash
 ./bootstrap
-./bin/dot init
-./bin/dot add <source>
-./bin/dot add <source> --type script
-./bin/dot link
-./bin/dot link --force
-./bin/dot unlink
-./bin/dot status
-./bin/dot sync --force
+./bin/dfm init
+./bin/dfm add <source>
+./bin/dfm add <source> --type script
+./bin/dfm link
+./bin/dfm link --force
+./bin/dfm unlink
+./bin/dfm status
+./bin/dfm sync --force
 ```
+
+`bootstrap` is intended for macOS: it installs Homebrew and mise, installs
+the repository runtimes from the root `.mise.toml`, and runs `dfm init` with
+the pinned Python runtime. Fill in `.dotenv` before running `dfm link`; in
+containers, copy the repository and run `dfm init` and `dfm link` directly.
+`sync` pulls the repository and updates Homebrew packages.
+
+After editing `.dotenv`, use `dfm sync --force` for the first full setup. It
+pulls the repository, installs or updates Homebrew and mise tools, and links
+managed configurations. The `--force` option backs up conflicting existing
+files before replacing them. Use `dfm sync` without `--force` for subsequent
+updates.
 
 ### Manifest Format
 
@@ -88,11 +100,11 @@ a central scripts directory.
 
 Behavior:
 
-- `dot` checks script entries with `status` before deciding whether
+- `dfm` checks script entries with `status` before deciding whether
   `link` needs to run
-- `dot link` executes the script with argument `link`
-- `dot unlink` executes the script with argument `unlink`
-- `dot sync` also executes script entries because it runs `dot link`
+- `dfm link` executes the script with argument `link`
+- `dfm unlink` executes the script with argument `unlink`
+- `dfm sync` also executes script entries because it runs `dfm link`
 
 Environment variables passed to script entries:
 
@@ -103,8 +115,8 @@ Environment variables passed to script entries:
 - `DOT_FORCE`
 - `DOT_DEBUG`
 
-To debug a script entry, run `DOT_DEBUG=1 ./bin/dot link` or
-`DOT_DEBUG=1 ./bin/dot unlink`.
+To debug a script entry, run `DOT_DEBUG=1 ./bin/dfm link` or
+`DOT_DEBUG=1 ./bin/dfm unlink`.
 
 Recommended script shape:
 
@@ -142,15 +154,29 @@ Guidelines for script entries:
 
 ## Templates
 
-Files ending with `.example` are treated as templates. `dot init`
+Files ending with `.example` are treated as templates. `dfm init`
 scans them, extracts `#{VAR}` placeholders, and updates `.dotenv`.
+Variables are grouped by the rendered local file so their purpose remains
+visible when multiple templates are added:
+
+```dotenv
+# .dotenv: variables used to render local configuration files.
+# Each section below corresponds to a rendered local file.
+# Edit values before running dfm link.
+
+# tools/git/config.local
+GIT_AUTHOREMAIL=
+GIT_AUTHORNAME=
+GIT_CREDENTIAL_HELPER=
+GIT_SIGNING_KEY=
+```
 
 Typical flow:
 
 ```bash
-./bin/dot init
+./bin/dfm init
 $EDITOR .dotenv
-./bin/dot link
+./bin/dfm link
 ```
 
 ## Validation
@@ -159,9 +185,9 @@ There is no full automated test suite for this repository. Validate
 changes with targeted checks:
 
 ```bash
-./bin/dot status
-python3 -m py_compile bin/dot bin/remote-vsc
+./bin/dfm status
+python3 -m py_compile bin/dfm bin/remote-vsc
 ```
 
-Use `./bin/dot link --force` only when you intend to back up and
+Use `./bin/dfm link --force` only when you intend to back up and
 replace existing files.

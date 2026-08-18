@@ -1,44 +1,60 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
+
+DOTFILES_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$DOTFILES_ROOT"
+PLATFORM="$(uname -s)"
 
 echo "🚀 Bootstrapping dotfiles..."
 
-# Detect platform
-if [[ "$(uname -s)" == "Darwin" ]]; then
-  PLATFORM="darwin"
-  echo "📍 Platform: macOS"
-# else
-#   PLATFORM="linux"
-#   echo "📍 Platform: Linux"
+if [[ "$PLATFORM" != "Darwin" ]]; then
+  echo "❌ This bootstrap script currently supports macOS only." >&2
+  echo "   In containers, copy the repository and run dfm init/link directly." >&2
+  exit 1
 fi
 
-# Platform-specific setup
-if [[ "$PLATFORM" == "darwin" ]]; then
-  # macOS: Install Homebrew
-  if ! command -v brew &>/dev/null; then
-    echo "📦 Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    echo "✅ Homebrew installed"
-  else
-    echo "✅ Homebrew already installed"
-  fi
+echo "📍 Platform: macOS"
 
+# Install Homebrew before any repository-managed runtime.
+if ! command -v brew &>/dev/null; then
+  echo "📦 Installing Homebrew..."
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  echo "✅ Homebrew installed"
 fi
 
-# Run dfm init
+# Homebrew may not be on PATH in the current shell immediately after install.
+if command -v brew &>/dev/null; then
+  eval "$(brew shellenv)"
+else
+  for brew_path in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    if [[ -x "$brew_path" ]]; then
+      eval "$("$brew_path" shellenv)"
+      break
+    fi
+  done
+fi
+
+if ! command -v brew &>/dev/null; then
+  echo "❌ Homebrew was installed but is not available in PATH." >&2
+  exit 1
+fi
+
+echo "✅ Homebrew ready"
+
+# mise is the first repository-level runtime dependency. It is installed by
+# Homebrew because mise itself must exist before it can install Python.
+if ! command -v mise &>/dev/null; then
+  echo "📦 Installing mise..."
+  brew install mise
+  echo "✅ mise installed"
+else
+  echo "✅ mise already installed"
+fi
+
+echo "🔨 Installing repository runtimes from .mise.toml..."
+mise trust -y "$DOTFILES_ROOT/.mise.toml"
+mise install
+
+# Run dfm only after the repository's pinned Python is available.
 echo "🔧 Initializing dotfiles..."
-./bin/dfm init
-
-# Link managed dotfiles, backing up existing targets before replacing them.
-echo "🔗 Linking dotfiles..."
-./bin/dfm link --force
-
-echo ""
-echo "✅ Bootstrap complete!"
-echo ""
-echo "Next steps:"
-echo "  1. Edit .dotenv if you have template variables"
-echo "  2. Re-run 'dfm link --force' after changing managed files if needed"
-if [[ "$PLATFORM" == "darwin" ]]; then
-  echo "  3. Run 'dfm sync' to install Homebrew packages"
-fi
+mise exec -- python "$DOTFILES_ROOT/bin/dfm" --dir "$DOTFILES_ROOT" init

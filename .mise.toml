@@ -1,0 +1,8 @@
+# Runtime versions used by scripts in this repository.
+# Keep this project-level file focused on interpreters required by bin/.
+
+[tools]
+python = "3.14.6"
+ruby = "4.0"
+elixir = "1.19.4-otp-28"
+erlang = "28"
