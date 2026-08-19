@@ -4,6 +4,7 @@ local M = {}
 ---@field search_paths string[]
 ---@field max_depth integer
 ---@field ignored_dirs table<string, boolean>
+---@field display_names table<string, string>
 local Project = {}
 Project.__index = Project
 
@@ -13,6 +14,30 @@ end
 
 local function has_git(path)
   return vim.uv.fs_stat(vim.fs.joinpath(path, ".git")) ~= nil
+end
+
+local function bare_git_directory(path)
+  local result = vim.system({ "git", "-C", path, "rev-parse", "--git-common-dir" }, { text = true }):wait()
+  if result.code ~= 0 then
+    return nil
+  end
+
+  local git_directory = vim.trim(result.stdout or "")
+  if git_directory == "" then
+    return nil
+  end
+
+  if git_directory:sub(1, 1) ~= "/" then
+    git_directory = vim.fs.joinpath(path, git_directory)
+  end
+  git_directory = normalize_path(git_directory)
+
+  local bare_result = vim.system({ "git", "--git-dir", git_directory, "rev-parse", "--is-bare-repository" }, {
+    text = true,
+  }):wait()
+  if bare_result.code == 0 and vim.trim(bare_result.stdout or "") == "true" then
+    return git_directory
+  end
 end
 
 local function visible_dirs(path, ignored_dirs)
@@ -73,6 +98,7 @@ function M.new(opts)
     search_paths = opts.search_paths or {},
     max_depth = opts.max_depth or 3,
     ignored_dirs = opts.ignored_dirs or {},
+    display_names = {},
   }, Project)
 end
 
@@ -110,6 +136,25 @@ function Project:projects()
 
   table.sort(projects)
   return projects
+end
+
+---Return the name shown for a project in the project picker.
+---@param path string
+---@return string
+function Project:display_name(path)
+  path = normalize_path(path)
+  if self.display_names[path] then
+    return self.display_names[path]
+  end
+
+  local name = vim.fs.basename(path)
+  local git_directory = bare_git_directory(path)
+  if git_directory then
+    name = vim.fs.basename(vim.fs.dirname(git_directory))
+  end
+
+  self.display_names[path] = name
+  return name
 end
 
 ---@param path string
