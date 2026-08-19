@@ -1,0 +1,4 @@
+[knowledgebase]
+path = "~/.anchor/knowledgebase"
+remote = "#{ANCHOR_KNOWLEDGEBASE_REMOTE}"
+base_branch = "main"

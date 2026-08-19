@@ -1,0 +1,815 @@
+#!/usr/bin/env python3
+"""
+anchor - Manage personal knowledge attached to Git repositories.
+
+The Anchor knowledgebase is a normal Git working tree. Repository-specific
+knowledge is stored under repository/<normalized-remote-path> and exposed from
+the bare repository container through a .anchor symlink.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+import tomllib
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Optional, Sequence
+from urllib.parse import unquote, urlparse
+
+
+sys.dont_write_bytecode = True
+
+CONFIG_DIR = Path.home() / ".anchor"
+CONFIG_PATH = CONFIG_DIR / "config"
+DEFAULT_KNOWLEDGEBASE_PATH = CONFIG_DIR / "knowledgebase"
+DEFAULT_BASE_BRANCH = "main"
+KNOWLEDGE_REPOSITORY_DIR = "repository"
+CATALOG_PATH = Path(".anchor") / "catalog.json"
+KNOWLEDGEBASE_SECTIONS = (
+    "architecture",
+    "development",
+    "testing",
+    "release",
+    "deployment",
+    "policies",
+    "team",
+)
+SCRIPT_ROOT = Path(__file__).resolve().parent.parent
+
+
+README_TEMPLATE = """# {{PROJECT_NAME}}
+
+<!-- anchor-remote: {{REMOTE_URL}} -->
+
+## Overview
+
+<!-- Add a short personal overview of this project here. -->
+"""
+
+CHANGELOG_TEMPLATE = """# Changelog
+
+<!-- Record meaningful changes to this personal knowledge base here. -->
+"""
+
+
+class AnchorError(RuntimeError):
+    """An expected, user-facing Anchor error."""
+
+
+@dataclass(frozen=True)
+class KnowledgebaseConfig:
+    """Persistent Anchor knowledgebase configuration."""
+
+    path: Path
+    remote: str
+    base_branch: str
+
+
+@dataclass(frozen=True)
+class RemoteIdentity:
+    """A normalized remote identity and its repository name."""
+
+    key: str
+    name: str
+
+
+@dataclass(frozen=True)
+class ProjectContext:
+    """Git and filesystem information for the current project."""
+
+    worktree_root: Path
+    container_root: Path
+    common_dir: Path
+    remote_name: str
+    remote_url: str
+    identity: RemoteIdentity
+
+    @property
+    def link_path(self) -> Path:
+        return self.container_root / ".anchor"
+
+
+def expand_path(value: str | Path) -> Path:
+    """Expand a configured path and make relative paths stable."""
+
+    path = Path(value).expanduser()
+    if not path.is_absolute():
+        path = CONFIG_DIR / path
+    return path.resolve()
+
+
+def display_path(path: Path) -> str:
+    """Render paths in a config-friendly form."""
+
+    try:
+        relative = path.resolve().relative_to(Path.home().resolve())
+    except ValueError:
+        return str(path)
+
+    return "~" if str(relative) == "." else f"~/{relative.as_posix()}"
+
+
+def run_command(
+    command: Sequence[str],
+    cwd: Path,
+    *,
+    capture: bool = True,
+    check: bool = True,
+) -> subprocess.CompletedProcess[str]:
+    """Run a command and turn expected failures into AnchorError."""
+
+    try:
+        result = subprocess.run(
+            list(command),
+            cwd=cwd,
+            text=True,
+            capture_output=capture,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        raise AnchorError(f"Command not found: {command[0]}") from exc
+
+    if check and result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        command_text = " ".join(command)
+        if detail:
+            raise AnchorError(f"{command_text} failed:\n{detail}")
+        raise AnchorError(f"{command_text} failed with exit code {result.returncode}")
+
+    return result
+
+
+def git_output(
+    arguments: Sequence[str], cwd: Path, *, check: bool = True
+) -> Optional[str]:
+    """Run Git and return trimmed stdout."""
+
+    result = run_command(["git", *arguments], cwd, check=check)
+    output = (result.stdout or "").strip()
+    return output if output else None
+
+
+def git_stream(arguments: Sequence[str], cwd: Path) -> None:
+    """Run Git while preserving its normal terminal output."""
+
+    run_command(["git", *arguments], cwd, capture=False)
+
+
+def normalize_remote(remote: str) -> RemoteIdentity:
+    """Normalize common Git remote forms into host/path identity."""
+
+    raw = remote.strip()
+    if not raw:
+        raise AnchorError("Git remote URL is empty")
+
+    host: Optional[str] = None
+    remote_path: Optional[str] = None
+
+    if "://" in raw:
+        parsed = urlparse(raw)
+        if parsed.scheme == "file":
+            host = "local"
+        else:
+            host = parsed.hostname
+        remote_path = parsed.path
+    else:
+        scp_match = re.match(r"^(?:[^@/]+@)?([^:/]+):(.+)$", raw)
+        if scp_match:
+            host = scp_match.group(1)
+            remote_path = scp_match.group(2)
+        elif raw.startswith("/") or raw.startswith("."):
+            host = "local"
+            remote_path = raw
+
+    if not host or not remote_path:
+        raise AnchorError(f"Unsupported Git remote URL: {remote}")
+
+    host = host.lower()
+    parts = []
+    for part in unquote(remote_path).strip("/").split("/"):
+        if not part or part == ".":
+            continue
+        if part == "..":
+            raise AnchorError(f"Unsafe Git remote path: {remote}")
+        parts.append(part)
+
+    if not parts:
+        raise AnchorError(f"Git remote URL has no repository path: {remote}")
+
+    if parts[-1].endswith(".git"):
+        parts[-1] = parts[-1][:-4]
+    if not parts[-1]:
+        raise AnchorError(f"Git remote URL has no repository name: {remote}")
+
+    key = "/".join([host, *parts])
+    return RemoteIdentity(key=key, name=parts[-1])
+
+
+def config_exists() -> bool:
+    """Return true for regular and broken config symlinks."""
+
+    return CONFIG_PATH.exists() or CONFIG_PATH.is_symlink()
+
+
+def load_config() -> KnowledgebaseConfig:
+    """Load ~/.anchor/config."""
+
+    if not config_exists():
+        raise AnchorError(
+            f"Anchor is not initialized. Run: anchor init --remote <url>"
+        )
+
+    try:
+        data = tomllib.loads(CONFIG_PATH.read_text())
+    except (OSError, tomllib.TOMLDecodeError) as exc:
+        raise AnchorError(f"Cannot read Anchor config: {CONFIG_PATH}") from exc
+
+    section = data.get("knowledgebase")
+    if not isinstance(section, dict):
+        raise AnchorError("Anchor config must contain a [knowledgebase] section")
+
+    remote = section.get("remote")
+    if not isinstance(remote, str) or not remote.strip():
+        raise AnchorError("Anchor config must define knowledgebase.remote")
+
+    path_value = section.get("path", display_path(DEFAULT_KNOWLEDGEBASE_PATH))
+    if not isinstance(path_value, str) or not path_value.strip():
+        raise AnchorError("Anchor config knowledgebase.path must be a path")
+
+    branch = section.get("base_branch", DEFAULT_BASE_BRANCH)
+    if not isinstance(branch, str) or not branch.strip():
+        raise AnchorError("Anchor config knowledgebase.base_branch must be a branch")
+
+    return KnowledgebaseConfig(
+        path=expand_path(path_value),
+        remote=remote.strip(),
+        base_branch=branch.strip(),
+    )
+
+
+def write_config(remote: str, path: Path, base_branch: str) -> None:
+    """Create the initial config without overwriting an existing file/link."""
+
+    if config_exists():
+        raise AnchorError(f"Anchor config already exists: {CONFIG_PATH}")
+
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    temporary = CONFIG_DIR / f".config.{os.getpid()}.tmp"
+    content = (
+        "[knowledgebase]\n"
+        f'path = "{display_path(path)}"\n'
+        f'remote = "{remote}"\n'
+        f'base_branch = "{base_branch}"\n'
+    )
+
+    try:
+        temporary.write_text(content)
+        os.chmod(temporary, 0o600)
+        os.replace(temporary, CONFIG_PATH)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def catalog_file(config: KnowledgebaseConfig) -> Path:
+    return config.path / CATALOG_PATH
+
+
+def load_catalog(config: KnowledgebaseConfig) -> dict[str, Any]:
+    """Load the machine-readable catalog in the knowledgebase."""
+
+    path = catalog_file(config)
+    if not path.exists():
+        return {"version": 1, "repositories": {}}
+
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise AnchorError(f"Cannot read Anchor catalog: {path}") from exc
+
+    if not isinstance(data, dict) or not isinstance(data.get("repositories"), dict):
+        raise AnchorError(f"Invalid Anchor catalog: {path}")
+
+    return data
+
+
+def save_catalog(config: KnowledgebaseConfig, data: dict[str, Any]) -> None:
+    """Write the catalog atomically."""
+
+    path = catalog_file(config)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        temporary.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+        os.replace(temporary, path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def ensure_catalog(config: KnowledgebaseConfig) -> None:
+    """Ensure Anchor metadata exists without changing existing catalog data."""
+
+    metadata_dir = config.path / ".anchor"
+    if metadata_dir.exists() and not metadata_dir.is_dir():
+        raise AnchorError(f"Anchor metadata path is not a directory: {metadata_dir}")
+    metadata_dir.mkdir(parents=True, exist_ok=True)
+
+    path = catalog_file(config)
+    if not path.exists():
+        save_catalog(config, {"version": 1, "repositories": {}})
+    else:
+        load_catalog(config)
+
+
+def ensure_knowledgebase(config: KnowledgebaseConfig) -> None:
+    """Clone or validate the configured Anchor knowledgebase."""
+
+    path = config.path
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        print(f"Cloning Anchor knowledgebase to {path}...")
+        git_stream(["clone", config.remote, str(path)], path.parent)
+    elif not path.is_dir():
+        raise AnchorError(f"Knowledgebase path is not a directory: {path}")
+    elif not (path / ".git").exists():
+        if any(path.iterdir()):
+            raise AnchorError(
+                f"Knowledgebase path exists but is not a Git repository: {path}"
+            )
+        print(f"Cloning Anchor knowledgebase to {path}...")
+        git_stream(["clone", config.remote, str(path)], path.parent)
+
+    origin = git_output(["remote", "get-url", "origin"], path, check=False)
+    if not origin:
+        raise AnchorError(f"Knowledgebase has no origin remote: {path}")
+
+    if normalize_remote(origin).key != normalize_remote(config.remote).key:
+        raise AnchorError(
+            "Knowledgebase origin does not match config:\n"
+            f"  config: {config.remote}\n"
+            f"  origin: {origin}"
+        )
+
+    directories = [path / KNOWLEDGE_REPOSITORY_DIR] + [
+        path / section for section in KNOWLEDGEBASE_SECTIONS
+    ]
+    for directory in directories:
+        if directory.exists() and not directory.is_dir():
+            raise AnchorError(f"Knowledgebase path is not a directory: {directory}")
+        directory.mkdir(parents=True, exist_ok=True)
+    ensure_catalog(config)
+
+
+def resolve_git_path(value: str, cwd: Path) -> Path:
+    """Resolve a path emitted by git relative to the command directory."""
+
+    path = Path(value)
+    return path if path.is_absolute() else (cwd / path).resolve()
+
+
+def resolve_project(cwd: Path, remote_name: str = "origin") -> ProjectContext:
+    """Resolve the current project, including the git-bare container root."""
+
+    common_output = git_output(["rev-parse", "--git-common-dir"], cwd, check=False)
+    if not common_output:
+        raise AnchorError("Run anchor from inside a Git repository or worktree")
+    common_dir = resolve_git_path(common_output, cwd)
+
+    top_output = git_output(["rev-parse", "--show-toplevel"], cwd, check=False)
+    worktree_root = Path(top_output).resolve() if top_output else None
+
+    if common_dir.name == ".bare" and (common_dir.parent / ".git").is_file():
+        container_root = common_dir.parent
+        worktree_root = worktree_root or container_root
+    else:
+        if worktree_root is None:
+            raise AnchorError("Run anchor from inside a Git worktree")
+        container_root = worktree_root
+
+    remote_url = git_output(["remote", "get-url", remote_name], cwd, check=False)
+    if not remote_url:
+        remote_url = git_output(
+            ["--git-dir", str(common_dir), "remote", "get-url", remote_name],
+            cwd,
+            check=False,
+        )
+    if not remote_url:
+        raise AnchorError(
+            f"Git remote '{remote_name}' was not found for the current project"
+        )
+
+    return ProjectContext(
+        worktree_root=worktree_root,
+        container_root=container_root,
+        common_dir=common_dir,
+        remote_name=remote_name,
+        remote_url=remote_url,
+        identity=normalize_remote(remote_url),
+    )
+
+
+def project_target(config: KnowledgebaseConfig, context: ProjectContext) -> Path:
+    """Return repository/<host>/<organization>/<repo>."""
+
+    return config.path / KNOWLEDGE_REPOSITORY_DIR / Path(
+        *context.identity.key.split("/")
+    )
+
+
+def register_project(
+    config: KnowledgebaseConfig, context: ProjectContext, target: Path
+) -> bool:
+    """Add or validate a repository entry in the machine catalog."""
+
+    data = load_catalog(config)
+    repositories = data["repositories"]
+    relative_target = target.relative_to(config.path).as_posix()
+    entry = {"path": relative_target, "remote": context.remote_url}
+    existing = repositories.get(context.identity.key)
+
+    if existing is not None and existing.get("path") != relative_target:
+        raise AnchorError(
+            f"Catalog maps {context.identity.key} to another path: "
+            f"{existing.get('path')}"
+        )
+
+    if existing == entry:
+        return False
+
+    repositories[context.identity.key] = entry
+    save_catalog(config, data)
+    return True
+
+
+def template_content(name: str) -> str:
+    """Load a versioned dotfiles template, with a safe built-in fallback."""
+
+    template_path = SCRIPT_ROOT / "tools" / "anchor" / "templates" / "project" / name
+    if template_path.exists():
+        return template_path.read_text()
+    return {"README.md": README_TEMPLATE, "CHANGELOG.md": CHANGELOG_TEMPLATE}[name]
+
+
+def render_project_template(name: str, context: ProjectContext) -> str:
+    content = template_content(name)
+    return (
+        content.replace("{{PROJECT_NAME}}", context.identity.name)
+        .replace("{{REMOTE_URL}}", context.remote_url)
+        .rstrip()
+        + "\n"
+    )
+
+
+def ensure_local_exclude(context: ProjectContext) -> None:
+    """Ignore .anchor locally for normal clones without editing tracked files."""
+
+    if context.container_root != context.worktree_root:
+        return
+    if context.common_dir.name != ".git":
+        return
+
+    exclude = context.common_dir / "info" / "exclude"
+    exclude.parent.mkdir(parents=True, exist_ok=True)
+    existing = exclude.read_text() if exclude.exists() else ""
+    if "/.anchor" in {line.strip() for line in existing.splitlines()}:
+        return
+
+    prefix = "" if not existing or existing.endswith("\n") else "\n"
+    exclude.write_text(
+        existing
+        + prefix
+        + "# Anchor personal knowledge sidecar\n"
+        + "/.anchor\n"
+    )
+
+
+def link_status(link: Path, target: Path) -> str:
+    """Describe the current sidecar link state."""
+
+    if not link.exists() and not link.is_symlink():
+        return "missing"
+    if not link.is_symlink():
+        return "conflict"
+    if link.resolve(strict=False) == target.resolve(strict=False):
+        return "linked"
+    return "mismatch"
+
+
+def command_init(args: argparse.Namespace) -> None:
+    """Initialize or validate Anchor from config."""
+
+    if config_exists():
+        config = load_config()
+        if args.remote and normalize_remote(args.remote).key != normalize_remote(config.remote).key:
+            raise AnchorError("The supplied --remote does not match ~/.anchor/config")
+        if args.path and expand_path(args.path) != config.path:
+            raise AnchorError("The supplied --path does not match ~/.anchor/config")
+        if args.base_branch and args.base_branch != config.base_branch:
+            raise AnchorError(
+                "The supplied --base-branch does not match ~/.anchor/config"
+            )
+    else:
+        if not args.remote:
+            raise AnchorError(
+                "First initialization requires --remote: "
+                "anchor init --remote <url>"
+            )
+        path = expand_path(args.path or DEFAULT_KNOWLEDGEBASE_PATH)
+        branch = args.base_branch or DEFAULT_BASE_BRANCH
+        write_config(args.remote, path, branch)
+        config = load_config()
+        print(f"Created Anchor config: {CONFIG_PATH}")
+
+    ensure_knowledgebase(config)
+    print(f"Knowledgebase: {config.path}")
+    print(f"Remote: {config.remote}")
+    print(f"Base branch: {config.base_branch}")
+
+
+def command_create(args: argparse.Namespace) -> None:
+    config = load_config()
+    ensure_knowledgebase(config)
+    context = resolve_project(Path.cwd(), args.remote_name)
+    target = project_target(config, context)
+
+    if target.exists() and not target.is_dir():
+        raise AnchorError(f"Project knowledge path is not a directory: {target}")
+    if target.is_symlink():
+        raise AnchorError(f"Project knowledge path must not be a symlink: {target}")
+
+    target.mkdir(parents=True, exist_ok=True)
+    created_files = []
+    for name in ("README.md", "CHANGELOG.md"):
+        path = target / name
+        if not path.exists():
+            path.write_text(render_project_template(name, context))
+            created_files.append(name)
+
+    catalog_changed = register_project(config, context, target)
+    print(f"Project knowledge: {target}")
+    if created_files:
+        print(f"Created: {', '.join(created_files)}")
+    if catalog_changed:
+        print(f"Catalog updated: {catalog_file(config)}")
+
+
+def command_link(args: argparse.Namespace) -> None:
+    config = load_config()
+    ensure_knowledgebase(config)
+    context = resolve_project(Path.cwd(), args.remote_name)
+    target = project_target(config, context)
+
+    if not target.is_dir() or target.is_symlink():
+        raise AnchorError(
+            f"Project knowledge does not exist. Run anchor create first: {target}"
+        )
+
+    register_project(config, context, target)
+    status = link_status(context.link_path, target)
+    if status == "linked":
+        ensure_local_exclude(context)
+        print(f"Already linked: {context.link_path}")
+        return
+    if status == "mismatch":
+        if not args.force:
+            raise AnchorError(
+                f".anchor points elsewhere: {context.link_path} (use --force to replace the symlink)"
+            )
+        context.link_path.unlink()
+    elif status == "conflict":
+        raise AnchorError(
+            f"Refusing to replace a real file or directory: {context.link_path}"
+        )
+
+    context.link_path.parent.mkdir(parents=True, exist_ok=True)
+    context.link_path.symlink_to(target, target_is_directory=True)
+    ensure_local_exclude(context)
+    print(f"Linked: {context.link_path} -> {target}")
+
+
+def command_unlink(args: argparse.Namespace) -> None:
+    config = load_config()
+    context = resolve_project(Path.cwd(), args.remote_name)
+    target = project_target(config, context)
+    status = link_status(context.link_path, target)
+
+    if status == "missing":
+        print(f"Not linked: {context.link_path}")
+        return
+    if status == "conflict":
+        raise AnchorError(
+            f"Refusing to remove a real file or directory: {context.link_path}"
+        )
+    if status == "mismatch" and not args.force:
+        raise AnchorError(
+            f".anchor points elsewhere: {context.link_path} (use --force to remove the symlink)"
+        )
+
+    context.link_path.unlink()
+    print(f"Unlinked: {context.link_path}")
+    print(f"Knowledge was preserved: {target}")
+
+
+def knowledge_branch(config: KnowledgebaseConfig) -> str:
+    branch = git_output(["branch", "--show-current"], config.path, check=False)
+    if not branch:
+        branch = git_output(
+            ["symbolic-ref", "--short", "HEAD"], config.path, check=False
+        )
+    return branch or ""
+
+
+def ensure_base_branch(config: KnowledgebaseConfig) -> None:
+    branch = knowledge_branch(config)
+    if branch != config.base_branch:
+        raise AnchorError(
+            f"Knowledgebase is on '{branch or '<detached>'}', expected "
+            f"'{config.base_branch}'"
+        )
+
+
+def staged_paths(config: KnowledgebaseConfig) -> list[str]:
+    output = git_output(["diff", "--cached", "--name-only", "--"], config.path)
+    return output.splitlines() if output else []
+
+
+def is_allowed_path(path: str, allowed_roots: set[str]) -> bool:
+    return any(path == root or path.startswith(root + "/") for root in allowed_roots)
+
+
+def command_pull(args: argparse.Namespace) -> None:
+    config = load_config()
+    ensure_knowledgebase(config)
+    ensure_base_branch(config)
+    git_stream(["pull", "--ff-only", "origin", config.base_branch], config.path)
+
+
+def command_push(args: argparse.Namespace) -> None:
+    config = load_config()
+    ensure_knowledgebase(config)
+    ensure_base_branch(config)
+    context = resolve_project(Path.cwd(), args.remote_name)
+    target = project_target(config, context)
+
+    if not target.is_dir() or target.is_symlink():
+        raise AnchorError(
+            f"Project knowledge does not exist. Run anchor create first: {target}"
+        )
+
+    register_project(config, context, target)
+    project_relative = target.relative_to(config.path).as_posix()
+    catalog_relative = catalog_file(config).relative_to(config.path).as_posix()
+    allowed = {project_relative, catalog_relative}
+
+    existing_staged = staged_paths(config)
+    if any(not is_allowed_path(path, allowed) for path in existing_staged):
+        raise AnchorError(
+            "The knowledgebase has staged changes outside the current project. "
+            "Commit or unstage them before anchor push."
+        )
+
+    run_command(
+        ["git", "add", "-A", "--", project_relative, catalog_relative],
+        config.path,
+    )
+    final_staged = staged_paths(config)
+    if any(not is_allowed_path(path, allowed) for path in final_staged):
+        raise AnchorError("anchor push would include files outside the current project")
+    if not final_staged:
+        print("No changes to push for the current project.")
+        return
+
+    print("Staged changes:")
+    stat = git_output(["diff", "--cached", "--stat"], config.path)
+    if stat:
+        print(stat)
+    git_stream(["commit", "-m", args.message], config.path)
+    git_stream(["push", "origin", config.base_branch], config.path)
+
+
+def command_status(args: argparse.Namespace) -> None:
+    if not config_exists():
+        print("Anchor is not initialized.")
+        return
+
+    config = load_config()
+    print(f"Knowledgebase: {config.path}")
+    print(f"Remote: {config.remote}")
+    print(f"Base branch: {config.base_branch}")
+
+    if not config.path.exists():
+        print("Knowledgebase status: missing")
+    elif not (config.path / ".git").exists():
+        print("Knowledgebase status: not a Git repository")
+    else:
+        branch = knowledge_branch(config)
+        dirty = git_output(["status", "--porcelain"], config.path)
+        print(f"Knowledgebase branch: {branch or '<detached>'}")
+        print(f"Knowledgebase changes: {'yes' if dirty else 'no'}")
+
+    try:
+        context = resolve_project(Path.cwd(), args.remote_name)
+    except AnchorError:
+        return
+
+    target = project_target(config, context)
+    print(f"Project remote: {context.remote_url}")
+    print(f"Project key: {context.identity.key}")
+    print(f"Project knowledge: {target}")
+    print(f"Sidecar: {link_status(context.link_path, target)}")
+
+
+def add_remote_name(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--remote-name",
+        default="origin",
+        help="Git remote used to identify the current project (default: origin)",
+    )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="anchor - Manage personal knowledge attached to Git repositories"
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    init_parser = subparsers.add_parser(
+        "init", help="Initialize or validate the Anchor knowledgebase"
+    )
+    init_parser.add_argument("--remote", help="Anchor knowledgebase Git remote")
+    init_parser.add_argument(
+        "--path", help="Knowledgebase path (default: ~/.anchor/knowledgebase)"
+    )
+    init_parser.add_argument(
+        "--base-branch", help="Knowledgebase integration branch (default: main)"
+    )
+
+    status_parser = subparsers.add_parser(
+        "status", help="Show Anchor and current project status"
+    )
+    add_remote_name(status_parser)
+
+    create_parser = subparsers.add_parser(
+        "create", help="Create knowledge files for the current Git repository"
+    )
+    add_remote_name(create_parser)
+
+    link_parser = subparsers.add_parser(
+        "link", help="Link the current project to its knowledge directory"
+    )
+    link_parser.add_argument(
+        "--force", action="store_true", help="Replace a mismatched .anchor symlink"
+    )
+    add_remote_name(link_parser)
+
+    unlink_parser = subparsers.add_parser(
+        "unlink", help="Remove the current project's knowledge symlink"
+    )
+    unlink_parser.add_argument(
+        "--force", action="store_true", help="Remove a mismatched .anchor symlink"
+    )
+    add_remote_name(unlink_parser)
+
+    subparsers.add_parser("pull", help="Pull the Anchor knowledgebase")
+
+    push_parser = subparsers.add_parser(
+        "push", help="Commit and push only the current project's knowledge"
+    )
+    push_parser.add_argument(
+        "-m", "--message", required=True, help="Git commit message"
+    )
+    add_remote_name(push_parser)
+
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+    try:
+        commands = {
+            "init": command_init,
+            "status": command_status,
+            "create": command_create,
+            "link": command_link,
+            "unlink": command_unlink,
+            "pull": command_pull,
+            "push": command_push,
+        }
+        commands[args.command](args)
+        return 0
+    except AnchorError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    except KeyboardInterrupt:
+        print("\nInterrupted.", file=sys.stderr)
+        return 130
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

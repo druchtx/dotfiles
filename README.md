@@ -59,6 +59,44 @@ managed configurations. The `--force` option backs up conflicting existing
 files before replacing them. Use `dfm sync` without `--force` for subsequent
 updates.
 
+## Anchor
+
+`./bin/anchor` keeps personal project knowledge and local helper scripts
+outside the source repositories managed by worktrees. The Anchor knowledgebase
+is a normal Git working tree configured through `~/.anchor/config`.
+
+On first use, provide the personal knowledgebase remote:
+
+```bash
+./bin/anchor init --remote git@github.com:your-name/anchor.git
+```
+
+The default local path is `~/.anchor/knowledgebase`. On another machine,
+`~/.anchor/config` can be restored by dotfiles and initialized without passing
+the remote again:
+
+```bash
+./bin/anchor init
+```
+
+From a project worktree:
+
+```bash
+./bin/anchor create
+./bin/anchor link
+./bin/anchor status
+./bin/anchor push -m "Record local test setup"
+```
+
+The knowledgebase keeps repository-specific knowledge under
+`knowledgebase/repository/<remote-host>/<organization>/<repository>`. Shared
+knowledge lives in top-level categories such as `architecture`, `testing`,
+`release`, `deployment`, `policies`, and `team`. Each repository directory
+starts with a small personal `README.md` and `CHANGELOG.md`; the project's
+`.anchor` link is created at the bare repository container root and is not
+added to the source repository. `anchor push` stages only the current
+project's knowledge and the Anchor catalog.
+
 ### Manifest Format
 
 Normal symlinked file:

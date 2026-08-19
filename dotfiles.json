@@ -91,6 +91,12 @@
       "type": "file"
     },
     {
+      "source": "tools/anchor/config.example",
+      "target": "~/.anchor/config",
+      "type": "file",
+      "template": true
+    },
+    {
       "source": "zsh/zlogin",
       "target": "~/.zlogin",
       "type": "file"

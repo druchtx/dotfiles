@@ -1,5 +1,6 @@
 *.local*
 !*.local.example
+tools/anchor/config
 .DS_Store
 .dot/
 .claude/
