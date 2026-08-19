@@ -7,3 +7,4 @@ tools/anchor/config
 .dotenv*
 TODO.md
 tmp/
+.idea/

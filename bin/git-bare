@@ -22,6 +22,11 @@ Layout:
   <dir>/.git        Gitdir file pointing to .bare
   <dir>/<branch>/   Worktree directory
 
+Reference storage:
+  New repositories use Git's reftable backend, so branches that differ only
+  by case can coexist on case-insensitive filesystems. Worktree directories
+  still need distinct filesystem paths.
+
 Examples:
   git-bare clone git@github.com:user/repo.git
   git-bare clone https://github.com/user/repo.git --dir myproject
@@ -124,8 +129,10 @@ do_clone() {
   fi
 
   # Initialize an empty bare repository so remote branches are stored as
-  # remote-tracking refs, matching a normal clone.
-  git init --quiet --bare --initial-branch="$branch" "$bare_dir"
+  # remote-tracking refs, matching a normal clone. Reftable keeps ref names
+  # independent of filesystem paths, which allows case-only branch names on
+  # case-insensitive filesystems.
+  git init --quiet --bare --ref-format=reftable --initial-branch="$branch" "$bare_dir"
   git --git-dir="$bare_dir" config core.logallrefupdates true
   git --git-dir="$bare_dir" remote add origin "$repo_url"
   git --git-dir="$bare_dir" config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
@@ -192,7 +199,9 @@ do_init() {
   }
   trap cleanup_init 0 1 2 3 15
 
-  git init --quiet --bare --initial-branch="$branch" "$bare_dir"
+  # Keep refs independent of filesystem paths so case-only branch names are
+  # supported on case-insensitive filesystems.
+  git init --quiet --bare --ref-format=reftable --initial-branch="$branch" "$bare_dir"
   git --git-dir="$bare_dir" config core.logallrefupdates true
 
   # Create .git file pointing to bare repo

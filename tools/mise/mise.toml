@@ -41,6 +41,7 @@ terraform = "1.14"
 go = "1.26"
 ruby = "4.0"
 gcloud = "580"
+deno = "2.9"
 
 # ============================================================================
 # Global Settings
@@ -157,6 +158,12 @@ NPM_CONFIG_PREFIX = "{{env.HOME}}/.node-globals"
 
 # Uncomment for custom npm registry
 # NPM_CONFIG_REGISTRY = "https://registry.npmmirror.com"
+
+# ----------------------------------------------------------------------------
+# Deno
+# ----------------------------------------------------------------------------
+# Keep Deno's global dependency and compiler cache outside project directories.
+DENO_DIR = "{{env.HOME}}/.deno"
 
 # ----------------------------------------------------------------------------
 # Python

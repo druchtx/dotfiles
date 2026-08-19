@@ -1,7 +1,6 @@
 # Load after all zshrc files to ensure bindings stick
 # This file loads last in the ZSH initialization sequence
 
-# Better history search with arrow keys
 autoload -U up-line-or-beginning-search down-line-or-beginning-search
 zle -N up-line-or-beginning-search
 zle -N down-line-or-beginning-search

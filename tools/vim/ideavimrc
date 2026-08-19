@@ -1,16 +1,57 @@
-" ~/.ideavimrc 
+" ~/.ideavimrc
+" Standalone IdeaVim configuration for IntelliJ IDEA
 
-" ------------------------------------
-" 导入原生 Vim 配置
-" ------------------------------------
-source ~/.vimrc
+" JetBrains-native editing behavior
+set ideajoin
+set ideamarks
+set idearefactormode=keep
+set ideastatusicon=gray
 
-" ------------------------------------
-" IdeaVim 专属或覆盖原生配置的设置
-" ------------------------------------
+" Built-in IdeaVim extensions
+set argtextobj
+set commentary
+set multiple-cursors
+set NERDTree
+set ReplaceWithRegister
+set surround
+set textobj-entire
+set VimEverywhere
+set which-key
+set timeoutlen=5000
 
-" 开启IdeaVim的EasyMotion扩展
-set easymotion
-
-" 设置 IdeaVim 的 leader 键
+" Set the IdeaVim leader key
 let mapleader = "\<Space>"
+
+" ------------------------------------
+" JetBrains-native action mappings
+" ------------------------------------
+
+" Files, projects, and recent files
+map <Leader>e <Action>(ActivateProjectToolWindow)
+map <Leader>ff <Action>(GotoFile)
+map <Leader>fg <Action>(FindInPath)
+map <Leader>fb <Action>(RecentFiles)
+
+" Project Tool Window actions
+" NERDTree support also provides context-aware n/N/d/Ctrl-r// mappings.
+" These leader mappings are explicit aliases that do not override normal Vim keys.
+map <Leader>an <Action>(NewFile)
+map <Leader>ad <Action>(NewDir)
+map <Leader>ax <Action>($Delete)
+map <Leader>ar <Action>(RenameElement)
+map <Leader>/ <Action>(SpeedSearch)
+
+" Code actions
+map <Leader>ca <Action>(ShowIntentionActions)
+map <Leader>f <Action>(ReformatCode)
+map <Leader>rn <Action>(RenameElement)
+
+" Run, debug, and version control
+map <Leader>r <Action>(Run)
+map <Leader>d <Action>(Debug)
+map <Leader>h <Action>(Vcs.ShowTabbedFileHistory)
+
+" IDEA editor tabs
+map ]t <Action>(NextTab)
+map [t <Action>(PreviousTab)
+map <Leader>n <Action>(NewEditorTab)

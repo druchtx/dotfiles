@@ -82,6 +82,7 @@ the remote again:
 From a project worktree:
 
 ```bash
+./bin/anchor usage
 ./bin/anchor create
 ./bin/anchor link
 ./bin/anchor status
@@ -94,7 +95,9 @@ knowledge lives in top-level categories such as `architecture`, `testing`,
 `release`, `deployment`, `policies`, and `team`. Each repository directory
 starts with a small personal `README.md` and `CHANGELOG.md`; the project's
 `.anchor` link is created at the bare repository container root and is not
-added to the source repository. `anchor push` stages only the current
+added to the source repository. Anchor stores home-directory paths using `~`
+and creates `.anchor` with a relative symlink target, so machine-specific
+absolute home paths are not embedded. `anchor push` stages only the current
 project's knowledge and the Anchor catalog.
 
 ### Manifest Format
