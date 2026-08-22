@@ -7,17 +7,39 @@ set ideamarks
 set idearefactormode=keep
 set ideastatusicon=gray
 
+" Common Vim behavior
+set showmode
+set showcmd
+set number
+set relativenumber
+set cursorline
+set colorcolumn=100
+set scrolloff=8
+set nowrap
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
+set wrapscan
+set history=2000
+set visualbell
+
 " Built-in IdeaVim extensions
 set argtextobj
 set commentary
 set multiple-cursors
+
+" Project tree shortcuts
+" `a` creates a new file; keep directory creation on `N`.
+let g:NERDTreeMapNewFile = 'a'
+" Reserve `yy` for IntelliJ's CopyFileName action in the Project tool window.
+let g:NERDTreeMapCopy = ''
+
 set NERDTree
 set ReplaceWithRegister
 set surround
 set textobj-entire
 set VimEverywhere
-set which-key
-set timeoutlen=5000
 
 " Set the IdeaVim leader key
 let mapleader = "\<Space>"
@@ -29,8 +51,9 @@ let mapleader = "\<Space>"
 " Files, projects, and recent files
 map <Leader>e <Action>(ActivateProjectToolWindow)
 map <Leader>ff <Action>(GotoFile)
-map <Leader>fg <Action>(FindInPath)
-map <Leader>fb <Action>(RecentFiles)
+map <Leader>/ <Action>(FindInPath)
+map <Leader>fr <Action>(RecentFiles)
+map <Leader>ss <Action>(GotoSymbol)
 
 " Project Tool Window actions
 " NERDTree support also provides context-aware n/N/d/Ctrl-r// mappings.
@@ -39,7 +62,6 @@ map <Leader>an <Action>(NewFile)
 map <Leader>ad <Action>(NewDir)
 map <Leader>ax <Action>($Delete)
 map <Leader>ar <Action>(RenameElement)
-map <Leader>/ <Action>(SpeedSearch)
 
 " Code actions
 map <Leader>ca <Action>(ShowIntentionActions)
@@ -47,11 +69,65 @@ map <Leader>f <Action>(ReformatCode)
 map <Leader>rn <Action>(RenameElement)
 
 " Run, debug, and version control
-map <Leader>r <Action>(Run)
-map <Leader>d <Action>(Debug)
-map <Leader>h <Action>(Vcs.ShowTabbedFileHistory)
+map <Leader>rr <Action>(Run)
+map <Leader>dd <Action>(Debug)
+map <Leader>fh <Action>(Vcs.ShowTabbedFileHistory)
+
+" Common tool window toggles
+sethandler <C-/> a:vim
+sethandler <C-_> a:vim
+map <C-/> <Action>(ActivateTerminalToolWindow)
+imap <C-/> <Action>(ActivateTerminalToolWindow)
+map <C-_> <Action>(ActivateTerminalToolWindow)
+imap <C-_> <Action>(ActivateTerminalToolWindow)
+map <Leader>gd <Action>(ActivateCommitToolWindow)
+map <Leader>gg <Action>(ActivateVersionControlToolWindow)
+map <Leader>td <Action>(ActivateDatabaseToolWindow)
+
+" Editor window navigation in non-insert modes
+sethandler <C-w> n-v:vim
+sethandler <C-h> n-v:vim
+sethandler <C-j> n-v:vim
+sethandler <C-k> n-v:vim
+sethandler <C-l> n-v:vim
+map <C-h> <C-w>h
+map <C-j> <C-w>j
+map <C-k> <C-w>k
+map <C-l> <C-w>l
+
+" Use Ctrl-g as Escape outside normal mode
+sethandler <C-g> a:vim
+map <C-g> <Esc>
+imap <C-g> <Esc>
+cmap <C-g> <C-c>
+nmap <Esc><Esc> :nohlsearch<CR>
+
+" Vim text editing behavior
+nmap U <C-r>
+nmap Y y$
+
+" Input-source switching is handled outside IdeaVim.
+
+" vim-flash default jump actions
+nmap s <Action>(flash.search)
+xmap s <Action>(flash.search)
+nmap f <Action>(flash.find)
+xmap f <Action>(flash.find)
+nmap F <Action>(flash.find_backward)
+xmap F <Action>(flash.find_backward)
+nmap t <Action>(flash.till)
+xmap t <Action>(flash.till)
+nmap T <Action>(flash.till_backward)
+xmap T <Action>(flash.till_backward)
+nmap ; <Action>(flash.repeat)
+xmap ; <Action>(flash.repeat)
+nmap , <Action>(flash.repeat_backward)
+xmap , <Action>(flash.repeat_backward)
+nmap S <Action>(flash.treesitter)
+xmap S <Action>(flash.treesitter)
+omap r <Action>(flash.remote)
 
 " IDEA editor tabs
-map ]t <Action>(NextTab)
-map [t <Action>(PreviousTab)
-map <Leader>n <Action>(NewEditorTab)
+map <S-H> <Action>(PreviousTab)
+map <S-L> <Action>(NextTab)
+map <Leader>fn <Action>(NewEditorTab)
