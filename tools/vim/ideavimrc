@@ -65,12 +65,11 @@ map <Leader>ar <Action>(RenameElement)
 
 " Code actions
 map <Leader>ca <Action>(ShowIntentionActions)
-map <Leader>f <Action>(ReformatCode)
-map <Leader>rn <Action>(RenameElement)
+map <Leader>cc <Action>(CodeVision.ShowMore)
+map <Leader>cf <Action>(ReformatCode)
+map <Leader>cr <Action>(RenameElement)
 
-" Run, debug, and version control
-map <Leader>rr <Action>(Run)
-map <Leader>dd <Action>(Debug)
+" Version control
 map <Leader>fh <Action>(Vcs.ShowTabbedFileHistory)
 
 " Common tool window toggles

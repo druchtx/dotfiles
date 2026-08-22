@@ -42,9 +42,9 @@ local launchers = {
 	},
 	{
 		mods = { "ctrl", "shift" },
-		key = "V",
-		app = "Visual Studio Code",
-		description = "Launch or focus VS Code",
+		key = "I",
+		app = "IntelliJ IDEA",
+		description = "Launch IntelliJ IDEA",
 	},
 	{
 		mods = { "ctrl", "shift" },
