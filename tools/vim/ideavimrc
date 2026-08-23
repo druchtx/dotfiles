@@ -31,8 +31,20 @@ set multiple-cursors
 set targets
 
 " Project tree shortcuts
-" `a` creates a new file; keep directory creation on `N`.
+" `a` creates a new file and `A` creates a new directory.
 let g:NERDTreeMapNewFile = 'a'
+let g:NERDTreeMapNewDir = 'A'
+
+" Snacks-style project tree navigation.
+" `o` opens a file, `l` opens/toggles a node, and `h` closes its parent.
+let g:NERDTreeMapOpenInTab = 'o'
+let g:NERDTreeMapActivateNode = 'l'
+let g:NERDTreeMapCloseDir = 'h'
+
+" File operations in the project tree.
+let g:NERDTreeMapCopy = 'c'
+let g:NERDTreeMapPaste = 'v'
+let g:NERDTreeMapRename = 'r'
 
 set NERDTree
 set ReplaceWithRegister
@@ -54,6 +66,31 @@ map <Leader>/ <Action>(FindInPath)
 map <Leader>fr <Action>(RecentFiles)
 map <Leader>fs <Action>(GotoSymbol)
 map <Leader>ss <Action>(FileStructurePopup)
+
+" Recent files and open editor buffers
+nmap <Leader>, <Action>(RecentFiles)
+nmap <Leader>. <Action>(RecentFiles)
+nmap <Leader>bf <Action>(Switcher)
+
+" Scratch navigation
+nmap <Leader>S <Action>(ActivateProjectToolWindow)
+
+" LSP-style symbol navigation
+nmap gd <Action>(GotoDeclaration)
+nmap gI <Action>(GotoImplementation)
+nmap gr <Action>(FindUsages)
+
+" Git hunk navigation
+nmap ]h <Action>(GotoNextChange)
+nmap [h <Action>(GotoPreviousChange)
+
+" Diagnostic navigation
+nmap ]d <Action>(GotoNextError)
+nmap [d <Action>(GotoPreviousError)
+
+" Parameter navigation
+nmap ]a <Action>(NextParameter)
+nmap [a <Action>(PrevParameter)
 
 " Project Tool Window actions
 " NERDTree support also provides context-aware n/N/d/Ctrl-r// mappings.

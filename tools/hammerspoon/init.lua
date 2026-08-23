@@ -23,6 +23,7 @@ require("hs.ipc")
 require("modules.window")
 require("modules.defaults")
 require("modules.keymaps")
+require("modules.input")
 
 -- ========================================
 -- Load completion message
