@@ -28,12 +28,11 @@ set visualbell
 set argtextobj
 set commentary
 set multiple-cursors
+set targets
 
 " Project tree shortcuts
 " `a` creates a new file; keep directory creation on `N`.
 let g:NERDTreeMapNewFile = 'a'
-" Reserve `yy` for IntelliJ's CopyFileName action in the Project tool window.
-let g:NERDTreeMapCopy = ''
 
 set NERDTree
 set ReplaceWithRegister
@@ -53,7 +52,8 @@ map <Leader>e <Action>(ActivateProjectToolWindow)
 map <Leader>ff <Action>(GotoFile)
 map <Leader>/ <Action>(FindInPath)
 map <Leader>fr <Action>(RecentFiles)
-map <Leader>ss <Action>(GotoSymbol)
+map <Leader>fs <Action>(GotoSymbol)
+map <Leader>ss <Action>(FileStructurePopup)
 
 " Project Tool Window actions
 " NERDTree support also provides context-aware n/N/d/Ctrl-r// mappings.
