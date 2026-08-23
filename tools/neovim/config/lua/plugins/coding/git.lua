@@ -1,4 +1,6 @@
-local gitlab_env = vim.fn.expand("~/.dotfiles/tools/gitlab/env.zsh")
+local gitlab_env = vim.env.ZSH
+  and vim.fs.joinpath(vim.env.ZSH, "tools/gitlab/env.zsh")
+  or ""
 
 -- Close the embedded LazyGit process through its own command rather than
 -- closing the surrounding Snacks terminal window abruptly.

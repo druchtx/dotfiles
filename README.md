@@ -11,7 +11,7 @@ This repository manages two kinds of setup:
 - Script-driven setup that is too fragmented or procedural to manage
   cleanly as many individual symlinks
 
-The source of truth is [dotfiles.json](/Users/druchtx/.dotfiles/dotfiles.json).
+The source of truth is [dotfiles.json](dotfiles.json).
 Each entry is applied by `./bin/dfm`.
 
 ## Repository Layout

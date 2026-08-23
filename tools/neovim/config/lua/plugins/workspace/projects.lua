@@ -4,7 +4,7 @@ local function pick_projects()
     search_paths = {
       vim.env.PROJECTS,
       vim.env.PLAYGROUNDS,
-      vim.fs.joinpath(vim.env.HOME, ".dotfiles"),
+      vim.env.WORK_ROOT and (vim.env.WORK_ROOT .. "/research") or nil,
     },
     max_depth = 3,
     ignored_dirs = {

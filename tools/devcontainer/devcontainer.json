@@ -17,7 +17,7 @@
     },
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
-  "postCreateCommand": "cd ~/.dotfiles && ./bin/dot init && ./bin/dot link --force",
+  "postCreateCommand": "cd ~/.dotfiles && ./bin/dfm init && ./bin/dfm link --force",
   "remoteUser": "vscode",
   "mounts": [
     "source=${localEnv:HOME}/Workspace,target=/home/vscode/Workspace,type=bind,consistency=cached",

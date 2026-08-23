@@ -2,84 +2,84 @@
   "dotfiles": [
     {
       "source": "tools/cobra-cli/cobra.yaml",
-      "target": "~/.cobra.yaml",
-      "type": "file"
+      "type": "file",
+      "target": "~/.cobra.yaml"
     },
     {
       "source": "tools/tmux/tmux.conf",
-      "target": "~/.tmux.conf",
-      "type": "file"
+      "type": "file",
+      "target": "~/.tmux.conf"
     },
     {
       "source": "tools/vim/vimrc",
-      "target": "~/.vimrc",
-      "type": "file"
+      "type": "file",
+      "target": "~/.vimrc"
     },
     {
       "source": "tools/vim/ideavimrc",
-      "target": "~/.ideavimrc",
-      "type": "file"
+      "type": "file",
+      "target": "~/.ideavimrc"
     },
     {
       "source": "tools/vscode/keybindings.json",
-      "target": "~/Library/Application Support/Code/User/keybindings.json",
-      "type": "file"
+      "type": "file",
+      "target": "~/Library/Application Support/Code/User/keybindings.json"
     },
     {
       "source": "tools/vscode/settings.json",
-      "target": "~/Library/Application Support/Code/User/settings.json",
-      "type": "file"
+      "type": "file",
+      "target": "~/Library/Application Support/Code/User/settings.json"
     },
     {
       "source": "tools/ghostty/config",
-      "target": "~/.config/ghostty/config",
-      "type": "file"
+      "type": "file",
+      "target": "~/.config/ghostty/config"
     },
     {
       "source": "zsh/zshrc",
-      "target": "~/.zshrc",
-      "type": "file"
+      "type": "file",
+      "target": "~/.zshrc"
     },
     {
       "source": "tools/ssh/config",
-      "target": "~/.ssh/config",
-      "type": "file"
+      "type": "file",
+      "target": "~/.ssh/config"
     },
     {
       "source": "tools/git/gitignore",
-      "target": "~/.config/git/gitignore",
-      "type": "file"
+      "type": "file",
+      "target": "~/.config/git/gitignore"
     },
     {
       "source": "tools/git/config",
-      "target": "~/.config/git/config",
-      "type": "file"
+      "type": "file",
+      "target": "~/.config/git/config"
     },
     {
       "source": "tools/git/config.local.example",
-      "target": "~/.config/git/config.local",
       "type": "file",
+      "target": "~/.config/git/config.local",
       "template": true
     },
     {
       "source": "tools/gh/config.yml",
-      "target": "~/.config/gh/config.yml",
-      "type": "file"
+      "type": "file",
+      "target": "~/.config/gh/config.yml"
     },
     {
       "source": "tools/hammerspoon",
-      "target": "~/.hammerspoon",
-      "type": "dir"
+      "type": "dir",
+      "target": "~/.hammerspoon"
     },
     {
       "source": "tools/neovim/config",
-      "target": "~/.config/nvim",
-      "type": "dir"
+      "type": "dir",
+      "target": "~/.config/nvim"
     },
     {
       "source": "tools/lazygit/config.yml",
-      "target": "~/.config/lazygit/config.yml",
-      "type": "file"
+      "type": "file",
+      "target": "~/.config/lazygit/config.yml"
     },
     {
       "source": "ai/setup-ai.sh",
@@ -87,24 +87,44 @@
     },
     {
       "source": "tools/mise/mise.toml",
-      "target": "~/.config/mise/config.toml",
-      "type": "file"
+      "type": "file",
+      "target": "~/.config/mise/config.toml"
     },
     {
       "source": "tools/anchor/config.example",
-      "target": "~/.anchor/config",
       "type": "file",
+      "target": "~/.anchor/config",
       "template": true
     },
     {
       "source": "zsh/zlogin",
-      "target": "~/.zlogin",
-      "type": "file"
+      "type": "file",
+      "target": "~/.zlogin"
     },
     {
       "source": "tools/maven/mavenrc",
-      "target": "~/.mavenrc",
-      "type": "file"
+      "type": "file",
+      "target": "~/.mavenrc"
+    },
+    {
+      "source": "tools/pi/AGENTS.md",
+      "type": "file",
+      "target": "~/.pi/agent/AGENTS.md"
+    },
+    {
+      "source": "tools/pi/keybindings.json",
+      "type": "file",
+      "target": "~/.pi/agent/keybindings.json"
+    },
+    {
+      "source": "tools/pi/settings.json",
+      "type": "file",
+      "target": "~/.pi/agent/settings.json"
+    },
+    {
+      "source": "tools/pi/zentui.json",
+      "type": "file",
+      "target": "~/.pi/agent/zentui.json"
     }
   ]
 }

@@ -23,6 +23,7 @@ brew 'htop'
 brew 'curl'
 brew 'wget'
 brew 'rg'
+brew 'tmux'
 
 # Development
 brew 'mise'
@@ -39,6 +40,7 @@ brew 'neovim'
 brew 'mas'
 brew 'gemini-cli'
 brew 'plantuml'
+brew 'pi-coding-agent'
 
 # Git
 brew 'git'
@@ -47,6 +49,7 @@ brew 'gh'
 brew 'lazygit'
 
 # Containers / Infra
+brew 'qemu'
 brew 'devcontainer'
 brew 'lazydocker'
 brew 'kustomize'
@@ -79,6 +82,7 @@ cask 'intellij-idea'
 cask 'slack'
 cask 'wechat'
 cask 'spotify'
+cask 'telegram'
 
 # AI
 cask 'chatgpt'

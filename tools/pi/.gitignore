@@ -1,0 +1,6 @@
+# Pi runtime data: keep these local and never commit them.
+auth.json
+models-store.json
+sessions/
+npm/
+git/

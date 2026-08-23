@@ -1,3 +1,4 @@
+*.gclocal*
 *.local*
 !*.local.example
 tools/anchor/config

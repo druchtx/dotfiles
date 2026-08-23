@@ -5,7 +5,7 @@ set -euo pipefail
 pane_id="$(tmux display-message -p '#{pane_id}')"
 pane_command="$(tmux display-message -p '#{pane_current_command}')"
 pane_path="$(tmux display-message -p '#{pane_current_path}')"
-popup_message="$HOME/.dotfiles/tools/tmux/popup-message"
+popup_message="$ZSH/tools/tmux/popup-message"
 shell_path="${SHELL:-/bin/zsh}"
 
 if ! tmux display-message -p -t "$pane_id" '#{pane_id}' >/dev/null 2>&1; then

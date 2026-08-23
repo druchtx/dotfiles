@@ -2,6 +2,7 @@
 DOTFILE_CONFIG_PATH: ~/Library/Application\ Support/Code/User/settings.json
 */
 {
+    "terminal.integrated.enableImages": true,
     /* 
     Appearance -- font
     */

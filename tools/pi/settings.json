@@ -1,0 +1,38 @@
+{
+  "theme": "dark",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-luna",
+  "defaultThinkingLevel": "high",
+  "externalEditor": "nvim",
+  "packages": [
+    "npm:pi-zentui@0.21.0",
+    "npm:pi-compact-transcript",
+    "npm:@juicesharp/rpiv-ask-user-question",
+    "npm:pi-mcp-adapter",
+    "npm:pi-web-access",
+    "npm:pi-subagents",
+    "npm:@companion-ai/feynman",
+    "npm:@juicesharp/rpiv-todo",
+    "npm:@narumitw/pi-goal",
+    "npm:billion-context",
+    "npm:pi-compact-transcript"
+  ],
+  "compaction": {
+    "enabled": true,
+    "reserveTokens": 16384,
+    "keepRecentTokens": 20000
+  },
+  "retry": {
+    "enabled": true,
+    "maxRetries": 3,
+    "baseDelayMs": 2000
+  },
+  "lastChangelogVersion": "0.84.4",
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "followUpMode": "one-at-a-time",
+  "tuiMode": "fullscreen",
+  "hideThinkingBlock": true,
+  "outputPad": 0
+}

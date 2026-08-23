@@ -1,0 +1,21 @@
+{
+  "components": {
+    "editor": {
+      "enabled": true,
+      "style": "minimalist"
+    },
+    "userMessages": {
+      "enabled": true,
+      "style": "labeled"
+    },
+    "workingLine": {
+      "enabled": false
+    },
+    "footer": {
+      "style": "hidden"
+    }
+  },
+  "icons": {
+    "mode": "auto"
+  }
+}

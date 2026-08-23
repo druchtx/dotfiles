@@ -24,6 +24,12 @@ set wrapscan
 set history=2000
 set visualbell
 
+" Give multi-key leader mappings enough time to complete.
+set timeoutlen=3000
+
+" Disable the Which-Key hover for direct leader mappings.
+set nowhich-key
+
 " Built-in IdeaVim extensions
 set argtextobj
 set commentary
@@ -34,6 +40,11 @@ set targets
 " `a` creates a new file and `A` creates a new directory.
 let g:NERDTreeMapNewFile = 'a'
 let g:NERDTreeMapNewDir = 'A'
+" Keep the default zoom action available on `Z` instead of conflicting with `A`.
+let g:NERDTreeMapToggleZoom = 'Z'
+" Open the selected NERDTree file in horizontal/vertical splits.
+let g:NERDTreeMapOpenSplit = '<C-s>'
+let g:NERDTreeMapOpenVSplit = '<C-v>'
 
 " Snacks-style project tree navigation.
 " `o` opens a file, `l` opens/toggles a node, and `h` closes its parent.
@@ -64,6 +75,7 @@ map <Leader>e <Action>(ActivateProjectToolWindow)
 map <Leader>ff <Action>(GotoFile)
 map <Leader>/ <Action>(FindInPath)
 map <Leader>fr <Action>(RecentFiles)
+map <Leader>fp <Action>(ManageRecentProjects)
 map <Leader>fs <Action>(GotoSymbol)
 map <Leader>ss <Action>(FileStructurePopup)
 
@@ -87,6 +99,7 @@ nmap [h <Action>(GotoPreviousChange)
 " Diagnostic navigation
 nmap ]d <Action>(GotoNextError)
 nmap [d <Action>(GotoPreviousError)
+nmap <C-w>d <Action>(ShowErrorDescription)
 
 " Parameter navigation
 nmap ]a <Action>(NextParameter)
@@ -105,6 +118,8 @@ map <Leader>ca <Action>(ShowIntentionActions)
 map <Leader>cc <Action>(CodeVision.ShowMore)
 map <Leader>cf <Action>(ReformatCode)
 map <Leader>cr <Action>(RenameElement)
+nmap gcc <Action>(CommentByLineComment)
+xmap gc <Action>(CommentByLineComment)
 
 " Version control
 map <Leader>fh <Action>(Vcs.ShowTabbedFileHistory)
@@ -112,10 +127,14 @@ map <Leader>fh <Action>(Vcs.ShowTabbedFileHistory)
 " Common tool window toggles
 sethandler <C-/> a:vim
 sethandler <C-_> a:vim
+" Toggle the terminal. macOS may report Ctrl-/ as Ctrl-_ depending on the
+" keyboard layout and terminal encoding, so keep both spellings in sync.
 map <C-/> <Action>(ActivateTerminalToolWindow)
 imap <C-/> <Action>(ActivateTerminalToolWindow)
 map <C-_> <Action>(ActivateTerminalToolWindow)
 imap <C-_> <Action>(ActivateTerminalToolWindow)
+sethandler <C-t> n-v:vim
+nmap <C-t> <Action>(Terminal.OpenInTerminal)
 map <Leader>gd <Action>(ActivateCommitToolWindow)
 map <Leader>gg <Action>(ActivateVersionControlToolWindow)
 map <Leader>td <Action>(ActivateDatabaseToolWindow)
@@ -130,6 +149,18 @@ map <C-h> <C-w>h
 map <C-j> <C-w>j
 map <C-k> <C-w>k
 map <C-l> <C-w>l
+" Keep the familiar Ctrl-W q alias for closing the current editor window.
+nmap <C-w>q <C-w>c
+
+" Editor window and buffer actions
+nmap <Leader>wq <Action>(Unsplit)
+nmap <Leader>bq <Action>(CloseEditor)
+nmap <Leader>wv <Action>(SplitVertically)
+nmap <Leader>ws <Action>(SplitHorizontally)
+
+" Save the current file and leave Insert mode.
+sethandler <C-s> a:ide i:vim
+imap <C-s> <Esc>:write<CR>
 
 " Use Ctrl-g as Escape outside normal mode
 sethandler <C-g> a:vim
@@ -162,6 +193,12 @@ xmap , <Action>(flash.repeat_backward)
 nmap S <Action>(flash.treesitter)
 xmap S <Action>(flash.treesitter)
 omap r <Action>(flash.remote)
+
+" Buffer and editor tab management
+nmap <Leader>bp <Action>(PinActiveTab)
+nmap <Leader>bl <Action>(CloseAllToTheLeft)
+nmap <Leader>br <Action>(CloseAllToTheRight)
+nmap <Leader>bP <Action>(CloseAllEditors)
 
 " IDEA editor tabs
 map <S-H> <Action>(PreviousTab)
