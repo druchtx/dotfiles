@@ -27,7 +27,7 @@
     "maxRetries": 3,
     "baseDelayMs": 2000
   },
-  "lastChangelogVersion": "0.84.4",
+  "lastChangelogVersion": "0.85.1",
   "terminal": {
     "showTerminalProgress": true
   },

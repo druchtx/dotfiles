@@ -38,7 +38,7 @@ node = "lts"
 bun = "1.3.14"
 # DevOps tools
 terraform = "1.14"
-go = "1.26"
+go = "1.27.1"
 ruby = "4.0"
 gcloud = "580"
 deno = "2.9"

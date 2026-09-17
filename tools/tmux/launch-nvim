@@ -5,7 +5,10 @@ set -euo pipefail
 pane_id="$(tmux display-message -p '#{pane_id}')"
 pane_command="$(tmux display-message -p '#{pane_current_command}')"
 pane_path="$(tmux display-message -p '#{pane_current_path}')"
-popup_message="$ZSH/tools/tmux/popup-message"
+# Do not rely on ZSH being present in tmux's server environment. The server
+# may have been started by a GUI terminal before .zshrc exported it.
+script_dir="${0:A:h}"
+popup_message="$script_dir/popup-message"
 shell_path="${SHELL:-/bin/zsh}"
 
 if ! tmux display-message -p -t "$pane_id" '#{pane_id}' >/dev/null 2>&1; then
